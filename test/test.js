@@ -1,4 +1,4 @@
-const Session = require("../libcommon/libcommon.js").Session;
+const Session = require("../libtowers/libtowers.js").Session;
 
 var assert = require("assert");
 

@@ -1,6 +1,6 @@
 (() => {
   let secondary = require("../../src/scripts/secondary.js");
-  let Session = require("../../../libcommon/libcommon.js").Session;
+  let Session = require("../../../libtowers/libtowers.js").Session;
 
   const save_button = document.getElementById("save_button");
   save_button.addEventListener("click", () => {

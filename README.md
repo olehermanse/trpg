@@ -1,6 +1,6 @@
-# Gulp example
+# Towers
 
-http://gulp-example.oleherman.com
+http://towers.oleherman.com
 
 ## Development server
 
@@ -19,8 +19,8 @@ http://127.0.0.1:3000
 ### docker
 
 ```
-docker build --tag gulp-example .
-docker run -p 80:80 --name gulp-example --rm gulp-example
+docker build --tag towers .
+docker run -p 80:80 --name towers --rm towers
 ```
 
 http://127.0.0.1:80

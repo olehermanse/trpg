@@ -1,5 +1,5 @@
 {
-  "name": "gulp-example",
+  "name": "towers",
   "version": "0.2.0",
   "description": "http://nowco.de",
   "main": "index.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/olehermanse/gulp-example.git"
+    "url": "git+https://github.com/olehermanse/towers.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/olehermanse/gulp-example/issues"
+    "url": "https://github.com/olehermanse/towers/issues"
   },
-  "homepage": "https://github.com/olehermanse/gulp-example#readme",
+  "homepage": "https://github.com/olehermanse/towers#readme",
   "dependencies": {
     "babel-preset-env": "^1.7.0",
     "babelify": "^7.3.0",
