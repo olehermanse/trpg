@@ -1,0 +1,43 @@
+{
+  "name": "gulp-example",
+  "version": "0.2.0",
+  "description": "http://nowco.de",
+  "main": "index.js",
+  "scripts": {
+    "build": "gulp",
+    "dev-server": "nodemon dev-server.js",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/olehermanse/gulp-example.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/olehermanse/gulp-example/issues"
+  },
+  "homepage": "https://github.com/olehermanse/gulp-example#readme",
+  "dependencies": {
+    "babel-preset-env": "^1.7.0",
+    "babelify": "^7.3.0",
+    "browserify": "^16.2.3",
+    "del": "^3.0.0",
+    "fs": "0.0.1-security",
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.2.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-inline-source": "^4.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-sequence": "^0.4.6",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-uglify": "^3.0.2",
+    "path": "^0.12.7",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^7.1.1",
+    "nodemon": "^2.0.2"
+  }
+}
