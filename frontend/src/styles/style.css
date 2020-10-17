@@ -12,11 +12,6 @@ body > * {
   margin-right: auto;
 }
 
-textarea {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 h1 > span {
   color: blue;
 }
@@ -33,20 +28,4 @@ a {
   margin-bottom: 0.5rem;
   border-radius: 2px;
   border-bottom: 2px solid rgb(210, 210, 210);
-}
-
-input,
-textarea {
-  background-color: white;
-  border: 0.1rem solid rgb(210, 210, 210);
-  border-radius: 2px;
-  padding: 0.5rem;
-}
-
-button {
-  background-color: #3b5998;
-  color: white;
-  padding: 0.5em;
-  border: none;
-  border-radius: 2px;
 }
