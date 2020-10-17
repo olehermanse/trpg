@@ -29,3 +29,8 @@ a {
   border-radius: 2px;
   border-bottom: 2px solid rgb(210, 210, 210);
 }
+canvas {
+  border: 1px solid black;
+  width: 100%;
+  max-width: 800px;
+}
