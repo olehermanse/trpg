@@ -1,7 +1,7 @@
 {
   "name": "towers",
   "version": "0.2.0",
-  "description": "http://nowco.de",
+  "description": "https://towers.oleherman.com",
   "main": "index.js",
   "scripts": {
     "build": "gulp",

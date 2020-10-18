@@ -1,6 +1,6 @@
 # Towers
 
-http://towers.oleherman.com
+https://towers.oleherman.com
 
 ## Development server
 
