@@ -13,6 +13,7 @@ const game = new Game(COLUMNS, ROWS);
 
 function draw_line(ctx, x1, y1, x2, y2) {
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -56,17 +57,56 @@ function draw_towers(ctx) {
     }
 }
 
-function draw() {
-    const canvas = document.getElementById('towers_canvas');
-    const ctx = canvas.getContext('2d');
-
+function draw(ctx) {
+    draw_background(ctx);
     draw_grid(ctx);
     draw_towers(ctx);
 }
 
+function to_grid(p) {
+    return Math.floor(p / GRID_SIZE);
+}
+
+function grid_click(c, r) {
+    if (!game.has_tower(c, r)) {
+        game.place_tower(c, r);
+    }
+}
+
+function mouse_click(x, y) {
+    grid_click(to_grid(x), to_grid(y));
+}
+
+function mouse_move(x, y) {
+
+}
+
+function mouse_release() {
+
+}
+
+function setup_events(canvas) {
+    canvas.addEventListener('mousedown', e => {
+        mouse_click(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        mouse_move(e.offsetX, e.offsetY);
+    });
+
+    window.addEventListener('mouseup', e => {
+        mouse_release();
+    });
+}
+
 function start() {
-    game.place_tower(0, 0);
-    draw();
+    const canvas = document.getElementById('towers_canvas');
+    const ctx = canvas.getContext('2d');
+    setup_events(canvas);
+    window.setInterval(() => {
+        game.tick(10);
+        draw(ctx);
+    }, 10)
 }
 
 module.exports = {

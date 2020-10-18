@@ -23,6 +23,9 @@ class Game {
     console.assert(!this.has_tower(c, r));
     this.towers.push(new Tower(c, r));
   }
+  tick(ms) {
+
+  }
 }
 
 module.exports = {
