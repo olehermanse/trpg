@@ -1,35 +1,30 @@
-class Session {
-  constructor(name, content, start = new Date().toISOString()) {
-    this.name = name;
-    this.content = content;
-    this.start = start;
+class Tower {
+  constructor(c, r) {
+    this.c = c;
+    this.r = r;
+  }
+}
+
+class Game {
+  constructor(columns, rows) {
+    this.rows = rows;
+    this.columns = columns;
+    this.towers = [];
   }
 
-  static from(data) {
-    return new Session(data.name, data.content, data.start);
+  has_tower(c, r) {
+    for (let t of this.towers) {
+      if (t.c === c && t.r === r)
+        return true;
+    }
+    return false;
   }
-
-  static from_json(json_string) {
-    return Session.from(JSON.parse(json_string));
-  }
-
-  copy() {
-    return Session.from(this);
-  }
-
-  to_json() {
-    return JSON.stringify(this);
-  }
-
-  identical(other) {
-    return (
-      this.name === other.name &&
-      this.content === other.content &&
-      this.start === other.start
-    );
+  place_tower(c, r) {
+    console.assert(!this.has_tower(c, r));
+    this.towers.push(new Tower(c, r));
   }
 }
 
 module.exports = {
-  Session,
+  Game,
 };
