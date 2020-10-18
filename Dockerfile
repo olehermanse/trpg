@@ -7,3 +7,4 @@ RUN npm run build
 
 FROM nginx:stable-alpine
 COPY --from=build /towers/frontend/dist/index.html /usr/share/nginx/html/index.html
+COPY --from=build /towers/frontend/dist/favicon.ico /usr/share/nginx/html/favicon.ico
