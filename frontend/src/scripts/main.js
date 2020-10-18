@@ -1,5 +1,5 @@
 (() => {
-  let secondary = require("../../src/scripts/secondary.js");
+  let secondary = require("./canvas.js");
 
   secondary.start();
 })();
