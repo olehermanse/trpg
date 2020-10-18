@@ -1,5 +1,3 @@
 (() => {
-  let secondary = require("./canvas.js");
-
-  secondary.start();
+  require("./canvas.js").start(document.getElementById("towers_canvas"));
 })();
