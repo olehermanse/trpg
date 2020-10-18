@@ -1,6 +1,6 @@
 const Session = require("../../../libtowers/libtowers.js").Session;
 
-const GRID_SIZE = 100;
+const GRID_SIZE = 50;
 const WIDTH = 800;
 const HEIGHT = 600;
 
