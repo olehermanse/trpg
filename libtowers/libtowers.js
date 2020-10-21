@@ -2,6 +2,10 @@ class Tower {
   constructor(c, r) {
     this.c = c;
     this.r = r;
+    this.rotation = 0;
+  }
+  tick(ms) {
+    this.rotation += 0.005 * ms;
   }
 }
 
@@ -24,7 +28,9 @@ class Game {
     this.towers.push(new Tower(c, r));
   }
   tick(ms) {
-
+    for (let tower of this.towers) {
+      tower.tick(ms);
+    }
   }
 }
 

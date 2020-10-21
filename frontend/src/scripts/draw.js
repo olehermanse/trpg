@@ -19,13 +19,18 @@ function circle(ctx, x, y, r) {
     ctx.stroke();
 }
 
-function triangle(ctx, x, y, r) {
+function triangle(ctx, x, y, r, angle) {
     const height = r * 2;
     const side = height * (2 / (Math.sqrt(3)));
 
     ctx.fillStyle = 'rgba(0, 200, 0, 1)';
     ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
     ctx.lineWidth = 2;
+
+    // Matrix transformation
+    ctx.translate(x, y);
+    ctx.rotate(-angle);
+    ctx.translate(-x, -y);
 
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -34,6 +39,8 @@ function triangle(ctx, x, y, r) {
     ctx.lineTo(x + r, y);
     ctx.fill();
     ctx.stroke();
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function background(ctx, width, height) {
