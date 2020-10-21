@@ -15,6 +15,7 @@ function draw_tower(ctx, tower) {
     const y = tower.r * GRID_SIZE + GRID_SIZE / 2;
     const r = (GRID_SIZE / 2) * 0.7;
     Draw.circle(ctx, x, y, r);
+    Draw.triangle(ctx, x, y, r);
 }
 
 function draw_towers(ctx) {
