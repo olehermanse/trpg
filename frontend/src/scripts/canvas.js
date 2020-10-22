@@ -25,10 +25,25 @@ function draw_towers(ctx) {
     }
 }
 
+function draw_enemy(ctx, enemy) {
+    const x = enemy.c * GRID_SIZE + GRID_SIZE / 2;
+    const y = enemy.r * GRID_SIZE + GRID_SIZE / 2;
+    const r = (GRID_SIZE / 2) * 0.7;
+    const angle = enemy.rotation;
+    Draw.triangle(ctx, x, y, r, angle, "#ff0000", "#000000");
+}
+
+function draw_enemies(ctx) {
+    for (let enemy of game.enemies) {
+        draw_enemy(ctx, enemy);
+    }
+}
+
 function draw(ctx) {
     Draw.background(ctx, WIDTH, HEIGHT);
     Draw.grid(ctx, GRID_SIZE, WIDTH, HEIGHT);
     draw_towers(ctx);
+    draw_enemies(ctx);
 }
 
 function to_grid(p) {
