@@ -76,13 +76,21 @@ function mouse_release() {
 
 }
 
+function to_canvas(p, canvas) {
+    return (p / canvas.getBoundingClientRect().width) * WIDTH;
+}
+
 function setup_events(canvas) {
     canvas.addEventListener('mousedown', e => {
-        mouse_click(e.offsetX, e.offsetY);
+        const x = to_canvas(e.offsetX, canvas);
+        const y = to_canvas(e.offsetY, canvas);
+        mouse_click(x, y);
     });
 
     canvas.addEventListener('mousemove', e => {
-        mouse_move(e.offsetX, e.offsetY);
+        const x = to_canvas(e.offsetX, canvas);
+        const y = to_canvas(e.offsetY, canvas);
+        mouse_move(x, y);
     });
 
     window.addEventListener('mouseup', e => {
