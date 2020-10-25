@@ -20,7 +20,9 @@ function draw_tower(ctx, tower) {
     if (tower.target) {
         const tx = tower.target.c * GRID_SIZE + GRID_SIZE / 2;
         const ty = tower.target.r * GRID_SIZE + GRID_SIZE / 2;
-        Draw.line(ctx, x, y, tx, ty, 'rgba(0, 0, 255, 0.25)', 4);
+        const intensity = tower.intensity;
+        const stroke = `rgba(127, 0, 255, ${intensity})`;
+        Draw.line(ctx, x, y, tx, ty, stroke, 5 * intensity);
     }
     Draw.triangle(ctx, x, y, r, angle);
 }

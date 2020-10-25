@@ -1,5 +1,5 @@
 function get_rotation(a, b) {
-    return Math.atan2(a.r - b.r, b.c - a.c);
+  return Math.atan2(a.r - b.r, b.c - a.c);
 }
 
 function dps(dps, ms) {
@@ -12,19 +12,30 @@ class Tower {
     this.r = r;
     this.rotation = 0;
     this.target = null;
+    this.intensity = 0.0;
   }
   tick(ms) {
     if (this.target) {
-      this.target.health -= dps(25, ms);
+      this.intensity += 3 * (ms / 1000);
+      if (this.intensity > 1.0) {
+        this.intensity = 1.0;
+      }
+      this.target.health -= dps(25 * this.intensity, ms);
       this.rotation = get_rotation(this, this.target);
     }
   }
   pick_target(enemies) {
     if (enemies.length === 0) {
       this.target = null;
+      this.intensity = 0.0;
       return;
     }
-    this.target = enemies[0];
+    const new_target = enemies[0];
+    if (this.target != new_target) {
+      this.target = new_target;
+      this.intensity = 0.0;
+    }
+
   }
 }
 
@@ -82,7 +93,7 @@ class Game {
         removed.push(enemy);
       }
     }
-    this.enemies = this.enemies.filter((enemy) => {return !removed.includes(enemy);});
+    this.enemies = this.enemies.filter((enemy) => { return !removed.includes(enemy); });
     for (let tower of this.towers) {
       tower.pick_target(this.enemies);
     }
