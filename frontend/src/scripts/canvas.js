@@ -1,9 +1,9 @@
 const Game = require("../../../libtowers/libtowers.js").Game;
 const Draw = require("./draw.js");
 
-const GRID_SIZE = 50;
-const WIDTH = 800;
-const HEIGHT = 600;
+const GRID_SIZE = 100;
+const WIDTH = 1600;
+const HEIGHT = 1200;
 
 const ROWS = HEIGHT / GRID_SIZE;
 const COLUMNS = WIDTH / GRID_SIZE;

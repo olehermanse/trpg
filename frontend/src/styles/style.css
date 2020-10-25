@@ -4,16 +4,22 @@ html {
 
 body {
   background-color: rgb(227, 227, 227);
+  padding: 1rem;
 }
 
 body > * {
-  max-width: 800px;
+  max-width: 1600px;
   margin-left: auto;
   margin-right: auto;
 }
 
 h1 > span {
   color: blue;
+}
+
+h1 {
+  padding: 0;
+  margin: 0;
 }
 
 a {
@@ -32,5 +38,4 @@ a {
 canvas {
   border: 1px solid black;
   width: 100%;
-  max-width: 800px;
 }
