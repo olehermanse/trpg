@@ -1,8 +1,8 @@
 const PI = 3.14159;
 
-function line(ctx, x1, y1, x2, y2) {
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
-    ctx.lineWidth = 1;
+function line(ctx, x1, y1, x2, y2, strokeStyle='rgba(0, 0, 0, 0.25)', lineWidth=1) {
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
