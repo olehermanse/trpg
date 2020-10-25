@@ -16,10 +16,10 @@ describe("Game", function () {
       assert.strictEqual(game.towers.length, 1);
     });
   });
-  describe("#has_tower()", function () {
-    it("Returns false by default", function () {
+  describe("#is_empty()", function () {
+    it("Returns true by default", function () {
       let game = new Game(4, 3);
-      assert.strictEqual(game.has_tower(0, 0), false);
+      assert.strictEqual(game.is_empty(0, 0), true);
     });
   });
 });

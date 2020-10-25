@@ -69,15 +69,15 @@ class Game {
     this.time = 0;
   }
 
-  has_tower(c, r) {
+  is_empty(c, r) {
     for (let t of this.towers) {
       if (t.c === c && t.r === r)
-        return true;
+        return false;
     }
-    return false;
+    return true;
   }
   place_tower(c, r) {
-    console.assert(!this.has_tower(c, r));
+    console.assert(this.is_empty(c, r));
     this.towers.push(new Tower(c, r));
   }
   place_enemy(c, r) {

@@ -59,7 +59,7 @@ function to_grid(p) {
 }
 
 function grid_click(c, r) {
-    if (!game.has_tower(c, r)) {
+    if (game.is_empty(c, r)) {
         game.place_tower(c, r);
     }
 }
