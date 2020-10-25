@@ -33,6 +33,33 @@ function draw_towers(ctx) {
     }
 }
 
+function draw_wall(ctx, c, r) {
+    const color = "rgba(128,128,128,1)";
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+}
+
+function draw_path(ctx, c, r) {
+    const color = "rgba(200,200,200,0.5)";
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+}
+
+function draw_tile(ctx, c, r) {
+    const tile = game.tiles[c][r];
+    if (tile === "wall") {
+        draw_wall(ctx, c, r)
+    } else if (tile === "path") {
+        draw_path(ctx, c, r);
+    }
+}
+
+function draw_tiles(ctx) {
+    for (let c = 0; c < COLUMNS; ++c) {
+        for (let r = 0; r < ROWS; ++r) {
+            draw_tile(ctx, c, r);
+        }
+    }
+}
+
 function draw_enemy(ctx, enemy) {
     const x = enemy.c * GRID_SIZE + GRID_SIZE / 2;
     const y = enemy.r * GRID_SIZE + GRID_SIZE / 2;
@@ -50,6 +77,7 @@ function draw_enemies(ctx) {
 function draw(ctx) {
     Draw.background(ctx, WIDTH, HEIGHT);
     Draw.grid(ctx, GRID_SIZE, WIDTH, HEIGHT);
+    draw_tiles(ctx);
     draw_towers(ctx);
     draw_enemies(ctx);
 }

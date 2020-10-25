@@ -1,6 +1,6 @@
 const PI = 3.14159;
 
-function line(ctx, x1, y1, x2, y2, strokeStyle='rgba(0, 0, 0, 0.25)', lineWidth=1) {
+function line(ctx, x1, y1, x2, y2, strokeStyle = 'rgba(0, 0, 0, 0.25)', lineWidth = 1) {
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = lineWidth;
     ctx.beginPath();
@@ -19,17 +19,9 @@ function circle(ctx, x, y, r) {
     ctx.stroke();
 }
 
-function triangle(ctx, x, y, r, angle, fill = 'rgba(0, 200, 0, 1)', stroke = 'rgba(255, 255, 255, 1)') {
+function triangle(ctx, x, y, r, angle, fill = 'rgba(0, 200, 0, 1)', stroke = 'white') {
     const height = r * 2;
     const side = height * (2 / (Math.sqrt(3)));
-
-    if (fill) {
-        ctx.fillStyle = fill;
-        ctx.lineWidth = 2;
-    }
-    if (stroke) {
-        ctx.strokeStyle = stroke;
-    }
 
     // Matrix transformation
     ctx.translate(x, y);
@@ -43,17 +35,44 @@ function triangle(ctx, x, y, r, angle, fill = 'rgba(0, 200, 0, 1)', stroke = 'rg
     ctx.lineTo(x + r, y);
 
     if (fill) {
+        ctx.fillStyle = fill;
         ctx.fill();
     }
     if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
         ctx.stroke();
     }
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+function rectangle(ctx, x, y, w, h, fill = "black", stroke = null) {
+    if (fill) {
+        ctx.fillStyle = fill;
+        ctx.lineWidth = 2;
+    }
+    if (stroke) {
+        ctx.strokeStyle = stroke;
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y);
+    ctx.lineTo(x + w, y + h);
+    ctx.lineTo(x, y + h);
+    ctx.lineTo(x, y);
+
+    if (fill) {
+        ctx.fill();
+    }
+    if (stroke) {
+        ctx.stroke();
+    }
+}
+
 function background(ctx, width, height) {
-    ctx.fillStyle = 'rgb(244, 244, 244)';
+    ctx.fillStyle = 'rgb(255, 255, 255)';
     ctx.fillRect(0, 0, width, height);
 }
 
@@ -69,6 +88,7 @@ function grid(ctx, size, width, height) {
 module.exports = {
     circle,
     triangle,
+    rectangle,
     line,
     background,
     grid,

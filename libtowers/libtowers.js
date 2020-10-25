@@ -64,21 +64,31 @@ class Game {
   constructor(columns, rows) {
     this.rows = rows;
     this.columns = columns;
+    this.spawn = { "c": -1, "r": Math.floor(this.rows / 2) };
     this.towers = [];
     this.enemies = [];
     this.time = 0;
+    this.tiles = [...Array(columns)].map(() => Array(rows).fill(null));
+    console.assert(this.tiles.length === columns);
+    console.assert(this.tiles[0].length === rows);
+
+    for (let i = 0; i < rows; ++i) {
+      this.tiles[0][i] = this.tiles[columns - 1][i] = "wall";
+    }
+    for (let i = 0; i < columns; ++i) {
+      this.tiles[i][0] = this.tiles[i][rows - 1] = "wall";
+      this.tiles[i][this.spawn.r] = "path";
+    }
   }
 
   is_empty(c, r) {
-    for (let t of this.towers) {
-      if (t.c === c && t.r === r)
-        return false;
-    }
-    return true;
+    return (this.tiles[c][r] === null);
   }
   place_tower(c, r) {
     console.assert(this.is_empty(c, r));
-    this.towers.push(new Tower(c, r));
+    const tower = new Tower(c, r);
+    this.towers.push(tower);
+    this.tiles[c][r] = tower;
   }
   place_enemy(c, r) {
     this.enemies.push(new Enemy(c, r));
@@ -92,7 +102,7 @@ class Game {
     }
     this.time += ms;
     while (this.time > 1000) {
-      this.place_enemy(-1, Math.floor(this.rows / 2));
+      this.place_enemy(this.spawn.c, this.spawn.r);
       this.time -= 1000;
     }
     let removed = [];
