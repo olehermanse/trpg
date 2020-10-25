@@ -6,6 +6,10 @@ function dps(dps, ms) {
   return dps * (ms / 1000);
 }
 
+function distance(a, b) {
+  return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
+}
+
 class Tower {
   constructor(c, r) {
     this.c = c;
@@ -30,7 +34,11 @@ class Tower {
       this.intensity = 0.0;
       return;
     }
-    const new_target = enemies[0];
+    const in_range = enemies.filter((e) => { return distance(this, e) < 3; });
+    let new_target = null;
+    if (in_range.length > 0) {
+      new_target = in_range[0];
+    }
     if (this.target != new_target) {
       this.target = new_target;
       this.intensity = 0.0;
