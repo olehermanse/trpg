@@ -7,5 +7,5 @@ app.use(express.static("frontend/dist/scripts"));
 // Start server on port 3000:
 const port = 3000;
 app.listen(port, function () {
-  console.log("example dev-server listening on port" + port);
+  console.log("towers dev-server listening on port " + port);
 });
