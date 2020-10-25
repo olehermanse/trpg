@@ -17,6 +17,12 @@ function draw_tower(ctx, tower) {
     const angle = tower.rotation;
     Draw.circle(ctx, x, y, r);
     Draw.triangle(ctx, x, y, r, angle);
+
+    if (tower.target) {
+        const tx = tower.target.c * GRID_SIZE + GRID_SIZE / 2;
+        const ty = tower.target.r * GRID_SIZE + GRID_SIZE / 2;
+        Draw.line(ctx, x,y,tx,ty);
+    }
 }
 
 function draw_towers(ctx) {
