@@ -43,12 +43,26 @@ function draw_path(ctx, c, r) {
     Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
 }
 
+function draw_spawn(ctx, c, r) {
+    const color = "rgba(0,128,0,1)";
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+}
+
+function draw_goal(ctx, c, r) {
+    const color = "rgba(200,200,0,1)";
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+}
+
 function draw_tile(ctx, c, r) {
     const tile = game.tiles[c][r];
     if (tile === "wall") {
         draw_wall(ctx, c, r)
     } else if (tile === "path") {
         draw_path(ctx, c, r);
+    } else if (tile === "spawn") {
+        draw_spawn(ctx, c, r);
+    } else if (tile === "goal") {
+        draw_goal(ctx, c, r);
     }
 }
 

@@ -64,7 +64,8 @@ class Game {
   constructor(columns, rows) {
     this.rows = rows;
     this.columns = columns;
-    this.spawn = { "c": -1, "r": Math.floor(this.rows / 2) };
+    this.spawn = { "c": 0, "r": Math.floor(this.rows / 2) };
+    this.goal = { "c": columns - 1, "r": this.spawn.r };
     this.towers = [];
     this.enemies = [];
     this.time = 0;
@@ -79,6 +80,8 @@ class Game {
       this.tiles[i][0] = this.tiles[i][rows - 1] = "wall";
       this.tiles[i][this.spawn.r] = "path";
     }
+    this.tiles[this.spawn.c][this.spawn.r] = "spawn";
+    this.tiles[this.goal.c][this.goal.r] = "goal";
   }
 
   is_empty(c, r) {
@@ -102,7 +105,7 @@ class Game {
     }
     this.time += ms;
     while (this.time > 1000) {
-      this.place_enemy(this.spawn.c, this.spawn.r);
+      this.place_enemy(this.spawn.c - 1, this.spawn.r);
       this.time -= 1000;
     }
     let removed = [];
