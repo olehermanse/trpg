@@ -60,7 +60,7 @@ class Enemy {
     this.rotation = 0.0;
     const step = 0.001 * ms;
     if (this.path_index >= this.path.length) {
-      return;
+      this.path_index = this.path.length - 1;
     }
     const target = this.path[this.path_index];
     const dx = target.c - this.c;
@@ -96,6 +96,15 @@ class Enemy {
   }
 }
 
+function path_includes(node, path) {
+  for (let p of path) {
+    if (p.c === node.c & p.r === node.r) {
+      return true;
+    }
+  }
+  return false;
+}
+
 class Game {
   constructor(columns, rows) {
     this.rows = rows;
@@ -121,7 +130,7 @@ class Game {
     this.create_path();
   }
 
-  add_to_path(c, r) {
+  place_path(c, r) {
     this.path.push({ "c": c, "r": r });
     if (this.is_outside(c, r)) {
       return;
@@ -134,7 +143,7 @@ class Game {
   }
 
   is_outside(c, r) {
-    return ((c < 0) || (r < 0) || (c >= this.rows) || (c >= this.columns));
+    return ((c < 0) || (r < 0) || (r >= this.rows) || (c >= this.columns));
   }
 
   is_empty(c, r) {
@@ -162,43 +171,65 @@ class Game {
     }
   }
 
+  find_path(c, r, visited) {
+    console.log(visited);
+    if (this.is_outside(c, r)) {
+      return [];
+    }
+    const node = { "c": c, "r": r };
+    if (path_includes(node, visited)) {
+      return [];
+    }
+    const tile = this.tiles[c][r];
+    if (tile === "goal") {
+      return [...visited, node];
+    }
+    if (!this.is_empty(c, r)) {
+      return [];
+    }
+
+    const right = this.find_path(c + 1, r, [...visited, node]);
+    if (right.length > 0) {
+      return right;
+    }
+    const up = this.find_path(c, r - 1, [...visited, node]);
+    if (up.length > 0) {
+      return up;
+    }
+    const down = this.find_path(c, r + 1, [...visited, node]);
+    return down;
+    if (up.length === 0 && down.length === 0) {
+      return [];
+      const left = this.find_path(c - 1, r, [...visited, node]);
+      return left;
+    }
+    if (up.length < down.length) {
+      return up;
+    }
+    if (up.length > down.length) {
+      return down;
+    }
+    if (r > this.goal.r) {
+      return up;
+    }
+    return down;
+  }
+
   create_path() {
     this.clear_path();
-    let c = this.spawn.c;
+    let c = this.spawn.c + 1;
     let r = this.spawn.r;
-    while (true) {
-      if (this.tiles[c][r] === "spawn") {
-        this.add_to_path(c, r);
-        ++c;
-        continue;
-      }
-      if (this.tiles[c][r] === "goal") {
-        this.add_to_path(c, r);
-        this.add_to_path(c + 1, r);
-        this.set_path();
-        return true;
-      }
-      if (this.tiles[c][r] === "wall") {
-        --c;
-        ++r;
-        if (!this.is_empty(c, r)) {
-          return false;
-        }
-        continue;
-      }
-      if (this.tiles[c][r] instanceof Tower) {
-        --c;
-        --r;
-      }
-      if (!this.is_empty(c, r)) {
-        return false;
-      }
 
-      this.tiles[c][r] = "path";
-      this.add_to_path(c, r);
-
-      ++c;
+    let path = this.find_path(c, r, [this.spawn]);
+    if (path.length === 0) {
+      return false;
     }
+    path.push({ "c": c, "r": r });
+    for (let p of path) {
+      this.place_path(p.c, p.r);
+    }
+    this.set_path();
+    return true;
   }
 
   place_tower(c, r) {
