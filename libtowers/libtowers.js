@@ -65,9 +65,8 @@ class Enemy {
     const target = this.path[this.path_index];
     const dx = target.c - this.c;
     const dy = target.r - this.r;
-    if (Math.abs(dx) < step && Math.abs(dy) < step) {
+    if ((Math.abs(dx) < step && Math.abs(dy) < step) && (this.path_index + 1 < this.path.length)) {
       this.path_index += 1;
-      return;
     }
     if (Math.abs(dx) > step) {
       this.c += step * Math.sign(dx);
@@ -182,7 +181,8 @@ class Game {
     }
     const tile = this.tiles[c][r];
     if (tile === "goal") {
-      return [...visited, node];
+      const out = { "c": node.c + 1, "r": node.r };
+      return [...visited, node, out];
     }
     if (!this.is_empty(c, r)) {
       return [];
@@ -224,7 +224,6 @@ class Game {
     if (path.length === 0) {
       return false;
     }
-    path.push({ "c": c, "r": r });
     for (let p of path) {
       this.place_path(p.c, p.r);
     }
@@ -270,7 +269,7 @@ class Game {
     }
     let removed = [];
     for (let enemy of this.enemies) {
-      if (enemy.health <= 0.0 || enemy.c > this.columns) {
+      if (enemy.health <= 0.0 || enemy.c >= this.columns) {
         removed.push(enemy);
       }
     }
