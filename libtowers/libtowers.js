@@ -171,7 +171,6 @@ class Game {
   }
 
   find_path(c, r, visited) {
-    console.log(visited);
     if (this.is_outside(c, r)) {
       return [];
     }
