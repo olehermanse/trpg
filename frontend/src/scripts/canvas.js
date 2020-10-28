@@ -10,16 +10,28 @@ const COLUMNS = WIDTH / GRID_SIZE;
 
 const game = new Game(COLUMNS, ROWS);
 
+function canvas_to_grid_int(p) {
+    return Math.floor(p / GRID_SIZE);
+}
+
+function grid_to_canvas(p) {
+    return (p * GRID_SIZE + GRID_SIZE / 2);
+}
+
+function offset_to_canvas(p, canvas) {
+    return (p / canvas.getBoundingClientRect().width) * WIDTH;
+}
+
 function draw_tower(ctx, tower) {
-    const x = tower.c * GRID_SIZE + GRID_SIZE / 2;
-    const y = tower.r * GRID_SIZE + GRID_SIZE / 2;
+    const x = grid_to_canvas(tower.c);
+    const y = grid_to_canvas(tower.r);
     const r = (GRID_SIZE / 2) * 0.7;
     const angle = tower.rotation;
     Draw.circle(ctx, x, y, r);
 
     if (tower.target) {
-        const tx = tower.target.c * GRID_SIZE + GRID_SIZE / 2;
-        const ty = tower.target.r * GRID_SIZE + GRID_SIZE / 2;
+        const tx = grid_to_canvas(tower.target.c);
+        const ty = grid_to_canvas(tower.target.r);
         const intensity = tower.intensity;
         const stroke = `rgba(127, 0, 255, ${intensity})`;
         Draw.line(ctx, x, y, tx, ty, stroke, 5 * intensity);
@@ -75,8 +87,8 @@ function draw_tiles(ctx) {
 }
 
 function draw_enemy(ctx, enemy) {
-    const x = enemy.c * GRID_SIZE + GRID_SIZE / 2;
-    const y = enemy.r * GRID_SIZE + GRID_SIZE / 2;
+    const x = grid_to_canvas(enemy.c);
+    const y = grid_to_canvas(enemy.r);
     const r = (GRID_SIZE / 2) * 0.7;
     const angle = enemy.rotation;
     Draw.triangle(ctx, x, y, r, angle, "#ff0000", "#000000");
@@ -96,10 +108,6 @@ function draw(ctx) {
     draw_enemies(ctx);
 }
 
-function to_grid(p) {
-    return Math.floor(p / GRID_SIZE);
-}
-
 function grid_click(c, r) {
     if (game.is_empty(c, r)) {
         game.place_tower(c, r);
@@ -107,7 +115,7 @@ function grid_click(c, r) {
 }
 
 function mouse_click(x, y) {
-    grid_click(to_grid(x), to_grid(y));
+    grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y));
 }
 
 function mouse_move(x, y) {
@@ -118,20 +126,16 @@ function mouse_release() {
 
 }
 
-function to_canvas(p, canvas) {
-    return (p / canvas.getBoundingClientRect().width) * WIDTH;
-}
-
 function setup_events(canvas) {
     canvas.addEventListener('mousedown', e => {
-        const x = to_canvas(e.offsetX, canvas);
-        const y = to_canvas(e.offsetY, canvas);
+        const x = offset_to_canvas(e.offsetX, canvas);
+        const y = offset_to_canvas(e.offsetY, canvas);
         mouse_click(x, y);
     });
 
     canvas.addEventListener('mousemove', e => {
-        const x = to_canvas(e.offsetX, canvas);
-        const y = to_canvas(e.offsetY, canvas);
+        const x = offset_to_canvas(e.offsetX, canvas);
+        const y = offset_to_canvas(e.offsetY, canvas);
         mouse_move(x, y);
     });
 
