@@ -197,21 +197,6 @@ class Game {
     }
     const down = this.find_path(c, r + 1, [...visited, node]);
     return down;
-    if (up.length === 0 && down.length === 0) {
-      return [];
-      const left = this.find_path(c - 1, r, [...visited, node]);
-      return left;
-    }
-    if (up.length < down.length) {
-      return up;
-    }
-    if (up.length > down.length) {
-      return down;
-    }
-    if (r > this.goal.r) {
-      return up;
-    }
-    return down;
   }
 
   create_path() {
