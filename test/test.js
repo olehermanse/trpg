@@ -19,7 +19,12 @@ describe("Game", function () {
   describe("#is_empty()", function () {
     it("Returns true by default", function () {
       let game = new Game(4, 3);
-      assert.strictEqual(game.is_empty(0, 0), true);
+      assert.strictEqual(game.is_empty(1, 1), true);
+    });
+    it("Returns false for wall", function () {
+      let game = new Game(10, 10);
+      assert.strictEqual(game.is_empty(0, 0), false);
+      assert.strictEqual(game.tiles[0][0], "wall");
     });
   });
 });
