@@ -242,18 +242,12 @@ class Game {
       const right = position(c + 1, r);
       const all = [up, down, left, right];
       const distances = all.map((pos) => { return this.get_distance(pos.c, pos.r); })
-      console.log("distances");
-      console.log(distances);
       const filtered = distances.filter(Number.isInteger);
-      console.log("filtered");
-      console.log(filtered);
       if (filtered.length === 0) {
         console.assert(this.tiles[c][r] === "spawn");
         return [];
       }
       const best = Math.min(...filtered);
-      console.log("best");
-      console.log(best);
       console.assert(all.length === distances.length);
       const best_position = all[distances.indexOf(best)];
       visited.push(best_position);
