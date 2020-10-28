@@ -10,6 +10,10 @@ function distance(a, b) {
   return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
 }
 
+function position(c, r) {
+  return { "c": c, "r": r };
+}
+
 class Tower {
   constructor(c, r) {
     this.c = c;
@@ -95,21 +99,13 @@ class Enemy {
   }
 }
 
-function path_includes(node, path) {
-  for (let p of path) {
-    if (p.c === node.c & p.r === node.r) {
-      return true;
-    }
-  }
-  return false;
-}
 
 class Game {
   constructor(columns, rows) {
     this.rows = rows;
     this.columns = columns;
-    this.spawn = { "c": 0, "r": Math.floor(this.rows / 2) };
-    this.goal = { "c": columns - 1, "r": this.spawn.r };
+    this.spawn = position(0, Math.floor(this.rows / 2));
+    this.goal = position(columns - 1, this.spawn.r);
     this.towers = [];
     this.enemies = [];
     this.time = 0;
@@ -126,11 +122,11 @@ class Game {
     }
     this.tiles[this.spawn.c][this.spawn.r] = "spawn";
     this.tiles[this.goal.c][this.goal.r] = "goal";
-    this.create_path();
+    const success = this.create_path();
+    console.assert(success === true, "Could not create path");
   }
 
   place_path(c, r) {
-    this.path.push({ "c": c, "r": r });
     if (this.is_outside(c, r)) {
       return;
     }
@@ -164,54 +160,123 @@ class Game {
     }
   }
 
-  set_path() {
+  set_path(path) {
+    this.path = path;
+    for (let pos of path) {
+      this.place_path(pos.c, pos.r);
+    }
     for (let enemy of this.enemies) {
       enemy.path = this.path;
     }
   }
 
-  find_path(c, r, visited) {
-    if (this.is_outside(c, r)) {
-      return [];
+  clear_distances() {
+    for (let tiles of this.tiles) {
+      for (let i = 0; i < tiles.length; ++i) {
+        if (Number.isInteger(tiles[i])) {
+          tiles[i] = null;
+        }
+      }
     }
-    const node = { "c": c, "r": r };
-    if (path_includes(node, visited)) {
-      return [];
+  }
+
+  fill_distances(c, r, distance) {
+    console.assert(Number.isInteger(c));
+    console.assert(Number.isInteger(r));
+    console.assert(Number.isInteger(distance));
+
+    if (this.is_outside(c, r)) {
+      return;
     }
     const tile = this.tiles[c][r];
-    if (tile === "goal") {
-      const out = { "c": node.c + 1, "r": node.r };
-      return [...visited, node, out];
-    }
-    if (!this.is_empty(c, r)) {
-      return [];
+    if (tile === null) {
+      // Good, we will record distance
+    } else if (Number.isInteger(tile)) {
+      if (distance >= tile) {
+        return; // Already a lower distance there
+      }
+    } else if (tile === "goal") {
+      if (distance > 0) {
+        // We've already been here, don't recurse
+        return;
+      }
+    } else if (tile === "spawn") {
+      return; // We reached spawn, no need to recurse further
+    } else {
+      console.assert(tile != "path");
+      return; // Something else, like a wall or a tower.
     }
 
-    const right = this.find_path(c + 1, r, [...visited, node]);
-    if (right.length > 0) {
-      return right;
+    if (tile === null || Number.isInteger(tile)) {
+      this.tiles[c][r] = distance;
+    } else {
+      console.assert(tile === "goal");
     }
-    const up = this.find_path(c, r - 1, [...visited, node]);
-    if (up.length > 0) {
-      return up;
+    this.fill_distances(c - 1, r, distance + 1);
+    this.fill_distances(c, r + 1, distance + 1);
+    this.fill_distances(c, r - 1, distance + 1);
+    this.fill_distances(c + 1, r, distance + 1);
+  }
+
+  get_distance(c, r) {
+    if (this.is_outside(c, r)) {
+      return null;
     }
-    const down = this.find_path(c, r + 1, [...visited, node]);
-    return down;
+    const tile = this.tiles[c][r];
+    if (!Number.isInteger(tile)) {
+      return null;
+    }
+
+    return tile;
+  }
+
+  find_path(start_c, start_r) {
+    let visited = [];
+    let current = position(start_c, start_r);
+    while (true) {
+      const c = current.c;
+      const r = current.r;
+      const up = position(c, r - 1);
+      const down = position(c, r + 1);
+      const left = position(c - 1, r);
+      const right = position(c + 1, r);
+      const all = [up, down, left, right];
+      const distances = all.map((pos) => { return this.get_distance(pos.c, pos.r); })
+      console.log("distances");
+      console.log(distances);
+      const filtered = distances.filter(Number.isInteger);
+      console.log("filtered");
+      console.log(filtered);
+      if (filtered.length === 0) {
+        console.assert(this.tiles[c][r] === "spawn");
+        return [];
+      }
+      const best = Math.min(...filtered);
+      console.log("best");
+      console.log(best);
+      console.assert(all.length === distances.length);
+      const best_position = all[distances.indexOf(best)];
+      visited.push(best_position);
+      if (best === 1) {
+        break;
+      }
+      current = best_position;
+    }
+    return visited;
   }
 
   create_path() {
-    this.clear_path();
-    let c = this.spawn.c + 1;
-    let r = this.spawn.r;
+    const spawn = this.spawn;
+    const goal = this.goal;
 
-    let path = this.find_path(c, r, [this.spawn]);
+    this.clear_path();
+    this.fill_distances(goal.c, goal.r, 0);
+    let path = this.find_path(spawn.c, spawn.r);
+    this.clear_distances();
     if (path.length === 0) {
       return false;
     }
-    for (let p of path) {
-      this.place_path(p.c, p.r);
-    }
-    this.set_path();
+    this.set_path([this.spawn, ...path, goal, position(goal.c + 1, goal.r)]);
     return true;
   }
 
@@ -230,7 +295,8 @@ class Game {
 
     if (!this.create_path()) {
       this.tiles[c][r] = null;
-      this.create_path();
+      const success = this.create_path();
+      console.assert(success === true);
       return false;
     }
 
