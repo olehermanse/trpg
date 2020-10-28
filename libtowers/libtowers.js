@@ -218,11 +218,14 @@ class Game {
   place_tower(c, r) {
     console.assert(this.is_empty(c, r));
 
-    const on_path = (this.has_path(c, r));
-    if (on_path) {
-      this.clear_path();
-    }
     const tower = new Tower(c, r);
+    const on_path = (this.has_path(c, r));
+    if (!on_path) {
+      this.tiles[c][r] = tower;
+      this.towers.push(tower);
+      return true;
+    }
+
     this.tiles[c][r] = tower;
 
     if (!this.create_path()) {
