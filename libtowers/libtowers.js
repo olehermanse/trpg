@@ -102,6 +102,7 @@ class Enemy {
 
 class Game {
   constructor(columns, rows) {
+    this.money = 0;
     this.rows = rows;
     this.columns = columns;
     this.spawn = position(0, Math.floor(this.rows / 2));
@@ -314,12 +315,26 @@ class Game {
       this.place_enemy(this.spawn.c - 1, this.spawn.r);
       this.time -= 1000;
     }
-    let removed = [];
+
+    let died = [];
     for (let enemy of this.enemies) {
-      if (enemy.health <= 0.0 || enemy.c >= this.columns) {
-        removed.push(enemy);
+      if (enemy.health <= 0.0) {
+        died.push(enemy);
       }
     }
+
+    this.money += died.length;
+
+    let finished = [];
+
+    for (let enemy of this.enemies) {
+      if (!died.includes(enemy) && enemy.c >= this.columns) {
+        finished.push(enemy);
+      }
+    }
+
+    let removed = [...died, ...finished];
+
     this.enemies = this.enemies.filter((enemy) => { return !removed.includes(enemy); });
     for (let tower of this.towers) {
       tower.pick_target(this.enemies);

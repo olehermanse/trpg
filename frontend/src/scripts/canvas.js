@@ -3,12 +3,72 @@ const Draw = require("./draw.js");
 
 const GRID_SIZE = 100;
 const WIDTH = 1600;
-const HEIGHT = 1200;
+const GRID_HEIGHT = 1100;
+const CANVAS_HEIGHT = 1200;
 
-const ROWS = HEIGHT / GRID_SIZE;
+const ROWS = GRID_HEIGHT / GRID_SIZE;
 const COLUMNS = WIDTH / GRID_SIZE;
+const BG = "rgba(128,128,128,1)";
+const FG = "rgba(64,64,64,1)";
+
+class UIText {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.text = "0";
+    }
+
+    draw(ctx) {
+        ctx.font = '48px monospace';
+        ctx.textAlign = "center";
+        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+        ctx.fillText(this.text, this.x, this.y);
+    }
+}
+
+class UI {
+    constructor(x, y, w, h, c) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.c = c;
+        this.children = [];
+    }
+
+    setup() {
+        this.add_inner(this.h / 5, FG);
+        this.add_text();
+    }
+
+    add_inner(padding, color) {
+        const x = this.x + padding;
+        const y = this.y + padding;
+        const w = this.w - 2 * padding;
+        const h = this.h - 2 * padding;
+        const inner = new UI(x, y, w, h, color);
+        this.children.push(inner);
+    }
+
+    add_text() {
+        const text = new UIText(this.x + this.w / 2, this.y + this.h / 2);
+        this.text = text;
+        this.children.push(text);
+    }
+
+    draw_self(ctx) {
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.c);
+    }
+
+    draw(ctx) {
+        this.draw_self(ctx);
+        this.children.map((c) => { c.draw(ctx); });
+    }
+}
 
 const game = new Game(COLUMNS, ROWS);
+const ui = new UI(0, GRID_HEIGHT - GRID_SIZE, WIDTH, GRID_SIZE * 2, BG);
+ui.setup();
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
@@ -46,23 +106,22 @@ function draw_towers(ctx) {
 }
 
 function draw_wall(ctx, c, r) {
-    const color = "rgba(128,128,128,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, BG);
 }
 
 function draw_path(ctx, c, r) {
     const color = "rgba(200,200,200,0.5)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_spawn(ctx, c, r) {
     const color = "rgba(0,128,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_goal(ctx, c, r) {
     const color = "rgba(200,200,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color)
+    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_tile(ctx, c, r) {
@@ -101,11 +160,12 @@ function draw_enemies(ctx) {
 }
 
 function draw(ctx) {
-    Draw.background(ctx, WIDTH, HEIGHT);
-    Draw.grid(ctx, GRID_SIZE, WIDTH, HEIGHT);
+    Draw.background(ctx, WIDTH, GRID_HEIGHT);
+    Draw.grid(ctx, GRID_SIZE, WIDTH, GRID_HEIGHT);
     draw_tiles(ctx);
     draw_towers(ctx);
     draw_enemies(ctx);
+    ui.draw(ctx);
 }
 
 function grid_click(c, r) {
@@ -144,11 +204,18 @@ function setup_events(canvas) {
     });
 }
 
+function tick(ms) {
+    game.tick(10);
+    ui.text.text = "" + game.money;
+}
+
 function start(canvas) {
     const ctx = canvas.getContext('2d');
+    canvas.setAttribute("width", WIDTH);
+    canvas.setAttribute("height", CANVAS_HEIGHT);
     setup_events(canvas);
     window.setInterval(() => {
-        game.tick(10);
+        tick(10);
         draw(ctx);
     }, 10)
 }
