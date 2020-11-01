@@ -1,5 +1,6 @@
 const Game = require("../../../libtowers/libtowers.js").Game;
 const Draw = require("./draw.js");
+const UI = require("./ui.js").UI;
 
 const GRID_SIZE = 100;
 const WIDTH = 1600;
@@ -8,66 +9,11 @@ const CANVAS_HEIGHT = 1200;
 
 const ROWS = GRID_HEIGHT / GRID_SIZE;
 const COLUMNS = WIDTH / GRID_SIZE;
-const BG = "rgba(128,128,128,1)";
-const FG = "rgba(64,64,64,1)";
-
-class UIText {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.text = "0";
-    }
-
-    draw(ctx) {
-        ctx.font = '48px monospace';
-        ctx.textAlign = "center";
-        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        ctx.fillText(this.text, this.x, this.y);
-    }
-}
-
-class UI {
-    constructor(x, y, w, h, c) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.c = c;
-        this.children = [];
-    }
-
-    setup() {
-        this.add_inner(this.h / 5, FG);
-        this.add_text();
-    }
-
-    add_inner(padding, color) {
-        const x = this.x + padding;
-        const y = this.y + padding;
-        const w = this.w - 2 * padding;
-        const h = this.h - 2 * padding;
-        const inner = new UI(x, y, w, h, color);
-        this.children.push(inner);
-    }
-
-    add_text() {
-        const text = new UIText(this.x + this.w / 2, this.y + this.h / 2);
-        this.text = text;
-        this.children.push(text);
-    }
-
-    draw_self(ctx) {
-        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.c);
-    }
-
-    draw(ctx) {
-        this.draw_self(ctx);
-        this.children.map((c) => { c.draw(ctx); });
-    }
-}
+const FG = "rgba(128,128,128,1)";
+const BG = "rgba(64,64,64,1)";
 
 const game = new Game(COLUMNS, ROWS);
-const ui = new UI(0, GRID_HEIGHT - GRID_SIZE, WIDTH, GRID_SIZE * 2, BG);
+const ui = new UI(0, GRID_HEIGHT - GRID_SIZE, WIDTH, GRID_SIZE * 2, BG, FG);
 ui.setup();
 
 function canvas_to_grid_int(p) {
