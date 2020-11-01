@@ -1,5 +1,25 @@
 const Draw = require("./draw.js");
 
+class UIRect {
+    constructor(x, y, w, h, c) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.c = c;
+        this.children = [];
+    }
+
+    draw_self(ctx) {
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.c);
+    }
+
+    draw(ctx) {
+        this.draw_self(ctx);
+        this.children.map((c) => { c.draw(ctx); });
+    }
+}
+
 class UIText {
     constructor(x, y) {
         this.x = x;
@@ -15,16 +35,11 @@ class UIText {
     }
 }
 
-class UI {
+class UI extends UIRect {
     constructor(x, y, w, h, bg, fg) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
+        super(x, y, w, h, bg);
         this.bg = bg;
         this.fg = fg;
-        this.c = bg;
-        this.children = [];
     }
 
     setup() {
@@ -45,15 +60,6 @@ class UI {
         const text = new UIText(this.x + this.w / 2, this.y + this.h / 2);
         this.text = text;
         this.children.push(text);
-    }
-
-    draw_self(ctx) {
-        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.c);
-    }
-
-    draw(ctx) {
-        this.draw_self(ctx);
-        this.children.map((c) => { c.draw(ctx); });
     }
 }
 
