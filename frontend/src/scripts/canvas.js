@@ -23,6 +23,18 @@ const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
 const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
 
+function on_start_click() {
+    game.start();
+    ui.button.transition("disabled");
+}
+
+function on_victory() {
+    ui.button.transition("active");
+}
+
+ui.button.on_click = on_start_click;
+game.on_victory = on_victory;
+
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
 }
@@ -128,14 +140,15 @@ function draw(ctx) {
 
 function mouse_click(x, y) {
     game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y));
+    ui.click(x, y);
 }
 
 function mouse_move(x, y) {
-
+    ui.hover(x, y);
 }
 
-function mouse_release() {
-
+function mouse_release(x, y) {
+    ui.release(x, y);
 }
 
 function setup_events(canvas) {
@@ -152,12 +165,16 @@ function setup_events(canvas) {
     });
 
     window.addEventListener('mouseup', e => {
-        mouse_release();
+        const x = offset_to_canvas(e.offsetX, canvas);
+        const y = offset_to_canvas(e.offsetY, canvas);
+        mouse_release(x, y);
     });
 }
 
 function tick(ms) {
-    game.tick(10);
+    if (!game.paused) {
+        game.tick(10);
+    }
     ui.text.text = "" + game.money + " $";
 }
 

@@ -102,7 +102,11 @@ class Enemy {
 
 class Game {
   constructor(columns, rows) {
-    this.money = 100;
+    this.paused = true;
+    this.on_victory = null;
+    this.level = 1;
+    this.remaining = 0;
+    this.money = 50;
     this.price = 25;
     this.rows = rows;
     this.columns = columns;
@@ -325,6 +329,24 @@ class Game {
     }
   }
 
+  start() {
+    console.assert(this.paused);
+    console.assert(this.on_victory != null);
+    console.assert(this.remaining === 0);
+    this.remaining = this.level * 2;
+    this.paused = false;
+    this.time = 0;
+  }
+
+  victory() {
+    console.assert(this.remaining === 0);
+    console.assert(this.paused === false);
+    this.paused = true;
+    this.money += 20;
+    this.level += 1;
+    this.on_victory();
+  }
+
   tick(ms) {
     for (let tower of this.towers) {
       tower.tick(ms);
@@ -333,9 +355,10 @@ class Game {
       enemy.tick(ms);
     }
     this.time += ms;
-    while (this.time > 1000) {
+    while (this.time > 1000 && this.remaining > 0) {
       this.place_enemy(this.spawn.c - 1, this.spawn.r);
       this.time -= 1000;
+      this.remaining -= 1;
     }
 
     let died = [];
@@ -360,6 +383,10 @@ class Game {
     this.enemies = this.enemies.filter((enemy) => { return !removed.includes(enemy); });
     for (let tower of this.towers) {
       tower.pick_target(this.enemies);
+    }
+
+    if (this.remaining === 0 && this.enemies.length === 0) {
+      this.victory();
     }
   }
 }
