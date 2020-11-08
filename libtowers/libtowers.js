@@ -148,10 +148,10 @@ class Game {
   }
 
   is_empty(c, r) {
-    return (this.tiles[c][r] === null || this.has_path(c, r));
+    return (this.tiles[c][r] === null || this.is_path(c, r));
   }
 
-  has_path(c, r) {
+  is_path(c, r) {
     return (this.tiles[c][r] === "path");
   }
 
@@ -289,7 +289,7 @@ class Game {
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
     const tower = new Tower(c, r);
-    const on_path = this.has_path(c, r);
+    const on_path = this.is_path(c, r);
 
     const save = this.tiles[c][r];
     this.tiles[c][r] = tower;
@@ -325,7 +325,9 @@ class Game {
 
   grid_click(c, r) {
     if (this.is_empty(c, r) && this.can_afford()) {
-      this.place_tower(c, r);
+      if (this.paused || !this.is_path(c, r)) {
+        this.place_tower(c, r);
+      }
     }
   }
 
