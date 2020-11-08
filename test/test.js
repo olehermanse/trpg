@@ -10,9 +10,9 @@ describe("Game", function () {
   });
   describe("#place_tower()", function () {
     it("Places a tower", function () {
-      let game = new Game(4, 3);
+      let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      game.place_tower(0, 0);
+      game.place_tower(1, 1);
       assert.strictEqual(game.towers.length, 1);
     });
   });
