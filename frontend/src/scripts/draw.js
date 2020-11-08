@@ -71,11 +71,6 @@ function rectangle(ctx, x, y, w, h, fill = "black", stroke = null) {
     }
 }
 
-function background(ctx, width, height) {
-    ctx.fillStyle = 'rgb(255, 255, 255)';
-    ctx.fillRect(0, 0, width, height);
-}
-
 function grid(ctx, size, width, height) {
     for (let x = size; x < width; x += size) {
         line(ctx, x, 0, x, height);
@@ -90,6 +85,5 @@ module.exports = {
     triangle,
     rectangle,
     line,
-    background,
     grid,
 };

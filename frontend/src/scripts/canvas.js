@@ -3,18 +3,25 @@ const Draw = require("./draw.js");
 const UI = require("./ui.js").UI;
 
 const GRID_SIZE = 100;
-const WIDTH = 1600;
-const GRID_HEIGHT = 1100;
+const CANVAS_WIDTH = 1600;
 const CANVAS_HEIGHT = 1200;
+const GRID_HEIGHT = CANVAS_HEIGHT - GRID_SIZE;
+const GRID_WIDTH = CANVAS_WIDTH;
+const WIDTH = CANVAS_WIDTH;
 
 const ROWS = GRID_HEIGHT / GRID_SIZE;
 const COLUMNS = WIDTH / GRID_SIZE;
-const FG = "rgba(128,128,128,1)";
-const BG = "rgba(64,64,64,1)";
+const FG = "rgba(256,256,256,1)";
+const BG = "rgba(0,0,0,1)";
 
 const game = new Game(COLUMNS, ROWS);
-const ui = new UI(0, GRID_HEIGHT - GRID_SIZE, WIDTH, GRID_SIZE * 2, BG, FG);
-ui.setup();
+const UI_X = 0;
+const UI_Y = GRID_HEIGHT - GRID_SIZE;
+const UI_W = WIDTH;
+const UI_H = GRID_SIZE * 2;
+const UI_C = FG;
+const UI_S = GRID_SIZE / 4;
+const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
@@ -106,11 +113,16 @@ function draw_enemies(ctx) {
 }
 
 function draw(ctx) {
-    Draw.background(ctx, WIDTH, GRID_HEIGHT);
+    // Background:
+    Draw.rectangle(ctx, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, BG);
+    // Grid:
+    Draw.rectangle(ctx, 0, 0, GRID_WIDTH, GRID_HEIGHT, FG);
     Draw.grid(ctx, GRID_SIZE, WIDTH, GRID_HEIGHT);
+    // Game elements:
     draw_tiles(ctx);
     draw_towers(ctx);
     draw_enemies(ctx);
+    // UI:
     ui.draw(ctx);
 }
 
@@ -152,12 +164,12 @@ function setup_events(canvas) {
 
 function tick(ms) {
     game.tick(10);
-    ui.text.text = "" + game.money;
+    ui.text.text = "" + game.money + " $";
 }
 
 function start(canvas) {
     const ctx = canvas.getContext('2d');
-    canvas.setAttribute("width", WIDTH);
+    canvas.setAttribute("width", CANVAS_WIDTH);
     canvas.setAttribute("height", CANVAS_HEIGHT);
     setup_events(canvas);
     window.setInterval(() => {
