@@ -303,6 +303,12 @@ class Game {
     this.enemies.push(new Enemy(c, r, this.path));
   }
 
+  grid_click(c, r) {
+    if (this.is_empty(c, r)) {
+      this.place_tower(c, r);
+    }
+  }
+
   tick(ms) {
     for (let tower of this.towers) {
       tower.tick(ms);

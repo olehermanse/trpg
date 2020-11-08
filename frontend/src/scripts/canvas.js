@@ -126,14 +126,8 @@ function draw(ctx) {
     ui.draw(ctx);
 }
 
-function grid_click(c, r) {
-    if (game.is_empty(c, r)) {
-        game.place_tower(c, r);
-    }
-}
-
 function mouse_click(x, y) {
-    grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y));
+    game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y));
 }
 
 function mouse_move(x, y) {
