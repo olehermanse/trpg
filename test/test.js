@@ -8,6 +8,28 @@ describe("Game", function () {
     assert.strictEqual(game.rows, 3);
     assert.strictEqual(game.columns, 4);
   });
+  describe("#is_empty()", function () {
+    it("Returns false for walls", function () {
+      let game = new Game(5, 5);
+      assert.strictEqual(game.is_empty(0, 0), false);
+    });
+    it("Returns true for empty tiles", function () {
+      let game = new Game(5, 5);
+      assert.strictEqual(game.is_empty(1, 1), true);
+    });
+    it("Returns false for goal", function () {
+      let game = new Game(5, 5);
+      let c = game.goal.c;
+      let r = game.goal.r;
+      assert.strictEqual(game.is_empty(c, r), false);
+    });
+    it("Returns false for spawn", function () {
+      let game = new Game(5, 5);
+      let c = game.spawn.c;
+      let r = game.spawn.r;
+      assert.strictEqual(game.is_empty(c, r), false);
+    });
+  });
   describe("#place_tower()", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
@@ -20,6 +42,7 @@ describe("Game", function () {
       assert.strictEqual(game.towers.length, 0);
       game.place_tower(1, 1);
       assert.strictEqual(game.towers.length, 0);
+      assert.strictEqual(game.is_empty(1, 1), true);
     });
   });
   describe("#grid_click()", function () {
