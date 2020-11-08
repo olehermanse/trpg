@@ -102,7 +102,8 @@ class Enemy {
 
 class Game {
   constructor(columns, rows) {
-    this.money = 0;
+    this.money = 100;
+    this.price = 25;
     this.rows = rows;
     this.columns = columns;
     this.spawn = position(0, Math.floor(this.rows / 2));
@@ -275,27 +276,42 @@ class Game {
     return true;
   }
 
-  place_tower(c, r) {
-    console.assert(this.is_empty(c, r));
+  can_afford() {
+    return (this.money >= this.price);
+  }
+
+  _try_place_tower(c, r) {
+    console.assert(this.can_afford(), "Cannot afford tower");
+    console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
     const tower = new Tower(c, r);
-    const on_path = (this.has_path(c, r));
-    if (!on_path) {
-      this.tiles[c][r] = tower;
-      this.towers.push(tower);
-      return true;
-    }
+    const on_path = this.has_path(c, r);
 
+    const save = this.tiles[c][r];
     this.tiles[c][r] = tower;
 
-    if (!this.create_path()) {
-      this.tiles[c][r] = null;
-      const success = this.create_path();
-      console.assert(success === true);
-      return false;
+    if (!on_path) {
+      return tower;
     }
 
+    if (!this.create_path()) {
+      this.tiles[c][r] = save;
+      const success = this.create_path();
+      console.assert(success === true);
+      return null;
+    }
+
+    return tower;
+  }
+
+  place_tower(c, r) {
+    const tower = this._try_place_tower(c, r);
+    if (tower === null) {
+      return false;
+    }
+    console.assert(this.tiles[c][r] === tower, "Tower not placed in tile");
     this.towers.push(tower);
+    this.money -= this.price;
     return true;
   }
 
@@ -304,7 +320,7 @@ class Game {
   }
 
   grid_click(c, r) {
-    if (this.is_empty(c, r)) {
+    if (this.is_empty(c, r) && this.can_afford()) {
       this.place_tower(c, r);
     }
   }

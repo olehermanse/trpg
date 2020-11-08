@@ -42,6 +42,13 @@ describe("Game", function () {
       game.grid_click(1, 1);
       assert.strictEqual(game.towers.length, 1);
     });
+    it("Doesn't place a tower when you have no money", function () {
+      let game = new Game(5, 5);
+      game.money = 0;
+      assert.strictEqual(game.towers.length, 0);
+      game.grid_click(1, 1);
+      assert.strictEqual(game.towers.length, 0);
+    });
   });
   describe("#is_empty()", function () {
     it("Returns true by default", function () {
@@ -52,6 +59,17 @@ describe("Game", function () {
       let game = new Game(10, 10);
       assert.strictEqual(game.is_empty(0, 0), false);
       assert.strictEqual(game.tiles[0][0], "wall");
+    });
+  });
+  describe("#can_afford()", function () {
+    it("Returns true at beginning of game", function () {
+      let game = new Game(4, 3);
+      assert.strictEqual(game.can_afford(), true);
+    });
+    it("Returns false when you have no money", function () {
+      let game = new Game(4, 3);
+      game.money = 0;
+      assert.strictEqual(game.can_afford(), false);
     });
   });
 });
