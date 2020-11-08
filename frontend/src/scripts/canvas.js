@@ -175,7 +175,8 @@ function tick(ms) {
     if (!game.paused) {
         game.tick(10);
     }
-    ui.text.text = "" + game.money + " $";
+    ui.money.text = "" + game.money + " $";
+    ui.level.text = "Lv. " + game.level;
 }
 
 function start(canvas) {

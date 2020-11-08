@@ -84,7 +84,7 @@ class UIText {
         this.text = text;
         this.textAlign = "center";
         this.font = "48px monospace";
-        this.w = 32 * 6;
+        this.w = 30 * 5;
     }
 
     left() {
@@ -184,18 +184,27 @@ class UI extends UIRect {
 
         let flow = this.inner.padded.right();
 
-        const text = new UIText(flow.x - padding, flow.y, this.c, text);
-        text.textAlign = "right";
-        this.text = text;
-        this.children.push(text);
+        const level = new UIText(flow.x - padding, flow.y, this.c);
+        level.textAlign = "right";
+        this.level = level;
+        this.children.push(level);
 
-        flow = text.left();
+        flow = level.left();
 
         const btn_w = w / 10;
         const btn_h = h / 3;
-        const button = new UIButton(flow.x - btn_w, flow.y - btn_h / 2, btn_w, btn_h, this.c, "Start");
+        const btn_x = flow.x - btn_w - padding;
+        const btn_y = flow.y - btn_h / 2;
+        const button = new UIButton(btn_x, btn_y, btn_w, btn_h, this.c, "Start");
         this.button = button;
         this.children.push(button);
+
+        flow = button.left();
+
+        const money = new UIText(flow.x - padding, flow.y, this.c);
+        money.textAlign = "right";
+        this.money = money;
+        this.children.push(money);
     }
 
     click(x, y) {
