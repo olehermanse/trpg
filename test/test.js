@@ -30,6 +30,24 @@ describe("Game", function () {
       assert.strictEqual(game.is_empty(c, r), false);
     });
   });
+  describe("#is_outside()", function () {
+    it("Returns false for positions inside", function () {
+      let game = new Game(10, 20);
+      assert.strictEqual(game.is_outside(0, 0), false);
+      assert.strictEqual(game.is_outside(1, 1), false);
+      assert.strictEqual(game.is_outside(9, 19), false);
+      assert.strictEqual(game.is_outside(9, 1), false);
+      assert.strictEqual(game.is_outside(1, 19), false);
+    });
+    it("Returns true for positions outside", function () {
+      let game = new Game(10, 20);
+      assert.strictEqual(game.is_outside(-1, 0), true);
+      assert.strictEqual(game.is_outside(0, -1), true);
+      assert.strictEqual(game.is_outside(10, 20), true);
+      assert.strictEqual(game.is_outside(10, 0), true);
+      assert.strictEqual(game.is_outside(0, 20), true);
+    });
+  });
   describe("#place_tower()", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
