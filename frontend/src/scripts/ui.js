@@ -77,14 +77,14 @@ class UIRect {
 }
 
 class UIText {
-    constructor(x, y, color, text = "") {
+    constructor(x, y, color, font, text = "") {
         this.x = x;
         this.y = y;
         this.c = color;
         this.text = text;
         this.textAlign = "center";
-        this.font = "48px monospace";
-        this.w = 30 * 5;
+        this.font = "" + Math.floor(font) + "px monospace";
+        this.w = 0.6 * font * 5;
     }
 
     left() {
@@ -103,8 +103,7 @@ class UIText {
 class UIButton extends UIRect {
     constructor(x, y, w, h, c, label) {
         super(x, y, w, h, c);
-        this.label = new UIText(x + w / 2, y + h / 2, c, label);
-        this.label.font = "32px monospace";
+        this.label = new UIText(x + w / 2, y + h / 2, c, h / 2, label);
         this.children.push(this.label);
         this.on_click = null;
         this.state = "active";
@@ -184,7 +183,7 @@ class UI extends UIRect {
 
         let flow = this.inner.padded.right();
 
-        const level = new UIText(flow.x - padding, flow.y, this.c);
+        const level = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
         level.textAlign = "right";
         this.level = level;
         this.children.push(level);
@@ -201,7 +200,7 @@ class UI extends UIRect {
 
         flow = button.left();
 
-        const money = new UIText(flow.x - padding, flow.y, this.c);
+        const money = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
         money.textAlign = "right";
         this.money = money;
         this.children.push(money);

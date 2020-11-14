@@ -2,17 +2,19 @@ const Game = require("../../../libtowers/libtowers.js").Game;
 const Draw = require("./draw.js");
 const UI = require("./ui.js").UI;
 
-const GRID_SIZE = 100;
-const CANVAS_WIDTH = 1600;
-const CANVAS_HEIGHT = 1200;
-const GRID_HEIGHT = CANVAS_HEIGHT - GRID_SIZE;
+const COLUMNS = 20;
+const ROWS = 14;
+const CANVAS_WIDTH = 1200;
+
 const GRID_WIDTH = CANVAS_WIDTH;
+const GRID_SIZE = GRID_WIDTH / COLUMNS;
 const WIDTH = CANVAS_WIDTH;
 
-const ROWS = GRID_HEIGHT / GRID_SIZE;
-const COLUMNS = WIDTH / GRID_SIZE;
+const GRID_HEIGHT = ROWS * GRID_SIZE;
+const CANVAS_HEIGHT = GRID_HEIGHT + GRID_SIZE;
+
 const FG = "rgba(256,256,256,1)";
-const BG = "rgba(0,0,0,1)";
+const BG = "rgba(16,16,16,1)";
 
 const game = new Game(COLUMNS, ROWS);
 const UI_X = 0;
