@@ -1,5 +1,9 @@
 function get_rotation(a, b) {
-  return Math.atan2(a.r - b.r, b.c - a.c);
+  const rot = Math.atan2(a.r - b.r, b.c - a.c);
+  if (rot > 0.0) {
+    return rot;
+  }
+  return rot + 2 * Math.PI;
 }
 
 function dps(dps, ms) {
@@ -99,6 +103,11 @@ class Enemy {
   }
 }
 
+function randint(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 class Game {
   constructor(columns, rows) {
@@ -110,8 +119,8 @@ class Game {
     this.price = 25;
     this.rows = rows;
     this.columns = columns;
-    this.spawn = position(0, Math.floor(this.rows / 2));
-    this.goal = position(columns - 1, this.spawn.r);
+    this.spawn = position(0, randint(1, this.rows - 2));
+    this.goal = position(columns - 1, randint(1, this.rows - 2));
     this.towers = [];
     this.enemies = [];
     this.time = 0;
@@ -126,6 +135,10 @@ class Game {
     for (let i = 0; i < columns; ++i) {
       this.tiles[i][0] = this.tiles[i][rows - 1] = "wall";
     }
+    console.assert(this.tiles[this.spawn.c][this.spawn.r] === "wall", "Spawn not on wall");
+    console.assert(this.tiles[this.goal.c][this.goal.r] === "wall", "Goal not on wall");
+    console.assert(this.tiles[this.spawn.c + 1][this.spawn.r] === null, "Spawn not accessible");
+    console.assert(this.tiles[this.goal.c - 1][this.goal.r] === null, "Goal not accessible");
     this.tiles[this.spawn.c][this.spawn.r] = "spawn";
     this.tiles[this.goal.c][this.goal.r] = "goal";
     const success = this.create_path();
@@ -237,6 +250,8 @@ class Game {
   }
 
   find_path(start_c, start_r) {
+    const PI = Math.PI;
+    const target = position(this.goal.c - 1, this.goal.r);
     let visited = [];
     let current = position(start_c, start_r);
     while (true) {
@@ -246,7 +261,24 @@ class Game {
       const down = position(c, r + 1);
       const left = position(c - 1, r);
       const right = position(c + 1, r);
-      const all = [up, down, left, right];
+      const direction = get_rotation(current, target);
+      let all = [];
+      if (direction <= 0) {
+        console.assert(false, "Bad direction during pathfinding");
+      }
+      if (direction <= 0.25 * PI) {
+        all = [right, up, down, left];
+      } else if (direction <= 0.75 * PI) {
+        all = [up, right, left, down];
+      } else if (direction <= 1.25 * PI) {
+        all = [left, up, down, right];
+      } else if (direction <= 1.75 * PI) {
+        all = [down, right, left, up];
+      } else if (direction <= 2.0 * PI) {
+        all = [right, up, down, left];
+      } else {
+        console.assert(false, "Bad direction during pathfinding");
+      }
       const distances = all.map((pos) => { return this.get_distance(pos.c, pos.r); })
       const filtered = distances.filter(Number.isInteger);
       if (filtered.length === 0) {

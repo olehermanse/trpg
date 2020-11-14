@@ -52,23 +52,26 @@ describe("Game", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      game.place_tower(1, 1);
+      let row = game.is_path(1, 1) ? 2 : 1;
+      game.place_tower(1, row);
       assert.strictEqual(game.towers.length, 1);
-    });
-    it("Doesn't block the path", function () {
-      let game = new Game(3, 3);
-      assert.strictEqual(game.towers.length, 0);
-      game.place_tower(1, 1);
-      assert.strictEqual(game.towers.length, 0);
-      assert.strictEqual(game.is_empty(1, 1), true);
     });
   });
   describe("#grid_click()", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      game.grid_click(1, 1);
+      let row = game.is_path(1, 1) ? 2 : 1;
+      game.place_tower(1, row);
       assert.strictEqual(game.towers.length, 1);
+    });
+    it("Doesn't block the path", function () {
+      let game = new Game(3, 3);
+      assert.strictEqual(game.towers.length, 0);
+      let row = game.spawn.r;
+      game.grid_click(1, row);
+      assert.strictEqual(game.towers.length, 0);
+      assert.strictEqual(game.is_empty(1, row), true);
     });
     it("Doesn't place a tower on a wall", function () {
       let game = new Game(5, 5);
@@ -79,15 +82,17 @@ describe("Game", function () {
     it("Doesn't place a tower on a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      game.grid_click(1, 1);
-      game.grid_click(1, 1);
+      let row = game.is_path(1, 1) ? 2 : 1;
+      game.grid_click(1, row);
+      game.grid_click(1, row);
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't place a tower when you have no money", function () {
       let game = new Game(5, 5);
       game.money = 0;
       assert.strictEqual(game.towers.length, 0);
-      game.grid_click(1, 1);
+      let row = game.is_path(1, 1) ? 2 : 1;
+      game.grid_click(1, row);
       assert.strictEqual(game.towers.length, 0);
     });
   });
