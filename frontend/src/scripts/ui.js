@@ -101,21 +101,27 @@ class UIText {
 }
 
 class UIButton extends UIRect {
-    constructor(x, y, w, h, c, label) {
+    constructor(x, y, w, h, c, label = null) {
         super(x, y, w, h, c);
-        this.label = new UIText(x + w / 2, y + h / 2, c, h / 2, label);
-        this.children.push(this.label);
+        if (label === null) {
+            this.label = null;
+        } else {
+            this.label = new UIText(x + w / 2, y + h / 2, c, h / 2, label);
+            this.children.push(this.label);
+        }
         this.on_click = null;
         this.state = "active";
         this.base_color = c;
     }
 
     set_temporary_color(label = null, rect = null) {
-        if (label != null) {
-            this.label.c = label;
-        }
-        else {
-            this.label.c = this.base_color;
+        if (this.label != null) {
+            if (label != null) {
+                this.label.c = label;
+            }
+            else {
+                this.label.c = this.base_color;
+            }
         }
         if (rect != null) {
             this.c = rect;
@@ -133,7 +139,7 @@ class UIButton extends UIRect {
         if (state === "active") {
             this.set_temporary_color();
         } else if (state === "hovered") {
-            this.set_temporary_color(blue);
+            this.set_temporary_color(blue, blue);
         } else if (state === "clicked") {
             this.set_temporary_color(blue, grey);
         } else if (state === "disabled") {
@@ -180,42 +186,51 @@ class UI extends UIRect {
         this.inner = inner;
         this.inner.c = null;
         this.children.push(inner);
+        this.buttons = [];
 
         let flow = this.inner.padded.right();
-
-        const level = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
-        level.textAlign = "right";
-        this.level = level;
-        this.children.push(level);
-
-        flow = level.left();
-
-        const btn_w = w / 10;
-        const btn_h = h / 3;
-        const btn_x = flow.x - btn_w - padding;
-        const btn_y = flow.y - btn_h / 2;
-        const button = new UIButton(btn_x, btn_y, btn_w, btn_h, this.c, "Start");
-        this.button = button;
-        this.children.push(button);
-
-        flow = button.left();
-
-        const money = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
-        money.textAlign = "right";
-        this.money = money;
-        this.children.push(money);
+        {
+            const level = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
+            level.textAlign = "right";
+            this.level = level;
+            this.children.push(level);
+            flow = level.left();
+        }
+        {
+            const btn_w = w / 10;
+            const btn_h = h / 3;
+            const btn_x = flow.x - btn_w - padding;
+            const btn_y = flow.y - btn_h / 2;
+            const button = new UIButton(btn_x, btn_y, btn_w, btn_h, this.c, "Start");
+            this.buttons.push(button);
+            this.start_button = button;
+            this.children.push(button);
+            flow = button.left();
+        }
+        {
+            const money = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
+            money.textAlign = "right";
+            this.money = money;
+            this.children.push(money);
+        }
     }
 
     click(x, y) {
-        this.button.click(x, y);
+        for (let button of this.buttons) {
+            button.click(x, y);
+        }
     }
 
     release(x, y) {
-        this.button.release(x, y);
+        for (let button of this.buttons) {
+            button.release(x, y);
+        }
     }
 
     hover(x, y) {
-        this.button.hover(x, y);
+        for (let button of this.buttons) {
+            button.hover(x, y);
+        }
     }
 }
 

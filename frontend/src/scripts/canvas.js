@@ -27,21 +27,31 @@ const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
 
 function on_start_click() {
     game.start();
-    ui.button.transition("disabled");
+    ui.start_button.transition("disabled");
 }
 
 function on_victory() {
-    ui.button.transition("active");
+    ui.start_button.transition("active");
 }
 
-ui.button.on_click = on_start_click;
+ui.start_button.on_click = on_start_click;
 game.on_victory = on_victory;
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
 }
 
+function xy(x, y) {
+    return { "x": x, "y": y };
+}
+
 function grid_to_canvas(p) {
+    if (p === null) {
+        return p;
+    }
+    if (isNaN(p)) {
+        return xy(grid_to_canvas(p.c), grid_to_canvas(p.r));
+    }
     return (p * GRID_SIZE + GRID_SIZE / 2);
 }
 
@@ -49,21 +59,26 @@ function offset_to_canvas(p, canvas) {
     return (p / canvas.getBoundingClientRect().width) * WIDTH;
 }
 
-function draw_tower(ctx, tower) {
-    const x = grid_to_canvas(tower.c);
-    const y = grid_to_canvas(tower.r);
-    const r = (GRID_SIZE / 2) * 0.7;
-    const angle = tower.rotation;
-    Draw.circle(ctx, x, y, r);
+function draw_damage_tower(ctx, pos, side, angle, t = null) {
+    const r = (side / 2) * 0.7;
+    Draw.circle(ctx, pos.x, pos.y, r);
 
-    if (tower.target) {
-        const tx = grid_to_canvas(tower.target.c);
-        const ty = grid_to_canvas(tower.target.r);
-        const intensity = tower.intensity;
-        const stroke = `rgba(127, 0, 255, ${intensity})`;
-        Draw.line(ctx, x, y, tx, ty, stroke, 5 * intensity);
+    if (t != null) {
+        const stroke = `rgba(127, 0, 255, ${t.intensity})`;
+        Draw.line(ctx, pos.x, pos.y, t.x, t.y, stroke, 5 * t.intensity);
     }
-    Draw.triangle(ctx, x, y, r, angle);
+    Draw.triangle(ctx, pos.x, pos.y, r, angle);
+}
+
+function draw_tower(ctx, tower) {
+    const pos = grid_to_canvas(tower);
+    const angle = tower.rotation;
+    const side = GRID_SIZE;
+    const target = grid_to_canvas(tower.target);
+    if (target != null) {
+        target.intensity = tower.intensity;
+    }
+    draw_damage_tower(ctx, pos, side, angle, target);
 }
 
 function draw_towers(ctx) {
