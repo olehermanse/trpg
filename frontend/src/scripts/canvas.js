@@ -15,6 +15,9 @@ const CANVAS_HEIGHT = GRID_HEIGHT + GRID_SIZE;
 
 const FG = "rgba(256,256,256,1)";
 const BG = "rgba(16,16,16,1)";
+const grey = "rgba(200,200,200,1)";
+const black = BG;
+const green = "rgba(0,255,0,1)";
 
 const game = new Game(COLUMNS, ROWS);
 const UI_X = 0;
@@ -61,13 +64,13 @@ function offset_to_canvas(p, canvas) {
 
 function draw_damage_tower(ctx, pos, side, angle, t = null) {
     const r = (side / 2) * 0.7;
-    Draw.circle(ctx, pos.x, pos.y, r);
+    Draw.circle(ctx, pos.x, pos.y, r, grey, black);
 
     if (t != null) {
         const stroke = `rgba(127, 0, 255, ${t.intensity})`;
         Draw.line(ctx, pos.x, pos.y, t.x, t.y, stroke, 5 * t.intensity);
     }
-    Draw.triangle(ctx, pos.x, pos.y, r, angle);
+    Draw.triangle(ctx, pos.x, pos.y, r, angle, green, black);
 }
 
 function draw_tower(ctx, tower) {
