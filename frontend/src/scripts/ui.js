@@ -39,6 +39,10 @@ class UIRect {
         this.children.map((c) => { c.draw(ctx); });
     }
 
+    center() {
+        return xy(this.x + this.w / 2, this.y + this.h / 2);
+    }
+
     top_left() {
         return xy(this.x, this.y);
     }
@@ -112,6 +116,19 @@ class UIButton extends UIRect {
         this.on_click = null;
         this.state = "active";
         this.base_color = c;
+        this.icon = null;
+    }
+
+    draw(ctx) {
+        this.draw_self(ctx);
+        this.children.map((c) => { c.draw(ctx); });
+        if (this.icon) {
+            const tower = this.center();
+            tower.w = this.w;
+            tower.rotation = Math.PI / 2;
+            tower.target = null;
+            this.icon(ctx, tower, null);
+        }
     }
 
     set_temporary_color(label = null, rect = null) {
@@ -136,6 +153,7 @@ class UIButton extends UIRect {
         this.state = state;
         const blue = "rgba(0,128,255,1)";
         const grey = "rgba(180,180,180,1)";
+        const red = "rgba(255,0,0,1)";
         if (state === "active") {
             this.set_temporary_color();
         } else if (state === "hovered") {
@@ -144,6 +162,10 @@ class UIButton extends UIRect {
             this.set_temporary_color(blue, grey);
         } else if (state === "disabled") {
             this.set_temporary_color(grey, grey);
+        } else if (state === "selected") {
+            this.set_temporary_color(blue, blue);
+        } else {
+            this.set_temporary_color(red, red);
         }
     }
 
@@ -158,7 +180,7 @@ class UIButton extends UIRect {
             if (this.is_inside(x, y)) {
                 this.transition("hovered");
                 if (this.on_click != null) {
-                    this.on_click();
+                    this.on_click(this);
                 }
             }
             else {
@@ -187,6 +209,7 @@ class UI extends UIRect {
         this.inner.c = null;
         this.children.push(inner);
         this.buttons = [];
+        this.tower_buttons = [];
 
         let flow = this.inner.padded.right();
         {
@@ -213,6 +236,25 @@ class UI extends UIRect {
             this.money = money;
             this.children.push(money);
         }
+        this.next_x = this.inner.padded.left().x;
+    }
+
+    add_tower_button(name, icon, on_click) {
+        const btn_h = this.inner.padded.h;
+        const btn_w = btn_h;
+        const btn_y = this.inner.padded.top().y;
+
+        const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, this.c);
+
+        button.name = name;
+        button.icon = icon;
+        button.on_click = on_click;
+
+        this.tower_buttons.push(button);
+        this.buttons.push(button);
+        this.children.push(button);
+        this.next_x += btn_w + this.padding;
+        return button;
     }
 
     click(x, y) {

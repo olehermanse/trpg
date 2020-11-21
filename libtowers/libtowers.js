@@ -19,24 +19,48 @@ function position(c, r) {
 }
 
 class Tower {
-  constructor(c, r) {
+  constructor(c, r, name) {
+    this.name = name;
     this.c = c;
     this.r = r;
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
+    if (this.name === "gun") {
+      this.charge_time = 0.3;
+      this.dps = 25;
+    } else if (this.name === "laser") {
+      this.charge_time = 1.0;
+      this.dps = 50;
+    } else if (this.name === "slow") {
+      this.charge_time = 1.0;
+      this.dps = 5;
+      this.slow = 1.0;
+    }
   }
   tick(ms) {
+    if (this.name === "rock") {
+      return;
+    }
+    const sec = (ms / 1000);
     if (this.target) {
-      this.intensity += 3 * (ms / 1000);
+      this.intensity += sec / this.charge_time;
       if (this.intensity > 1.0) {
         this.intensity = 1.0;
       }
-      this.target.health -= dps(25 * this.intensity, ms);
+      if (this.name === "slow") {
+        const slow_factor = this.slow * this.intensity * sec;
+        this.target.slow += slow_factor; // squares per second
+        this.target.slow_time += 2 * slow_factor; // seconds
+      }
+      this.target.health -= dps(this.dps * this.intensity, ms);
       this.rotation = get_rotation(this, this.target);
     }
   }
   pick_target(enemies) {
+    if (this.name === "rock") {
+      return;
+    }
     if (enemies.length === 0) {
       this.target = null;
       this.intensity = 0.0;
@@ -51,7 +75,20 @@ class Tower {
       this.target = new_target;
       this.intensity = 0.0;
     }
-
+  }
+  static price(name) {
+    if (name === "rock") {
+      return 5;
+    }
+    if (name === "gun") {
+      return 20;
+    }
+    if (name === "slow") {
+      return 25;
+    }
+    if (name === "laser") {
+      return 50;
+    }
   }
 }
 
@@ -63,10 +100,23 @@ class Enemy {
     this.health = 100.0;
     this.path = path;
     this.path_index = 0;
+    this.slow = 0.0;
+    this.slow_time = 0.0;
+    this.speed = 1.0;
   }
   tick(ms) {
-    this.rotation = 0.0;
-    const step = 0.001 * ms;
+    const sec = (ms / 1000.0);
+    this.slow_time -= sec;
+    if (this.slow_time < 0.0) {
+      this.slow_time = 0.0;
+      this.slow = 0.0;
+    }
+    else if (this.slow > 1.0) {
+      this.slow = 1.0;
+    }
+
+    const speed = this.speed * (1 - this.slow * 0.8);
+    const step = speed * sec;
     if (this.path_index >= this.path.length) {
       this.path_index = this.path.length - 1;
     }
@@ -116,7 +166,6 @@ class Game {
     this.level = 1;
     this.remaining = 0;
     this.money = 50;
-    this.price = 25;
     this.rows = rows;
     this.columns = columns;
     this.spawn = position(0, randint(1, this.rows - 2));
@@ -312,15 +361,15 @@ class Game {
     return true;
   }
 
-  can_afford() {
-    return (this.money >= this.price);
+  can_afford(name) {
+    return (this.money >= Tower.price(name));
   }
 
-  _try_place_tower(c, r) {
-    console.assert(this.can_afford(), "Cannot afford tower");
+  _try_place_tower(c, r, name) {
+    console.assert(this.can_afford(name), "Cannot afford tower");
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
-    const tower = new Tower(c, r);
+    const tower = new Tower(c, r, name);
     const on_path = this.is_path(c, r);
 
     const save = this.tiles[c][r];
@@ -340,27 +389,29 @@ class Game {
     return tower;
   }
 
-  place_tower(c, r) {
-    const tower = this._try_place_tower(c, r);
+  place_tower(c, r, name) {
+    console.assert(this.can_afford(name));
+    const tower = this._try_place_tower(c, r, name);
     if (tower === null) {
-      return false;
+      return null;
     }
     console.assert(this.tiles[c][r] === tower, "Tower not placed in tile");
     this.towers.push(tower);
-    this.money -= this.price;
-    return true;
+    this.money -= Tower.price(name);
+    return tower;
   }
 
   place_enemy(c, r) {
     this.enemies.push(new Enemy(c, r, this.path));
   }
 
-  grid_click(c, r) {
-    if (this.is_empty(c, r) && this.can_afford()) {
+  grid_click(c, r, name) {
+    if (this.is_empty(c, r) && this.can_afford(name)) {
       if (this.paused || !this.is_path(c, r)) {
-        this.place_tower(c, r);
+        return this.place_tower(c, r, name);
       }
     }
+    return null;
   }
 
   start() {

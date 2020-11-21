@@ -53,7 +53,7 @@ describe("Game", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
       let row = game.is_path(1, 1) ? 2 : 1;
-      game.place_tower(1, row);
+      game.place_tower(1, row, "gun");
       assert.strictEqual(game.towers.length, 1);
     });
   });
@@ -62,29 +62,29 @@ describe("Game", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
       let row = game.is_path(1, 1) ? 2 : 1;
-      game.place_tower(1, row);
+      game.place_tower(1, row, "gun");
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't block the path", function () {
       let game = new Game(3, 3);
       assert.strictEqual(game.towers.length, 0);
       let row = game.spawn.r;
-      game.grid_click(1, row);
+      game.grid_click(1, row, "gun");
       assert.strictEqual(game.towers.length, 0);
       assert.strictEqual(game.is_empty(1, row), true);
     });
     it("Doesn't place a tower on a wall", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      game.grid_click(0, 0);
+      game.grid_click(0, 0, "gun");
       assert.strictEqual(game.towers.length, 0);
     });
     it("Doesn't place a tower on a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
       let row = game.is_path(1, 1) ? 2 : 1;
-      game.grid_click(1, row);
-      game.grid_click(1, row);
+      game.grid_click(1, row, "gun");
+      game.grid_click(1, row, "gun");
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't place a tower when you have no money", function () {
@@ -110,12 +110,14 @@ describe("Game", function () {
   describe("#can_afford()", function () {
     it("Returns true at beginning of game", function () {
       let game = new Game(4, 3);
-      assert.strictEqual(game.can_afford(), true);
+      assert.strictEqual(game.can_afford("rock"), true);
+      assert.strictEqual(game.can_afford("gun"), true);
     });
     it("Returns false when you have no money", function () {
       let game = new Game(4, 3);
       game.money = 0;
-      assert.strictEqual(game.can_afford(), false);
+      assert.strictEqual(game.can_afford("rock"), false);
+      assert.strictEqual(game.can_afford("gun"), false);
     });
   });
 });

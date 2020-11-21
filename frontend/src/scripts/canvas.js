@@ -13,11 +13,15 @@ const WIDTH = CANVAS_WIDTH;
 const GRID_HEIGHT = ROWS * GRID_SIZE;
 const CANVAS_HEIGHT = GRID_HEIGHT + GRID_SIZE;
 
-const FG = "rgba(256,256,256,1)";
-const BG = "rgba(16,16,16,1)";
-const grey = "rgba(200,200,200,1)";
+const FG = "rgb(256,256,256)";
+const BG = "rgb(16,16,16)";
 const black = BG;
-const green = "rgba(0,255,0,1)";
+const green = "rgb(0,255,0)";
+const bright_blue = "#a9d1fa";
+const dark_blue = "#330bd8";
+const grey = "rgb(200,200,200)";
+const bright_purple = "rgb(255,0,255)";
+const dark_purple = "rgb(128,0,128)";
 
 const game = new Game(COLUMNS, ROWS);
 const UI_X = 0;
@@ -27,18 +31,6 @@ const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
 const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
-
-function on_start_click() {
-    game.start();
-    ui.start_button.transition("disabled");
-}
-
-function on_victory() {
-    ui.start_button.transition("active");
-}
-
-ui.start_button.on_click = on_start_click;
-game.on_victory = on_victory;
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
@@ -62,26 +54,62 @@ function offset_to_canvas(p, canvas) {
     return (p / canvas.getBoundingClientRect().width) * WIDTH;
 }
 
-function draw_damage_tower(ctx, pos, side, angle, t = null) {
-    const r = (side / 2) * 0.7;
-    Draw.circle(ctx, pos.x, pos.y, r, grey, black);
+function fill_stroke(f, s) {
+    return { "fill": f, "stroke": s };
+}
 
-    if (t != null) {
-        const stroke = `rgba(127, 0, 255, ${t.intensity})`;
-        Draw.line(ctx, pos.x, pos.y, t.x, t.y, stroke, 5 * t.intensity);
+function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {
+    const r = (s / 2) * 0.7;
+    if (circle != null) {
+        Draw.circle(ctx, x, y, r, circle.fill, circle.stroke);
     }
-    Draw.triangle(ctx, pos.x, pos.y, r, angle, green, black);
+    if (triangle != null) {
+        Draw.triangle(ctx, x, y, r, rotation, triangle.fill, triangle.stroke);
+    }
+}
+
+function draw_rock(ctx, t, target = null) {
+    const circle = fill_stroke(grey, black);
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, null);
+}
+
+function draw_gun_tower(ctx, t, target = null) {
+    const circle = fill_stroke(grey, black);
+    const triangle = fill_stroke(green, black);
+    if (target != null) {
+        const stroke = green;
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+    }
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
+}
+
+function draw_slow_tower(ctx, t, target = null) {
+    const circle = fill_stroke(grey, black);
+    const triangle = fill_stroke(bright_blue, dark_blue);
+    if (target != null) {
+        const stroke = bright_blue;
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+    }
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
+}
+
+function draw_laser_tower(ctx, t, target = null) {
+    const circle = fill_stroke(grey, black);
+    const triangle = fill_stroke(bright_purple, dark_purple);
+    if (target != null) {
+        const stroke = bright_purple;
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+    }
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
 }
 
 function draw_tower(ctx, tower) {
-    const pos = grid_to_canvas(tower);
-    const angle = tower.rotation;
-    const side = GRID_SIZE;
+    const t = grid_to_canvas(tower);
+    t.w = GRID_SIZE;
+    t.rotation = tower.rotation;
+    t.intensity = tower.intensity;
     const target = grid_to_canvas(tower.target);
-    if (target != null) {
-        target.intensity = tower.intensity;
-    }
-    draw_damage_tower(ctx, pos, side, angle, target);
+    tower.draw(ctx, t, target);
 }
 
 function draw_towers(ctx) {
@@ -159,7 +187,11 @@ function draw(ctx) {
 }
 
 function mouse_click(x, y) {
-    game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y));
+    const name = ui.selected.name;
+    const tower = game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y), name);
+    if (tower != null) {
+        tower.draw = ui.selected.icon;
+    }
     ui.click(x, y);
 }
 
@@ -171,7 +203,52 @@ function mouse_release(x, y) {
     ui.release(x, y);
 }
 
+function on_start_click() {
+    game.start();
+    ui.start_button.transition("disabled");
+}
+
+function on_victory() {
+    ui.start_button.transition("active");
+}
+
+function select(btn) {
+    ui.selected = btn;
+    if (btn.state != "selected") {
+        btn.transition("selected");
+    }
+    for (let button of ui.tower_buttons) {
+        if (button != btn && button.state === "selected") {
+            button.transition("active");
+        }
+    }
+}
+
+function on_rock_click(btn) {
+    select(btn);
+}
+
+function on_gun_click(btn) {
+    select(btn);
+}
+
+function on_slow_click(btn) {
+    select(btn);
+}
+
+function on_laser_click(btn) {
+    select(btn);
+}
+
 function setup_events(canvas) {
+    ui.start_button.on_click = on_start_click;
+    game.on_victory = on_victory;
+
+    ui.add_tower_button("rock", draw_rock, on_rock_click);
+    select(ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
+    ui.add_tower_button("slow", draw_slow_tower, on_slow_click);
+    ui.add_tower_button("laser", draw_laser_tower, on_laser_click);
+
     canvas.addEventListener('mousedown', e => {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
