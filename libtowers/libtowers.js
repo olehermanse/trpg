@@ -23,6 +23,7 @@ class Tower {
     this.name = name;
     this.c = c;
     this.r = r;
+    this.price = Tower.price(name);
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
@@ -399,6 +400,20 @@ class Game {
 
   place_tower(c, r, name) {
     console.assert(this.can_afford(name));
+    console.assert(this.can_place(c, r, name));
+    if (this.has_tower(c, r)) {
+      const tower = this.tiles[c][r];
+      const towers = this.towers;
+      const i = towers.indexOf(tower);
+      this.tiles[c][r] = null;
+      towers[i] = this._try_place_tower(c, r, name);
+      console.assert(towers[i] != null);
+      console.assert(towers[i] != tower);
+      console.assert(towers[i] === this.tiles[c][r]);
+      this.money -= Tower.price(name);
+      return towers[i];
+    }
+
     const tower = this._try_place_tower(c, r, name);
     if (tower === null) {
       return null;
@@ -413,8 +428,43 @@ class Game {
     this.enemies.push(new Enemy(c, r, this.path));
   }
 
+  has_tower(c, r) {
+    if (this.is_outside(c, r)) {
+      return false;
+    }
+    if (this.is_empty(c, r)) {
+      return false;
+    }
+    const tile = this.tiles[c][r];
+    console.assert(tile != null);
+    if (["spawn", "wall", "path", "goal"].includes(tile)) {
+      return false;
+    }
+    return true;
+  }
+
+  can_place(c, r, name) {
+    if (!this.can_afford(name)) {
+      return false;
+    }
+    if (this.is_outside(c, r)) {
+      return false;
+    }
+    if (this.is_empty(c, r)) {
+      return true;
+    }
+    if (!this.has_tower(c, r)) {
+      return false;
+    }
+    const tower = this.tiles[c][r];
+    if (tower.price >= Tower.price(name)) {
+      return false;
+    }
+    return true;
+  }
+
   grid_click(c, r, name) {
-    if (this.is_empty(c, r) && this.can_afford(name)) {
+    if (this.can_place(c, r, name)) {
       if (this.paused || !this.is_path(c, r)) {
         return this.place_tower(c, r, name);
       }
