@@ -83,7 +83,7 @@ class Tower {
   }
   static price(name) {
     if (name === "rock") {
-      return 5;
+      return 2;
     }
     if (name === "gun") {
       return 20;
