@@ -485,5 +485,6 @@ class Game {
 }
 
 module.exports = {
+  Tower,
   Game,
 };

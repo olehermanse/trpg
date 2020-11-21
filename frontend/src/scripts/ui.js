@@ -1,4 +1,5 @@
 const Draw = require("./draw.js");
+const Tower = require("../../../libtowers/libtowers.js").Tower;
 
 function xy(x, y) {
     return { "x": x, "y": y };
@@ -87,6 +88,7 @@ class UIText {
         this.c = color;
         this.text = text;
         this.textAlign = "center";
+        this.textBaseline = "middle";
         this.font = "" + Math.floor(font) + "px monospace";
         this.w = 0.6 * font * 5;
     }
@@ -98,7 +100,7 @@ class UIText {
     draw(ctx) {
         ctx.font = this.font;
         ctx.textAlign = this.textAlign;
-        ctx.textBaseline = "middle";
+        ctx.textBaseline = this.textBaseline;
         ctx.fillStyle = this.c;
         ctx.fillText(this.text, this.x, this.y);
     }
@@ -133,8 +135,6 @@ class UIButton extends UIRect {
         if (this.state === "hidden") {
             return;
         }
-        this.draw_self(ctx);
-        this.children.map((c) => { c.draw(ctx); });
         if (this.icon) {
             const tower = this.center();
             tower.w = this.w;
@@ -142,6 +142,8 @@ class UIButton extends UIRect {
             tower.target = null;
             this.icon(ctx, tower, null);
         }
+        this.draw_self(ctx);
+        this.children.map((c) => { c.draw(ctx); });
     }
 
     set_temporary_color(label = null, rect = null) {
@@ -271,6 +273,15 @@ class UI extends UIRect {
         button.name = name;
         button.icon = icon;
         button.on_click = on_click;
+
+        const x = button.right().x;
+        const y = button.bottom().y;
+        const price = Tower.price(name);
+        const money = new UIText(x, y, "#ffff00", 0.35 * btn_h, price);
+        money.textAlign = "right";
+        money.textBaseline = "bottom";
+        button.price = money;
+        button.children.push(money);
 
         this.tower_buttons.push(button);
         this.buttons.push(button);
