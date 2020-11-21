@@ -70,6 +70,11 @@ class Tower {
     let new_target = null;
     if (in_range.length > 0) {
       new_target = in_range[0];
+      for (let t of in_range) {
+        if (t.travelled > new_target.travelled) {
+          new_target = t;
+        }
+      }
     }
     if (this.target != new_target) {
       this.target = new_target;
@@ -103,6 +108,7 @@ class Enemy {
     this.slow = 0.0;
     this.slow_time = 0.0;
     this.speed = 1.0;
+    this.travelled = 0.0;
   }
   tick(ms) {
     const sec = (ms / 1000.0);
@@ -128,6 +134,7 @@ class Enemy {
     }
     if (Math.abs(dx) > step) {
       this.c += step * Math.sign(dx);
+      this.travelled += step;
       if (Math.sign(dx) > 0.0) {
         this.rotation = 0.0;
       }
@@ -140,6 +147,7 @@ class Enemy {
     }
     if (Math.abs(dy) > step) {
       this.r += step * Math.sign(dy);
+      this.travelled += step;
       if (Math.sign(dy) > 0.0) {
         this.rotation = 3 * Math.PI / 2;
       }
