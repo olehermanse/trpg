@@ -173,7 +173,7 @@ class Game {
     this.on_victory = null;
     this.level = 1;
     this.remaining = 0;
-    this.money = 50;
+    this.money = 40;
     this.rows = rows;
     this.columns = columns;
     this.spawn = position(0, randint(1, this.rows - 2));
@@ -435,7 +435,7 @@ class Game {
     console.assert(this.remaining === 0);
     console.assert(this.paused === false);
     this.paused = true;
-    this.money += 20;
+    this.money += this.level;
     this.level += 1;
     this.on_victory();
   }
