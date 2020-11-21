@@ -119,7 +119,20 @@ class UIButton extends UIRect {
         this.icon = null;
     }
 
+    hide() {
+        this.state = "hidden";
+    }
+
+    show() {
+        if (this.state === "hidden") {
+            this.state = "active";
+        }
+    }
+
     draw(ctx) {
+        if (this.state === "hidden") {
+            return;
+        }
         this.draw_self(ctx);
         this.children.map((c) => { c.draw(ctx); });
         if (this.icon) {
@@ -170,12 +183,18 @@ class UIButton extends UIRect {
     }
 
     click(x, y) {
+        if (this.state === "hidden") {
+            return;
+        }
         if (["active", "hovered"].includes(this.state) && this.is_inside(x, y)) {
             this.transition("clicked");
         }
     }
 
     release(x, y) {
+        if (this.state === "hidden") {
+            return;
+        }
         if (this.state === "clicked") {
             if (this.is_inside(x, y)) {
                 this.transition("hovered");
@@ -190,6 +209,9 @@ class UIButton extends UIRect {
     }
 
     hover(x, y) {
+        if (this.state === "hidden") {
+            return;
+        }
         const inside = this.is_inside(x, y);
         if (this.state === "hovered" && !inside) {
             this.transition("active");

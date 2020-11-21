@@ -210,6 +210,19 @@ function on_start_click() {
 
 function on_victory() {
     ui.start_button.transition("active");
+    switch (game.level) {
+        case 2:
+            ui.tower_buttons[0].show();
+            break;
+        case 5:
+            ui.tower_buttons[2].show();
+            break;
+        case 10:
+            ui.tower_buttons[3].show();
+            break;
+        default:
+            break;
+    }
 }
 
 function select(btn) {
@@ -244,10 +257,10 @@ function setup_events(canvas) {
     ui.start_button.on_click = on_start_click;
     game.on_victory = on_victory;
 
-    ui.add_tower_button("rock", draw_rock, on_rock_click);
+    ui.add_tower_button("rock", draw_rock, on_rock_click).hide();
     select(ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
-    ui.add_tower_button("slow", draw_slow_tower, on_slow_click);
-    ui.add_tower_button("laser", draw_laser_tower, on_laser_click);
+    ui.add_tower_button("slow", draw_slow_tower, on_slow_click).hide();
+    ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
 
     canvas.addEventListener('mousedown', e => {
         const x = offset_to_canvas(e.offsetX, canvas);
