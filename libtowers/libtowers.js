@@ -174,7 +174,7 @@ class Game {
     this.on_victory = null;
     this.level = 1;
     this.remaining = [];
-    this.money = 50;
+    this.money = 45;
     this.rows = rows;
     this.columns = columns;
     this.spawn = position(0, randint(1, this.rows - 2));
