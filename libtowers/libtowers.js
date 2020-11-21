@@ -173,7 +173,7 @@ class Game {
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
-    this.remaining = 0;
+    this.remaining = [];
     this.money = 40;
     this.rows = rows;
     this.columns = columns;
@@ -424,9 +424,6 @@ class Game {
     return tower;
   }
 
-  place_enemy(c, r) {
-    this.enemies.push(new Enemy(c, r, this.path));
-  }
 
   has_tower(c, r) {
     if (this.is_outside(c, r)) {
@@ -475,14 +472,20 @@ class Game {
   start() {
     console.assert(this.paused);
     console.assert(this.on_victory != null);
-    console.assert(this.remaining === 0);
-    this.remaining = this.level * 2;
+    console.assert(this.remaining.length === 0);
+    const enemies = this.level * 2;
+    const c = this.spawn.c - 1;
+    const r = this.spawn.r;
+    const path = this.path;
+    for (let i = 0; i < enemies; ++i) {
+      this.remaining.push(new Enemy(c, r, path));
+    }
     this.paused = false;
     this.time = 0;
   }
 
   victory() {
-    console.assert(this.remaining === 0);
+    console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
     this.paused = true;
     this.money += this.level;
@@ -498,10 +501,9 @@ class Game {
       enemy.tick(ms);
     }
     this.time += ms;
-    while (this.time > 1000 && this.remaining > 0) {
-      this.place_enemy(this.spawn.c - 1, this.spawn.r);
+    while (this.time > 1000 && this.remaining.length > 0) {
+      this.enemies.push(this.remaining.pop());
       this.time -= 1000;
-      this.remaining -= 1;
     }
 
     let died = [];
@@ -528,7 +530,7 @@ class Game {
       tower.pick_target(this.enemies);
     }
 
-    if (this.remaining === 0 && this.enemies.length === 0) {
+    if (this.remaining.length === 0 && this.enemies.length === 0) {
       this.victory();
     }
   }
