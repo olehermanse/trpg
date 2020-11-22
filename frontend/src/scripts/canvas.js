@@ -212,6 +212,9 @@ function mouse_release(x, y) {
 
 function key_down(key) {
     if (key === " ") {
+        if (!space_pressed && game.paused) {
+            on_start_click();
+        }
         space_pressed = true;
     }
 }
