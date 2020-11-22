@@ -31,6 +31,7 @@ const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
 const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
+let space_pressed = false;
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
@@ -209,6 +210,18 @@ function mouse_release(x, y) {
     ui.release(x, y);
 }
 
+function key_down(key) {
+    if (key === " ") {
+        space_pressed = true;
+    }
+}
+
+function key_up(key) {
+    if (key === " ") {
+        space_pressed = false;
+    }
+}
+
 function on_start_click() {
     game.start();
     ui.start_button.transition("disabled");
@@ -285,6 +298,14 @@ function setup_events(canvas) {
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_release(x, y);
     });
+
+    document.addEventListener('keydown', (event) => {
+        key_down(event.key);
+    }, false);
+
+    document.addEventListener('keyup', (event) => {
+        key_up(event.key);
+    }, false);
 }
 
 function tick(ms) {
@@ -305,7 +326,11 @@ function start(canvas) {
     setup_events(canvas);
     const ms = 10;
     window.setInterval(() => {
-        tick(ms);
+        let speedup = 1.0;
+        if (space_pressed) {
+            speedup = 4.0;
+        }
+        tick(ms * speedup);
         draw(ctx);
     }, ms)
 }
