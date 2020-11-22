@@ -196,7 +196,7 @@ class Boss extends Enemy {
     this.speed = this.speed / 2;
     this.color = "#000000";
     this.reward = 10;
-    this.health = 5000.0;
+    this.health = 4000.0;
     this.delay = this.delay * 2;
   }
 }
