@@ -212,6 +212,7 @@ class Game {
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
+    this.lives = 1;
     this.remaining = [];
     this.money = 45;
     this.rows = rows;
@@ -578,6 +579,7 @@ class Game {
     for (let enemy of this.enemies) {
       if (!died.includes(enemy) && enemy.c >= this.columns) {
         finished.push(enemy);
+        this.lives -= 1;
       }
     }
 

@@ -71,6 +71,14 @@ function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = 2) {
     }
 }
 
+function text(ctx, x, y, string, c, size) {
+    ctx.font = Math.floor(size) + "px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = c;
+    ctx.fillText(string, x, y);
+}
+
 function grid(ctx, size, width, height) {
     for (let x = size; x < width; x += size) {
         line(ctx, x, 0, x, height, GRID_COLOR, 2);
@@ -85,5 +93,6 @@ module.exports = {
     triangle,
     rectangle,
     line,
+    text,
     grid,
 };

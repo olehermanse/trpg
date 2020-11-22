@@ -175,6 +175,12 @@ function draw_enemies(ctx) {
 function draw(ctx) {
     // Background:
     Draw.rectangle(ctx, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, BG);
+
+    if (game.lives <= 0) {
+        Draw.text(ctx, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, "Game over", FG, CANVAS_HEIGHT / 5);
+        return;
+    }
+
     // Grid:
     Draw.rectangle(ctx, 0, 0, GRID_WIDTH, GRID_HEIGHT, FG);
     Draw.grid(ctx, GRID_SIZE, WIDTH, GRID_HEIGHT);
@@ -282,6 +288,9 @@ function setup_events(canvas) {
 }
 
 function tick(ms) {
+    if (game.lives <= 0) {
+        return;
+    }
     if (!game.paused) {
         game.tick(ms);
     }
