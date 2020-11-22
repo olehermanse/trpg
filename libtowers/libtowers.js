@@ -82,6 +82,9 @@ class Tower {
       return;
     }
     const in_range = enemies.filter((e) => { return distance(this, e) < 3; });
+    if (this.name === "laser" && in_range.includes(this.target)) {
+      return;
+    }
     let new_target = null;
     if (in_range.length > 0) {
       new_target = in_range[0];
