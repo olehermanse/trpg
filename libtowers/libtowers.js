@@ -6,8 +6,22 @@ function get_rotation(a, b) {
   return rot + 2 * Math.PI;
 }
 
+function limit(min, x, max) {
+  if (x < min) {
+    return min;
+  }
+  if (x > max) {
+    return max;
+  }
+  return x;
+}
+
+function seconds(ms) {
+  return (ms / 1000);
+}
+
 function dps(dps, ms) {
-  return dps * (ms / 1000);
+  return dps * seconds(ms);
 }
 
 function distance(a, b) {
@@ -84,7 +98,7 @@ class Tower {
   }
   static price(name) {
     if (name === "rock") {
-      return 2;
+      return 1;
     }
     if (name === "gun") {
       return 20;
@@ -102,6 +116,7 @@ class Enemy {
   constructor(c, r, path) {
     this.c = c;
     this.r = r;
+    this.color = "#ff0000";
     this.rotation = 0;
     this.health = 100.0;
     this.path = path;
@@ -110,6 +125,8 @@ class Enemy {
     this.slow_time = 0.0;
     this.speed = 1.0;
     this.travelled = 0.0;
+    this.reward = 1;
+    this.delay = 1.0;
   }
   tick(ms) {
     const sec = (ms / 1000.0);
@@ -122,7 +139,7 @@ class Enemy {
       this.slow = 1.0;
     }
 
-    const speed = this.speed * (1 - this.slow * 0.8);
+    const speed = this.speed * (1 - this.slow * 0.5);
     const step = speed * sec;
     if (this.path_index >= this.path.length) {
       this.path_index = this.path.length - 1;
@@ -162,6 +179,28 @@ class Enemy {
   }
 }
 
+class Speedy extends Enemy {
+  constructor(c, r, path) {
+    super(c, r, path);
+    this.speed = this.speed * 2;
+    this.color = "#ffff00";
+    this.reward = 3;
+    this.health = 150.0;
+    this.delay = this.delay / 2;
+  }
+}
+
+class Boss extends Enemy {
+  constructor(c, r, path) {
+    super(c, r, path);
+    this.speed = this.speed / 2;
+    this.color = "#000000";
+    this.reward = 10;
+    this.health = 5000.0;
+    this.delay = this.delay / 2;
+  }
+}
+
 function randint(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -181,7 +220,7 @@ class Game {
     this.goal = position(columns - 1, randint(1, this.rows - 2));
     this.towers = [];
     this.enemies = [];
-    this.time = 0;
+    this.delay = 0;
     this.path = [];
     this.tiles = [...Array(columns)].map(() => Array(rows).fill(null));
     console.assert(this.tiles.length === columns);
@@ -473,22 +512,38 @@ class Game {
     console.assert(this.paused);
     console.assert(this.on_victory != null);
     console.assert(this.remaining.length === 0);
-    const enemies = this.level * 2;
     const c = this.spawn.c - 1;
     const r = this.spawn.r;
     const path = this.path;
-    for (let i = 0; i < enemies; ++i) {
-      this.remaining.push(new Enemy(c, r, path));
+
+    if (this.level % 10 === 0) {
+      const bosses = (this.level / 10);
+      for (let i = 0; i < bosses; ++i) {
+        this.remaining.push(new Boss(c, r, path));
+      }
+    } else {
+      const speedies = (this.level - 5);
+      for (let i = 0; i < speedies; ++i) {
+        this.remaining.push(new Speedy(c, r, path));
+      }
+
+      let enemies = limit(1, this.level * 2 - 4, 12);
+      for (let i = 0; i < enemies; ++i) {
+        this.remaining.push(new Enemy(c, r, path));
+      }
     }
+
+    this.remaining.reverse();
+
     this.paused = false;
-    this.time = 0;
+    this.delay = 0.0;
   }
 
   victory() {
     console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
     this.paused = true;
-    this.money += this.level;
+    this.money += Math.floor(this.money / 10);
     this.level += 1;
     this.on_victory();
   }
@@ -500,10 +555,11 @@ class Game {
     for (let enemy of this.enemies) {
       enemy.tick(ms);
     }
-    this.time += ms;
-    while (this.time > 1000 && this.remaining.length > 0) {
-      this.enemies.push(this.remaining.pop());
-      this.time -= 1000;
+    this.delay -= seconds(ms);
+    while (this.delay <= 0 && this.remaining.length > 0) {
+      const enemy = this.remaining.pop();
+      this.enemies.push(enemy);
+      this.delay += enemy.delay;
     }
 
     let died = [];
@@ -513,7 +569,9 @@ class Game {
       }
     }
 
-    this.money += died.length;
+    for (let dead of died) {
+      this.money += dead.reward;
+    }
 
     let finished = [];
 

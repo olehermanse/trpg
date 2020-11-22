@@ -163,7 +163,7 @@ function draw_enemy(ctx, enemy) {
     const y = grid_to_canvas(enemy.r);
     const r = (GRID_SIZE / 2) * 0.7;
     const angle = enemy.rotation;
-    Draw.triangle(ctx, x, y, r, angle, "#ff0000", "#000000");
+    Draw.triangle(ctx, x, y, r, angle, enemy.color, "#000000");
 }
 
 function draw_enemies(ctx) {
@@ -283,7 +283,7 @@ function setup_events(canvas) {
 
 function tick(ms) {
     if (!game.paused) {
-        game.tick(10);
+        game.tick(ms);
     }
     ui.money.text = "" + game.money + " $";
     ui.level.text = "Lv. " + game.level;
@@ -294,10 +294,11 @@ function start(canvas) {
     canvas.setAttribute("width", CANVAS_WIDTH);
     canvas.setAttribute("height", CANVAS_HEIGHT);
     setup_events(canvas);
+    const ms = 10;
     window.setInterval(() => {
-        tick(10);
+        tick(ms);
         draw(ctx);
-    }, 10)
+    }, ms)
 }
 
 module.exports = {
