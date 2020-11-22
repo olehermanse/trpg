@@ -184,7 +184,7 @@ class Speedy extends Enemy {
     super(c, r, path);
     this.speed = this.speed * 2;
     this.color = "#ffff00";
-    this.reward = 3;
+    this.reward = 4;
     this.health = 150.0;
     this.delay = this.delay / 2;
   }
@@ -197,7 +197,7 @@ class Boss extends Enemy {
     this.color = "#000000";
     this.reward = 10;
     this.health = 5000.0;
-    this.delay = this.delay / 2;
+    this.delay = this.delay * 2;
   }
 }
 
@@ -518,7 +518,7 @@ class Game {
     const path = this.path;
 
     if (this.level % 10 === 0) {
-      const bosses = (this.level / 10);
+      const bosses = (this.level / 10) ** 2;
       for (let i = 0; i < bosses; ++i) {
         this.remaining.push(new Boss(c, r, path));
       }
