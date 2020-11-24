@@ -104,6 +104,11 @@ function draw_laser_tower(ctx, t, target = null) {
     draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
 }
 
+function draw_bank(ctx, t, target = null) {
+    const circle = fill_stroke("yellow", black);
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, null);
+}
+
 function draw_tower(ctx, tower) {
     const t = grid_to_canvas(tower);
     t.w = GRID_SIZE;
@@ -239,8 +244,11 @@ function on_victory() {
         case 5:
             ui.tower_buttons[2].show();
             break;
-        case 10:
+        case 8:
             ui.tower_buttons[3].show();
+            break;
+        case 11:
+            ui.tower_buttons[4].show();
             break;
         default:
             break;
@@ -275,6 +283,10 @@ function on_laser_click(btn) {
     select(btn);
 }
 
+function on_bank_click(btn) {
+    select(btn);
+}
+
 function setup_events(canvas) {
     ui.start_button.on_click = on_start_click;
     game.on_victory = on_victory;
@@ -283,6 +295,7 @@ function setup_events(canvas) {
     select(ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
     ui.add_tower_button("slow", draw_slow_tower, on_slow_click).hide();
     ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
+    ui.add_tower_button("bank", draw_bank, on_bank_click).hide();
 
     canvas.addEventListener('mousedown', e => {
         const x = offset_to_canvas(e.offsetX, canvas);
@@ -318,7 +331,8 @@ function tick(ms) {
     if (!game.paused) {
         game.tick(ms);
     }
-    ui.money.text = "" + game.money + " $";
+    ui.interest.text = "+ " + game.reward() + "";
+    ui.money.text = "$ " + game.money + "";
     ui.level.text = "Lv. " + game.level;
 }
 

@@ -82,7 +82,7 @@ class UIRect {
 }
 
 class UIText {
-    constructor(x, y, color, font, text = "") {
+    constructor(x, y, color, font, text = "", n = 5) {
         this.x = x;
         this.y = y;
         this.c = color;
@@ -90,7 +90,7 @@ class UIText {
         this.textAlign = "center";
         this.textBaseline = "middle";
         this.font = "" + Math.floor(font) + "px monospace";
-        this.w = 0.6 * font * 5;
+        this.w = 0.6 * font * n;
     }
 
     left() {
@@ -255,7 +255,15 @@ class UI extends UIRect {
             flow = button.left();
         }
         {
-            const money = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
+            let top = this.inner.padded.top().y + h/8;
+            const interest = new UIText(flow.x - 2 * padding, top, this.c, 0.2 * h, "", 3);
+            interest.textAlign = "right";
+            this.interest = interest;
+            this.children.push(interest);
+        }
+        {
+            let top = this.inner.padded.top().y + 3 * h/8;
+            const money = new UIText(flow.x - 2 * padding, top, this.c, 0.2 * h);
             money.textAlign = "right";
             this.money = money;
             this.children.push(money);

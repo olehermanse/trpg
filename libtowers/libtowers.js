@@ -54,7 +54,7 @@ class Tower {
     }
   }
   tick(ms) {
-    if (this.name === "rock") {
+    if (["rock", "bank"].includes(this.name)) {
       return;
     }
     const sec = (ms / 1000);
@@ -73,7 +73,7 @@ class Tower {
     }
   }
   pick_target(enemies) {
-    if (this.name === "rock") {
+    if (["rock", "bank"].includes(this.name)) {
       return;
     }
     if (enemies.length === 0) {
@@ -111,6 +111,9 @@ class Tower {
     }
     if (name === "laser") {
       return 50;
+    }
+    if (name === "bank") {
+      return 100;
     }
   }
 }
@@ -544,11 +547,26 @@ class Game {
     this.delay = 0.0;
   }
 
+  banks() {
+    let n = 0;
+    for (let t of this.towers) {
+      if (t.name === "bank") {
+        n += 1;
+      }
+    }
+    return n;
+  }
+
+  reward() {
+    let n = this.banks();
+    return 2 * n + Math.floor((5 * n + 10) * this.money / 100);
+  }
+
   victory() {
     console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
     this.paused = true;
-    this.money += Math.floor(this.money / 10);
+    this.money += this.reward();
     this.level += 1;
     this.on_victory();
   }
