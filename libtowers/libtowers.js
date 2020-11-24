@@ -530,10 +530,11 @@ class Game {
       for (let i = 0; i < speedies; ++i) {
         this.remaining.push(new Speedy(c, r, path));
       }
-
-      let enemies = limit(1, this.level * 2 - 4, 12);
-      for (let i = 0; i < enemies; ++i) {
-        this.remaining.push(new Enemy(c, r, path));
+      if (this.level <= 15) {
+        let enemies = limit(1, this.level * 2 - 4, 12);
+        for (let i = 0; i < enemies; ++i) {
+          this.remaining.push(new Enemy(c, r, path));
+        }
       }
     }
 
