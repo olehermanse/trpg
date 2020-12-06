@@ -366,7 +366,7 @@ function tick(ms) {
     }
     ui.interest.text = "+ " + game.reward() + "";
     ui.money.text = "$ " + game.money + "";
-    ui.level.text = "Lv. " + game.level;
+    ui.level.text = "Level: " + game.level;
     ui.lives.text = "Lives: " + game.lives;
 }
 

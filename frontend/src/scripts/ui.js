@@ -243,13 +243,6 @@ class UI extends UIRect {
 
         let flow = this.inner.padded.right();
         {
-            const level = new UIText(flow.x - padding, flow.y, stroke, 0.3 * h);
-            level.textAlign = "right";
-            this.level = level;
-            this.children.push(level);
-            flow = level.left();
-        }
-        {
             const btn_w = w / 10;
             const btn_h = h / 3;
             const btn_x = flow.x - btn_w - padding;
@@ -276,12 +269,21 @@ class UI extends UIRect {
         }
         this.next_x = this.inner.padded.left().x;
 
-        // Life counter
+        // Life counter:
+        {
+            this.lives = new UIText(this.grid_size, padding, this.stroke, 0.3 * h, "", 8);
+            this.lives.textBaseline = "top";
+            this.lives.textAlign = "left";
+            this.children.push(this.lives);
+        }
 
-        this.lives = new UIText(this.grid_size, padding, this.stroke, 0.3 * h, "", 8);
-        this.lives.textBaseline = "top";
-        this.lives.textAlign = "left";
-        this.children.push(this.lives);
+        // Level counter:
+        {
+            this.level = new UIText(w - grid_size, padding, stroke, 0.3 * h);
+            this.level.textBaseline = "top";
+            this.level.textAlign = "right";
+            this.children.push(this.level);
+        }
     }
 
     add_tower_button(name, icon, on_click) {
