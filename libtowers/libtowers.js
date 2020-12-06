@@ -42,17 +42,20 @@ class Tower {
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
-    this.range = 3.0;
+    this.range = null;
     if (this.name === "gun") {
       this.charge_time = 0.3;
       this.dps = 25;
+      this.range = 3.0;
     } else if (this.name === "laser") {
       this.charge_time = 1.0;
       this.dps = 50;
+      this.range = 4.0;
     } else if (this.name === "slow") {
       this.charge_time = 1.0;
       this.dps = 5;
       this.slow = 1.0;
+      this.range = 2.0;
     }
   }
   tick(ms) {
@@ -75,7 +78,7 @@ class Tower {
     }
   }
   pick_target(enemies) {
-    if (["rock", "bank"].includes(this.name)) {
+    if (this.range === null) {
       return;
     }
     if (enemies.length === 0) {
