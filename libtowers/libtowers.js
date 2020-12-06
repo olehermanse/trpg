@@ -33,10 +33,11 @@ function position(c, r) {
 }
 
 class Tower {
-  constructor(c, r, name) {
+  constructor(c, r, name, draw = null) {
     this.name = name;
     this.c = c;
     this.r = r;
+    this.draw = draw;
     this.price = Tower.price(name);
     this.rotation = 0;
     this.target = null;
@@ -264,7 +265,14 @@ class Game {
     return ((c < 0) || (r < 0) || (r >= this.rows) || (c >= this.columns));
   }
 
+  is_inside(c, r) {
+    return !this.is_outside(c, r);
+  }
+
   is_empty(c, r) {
+    if (this.is_outside(c, r)) {
+      return false;
+    }
     return (this.tiles[c][r] === null || this.is_path(c, r));
   }
 

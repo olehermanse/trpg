@@ -1,4 +1,5 @@
 const Game = require("../../../libtowers/libtowers.js").Game;
+const Tower = require("../../../libtowers/libtowers.js").Tower;
 const Draw = require("./draw.js");
 const UI = require("./ui.js").UI;
 
@@ -32,6 +33,8 @@ const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
 const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
 let space_pressed = false;
+
+let preview = null;
 
 function canvas_to_grid_int(p) {
     return Math.floor(p / GRID_SIZE);
@@ -178,6 +181,15 @@ function draw_enemies(ctx) {
     }
 }
 
+function draw_preview(ctx) {
+    if (preview === null) {
+        return;
+    }
+    ctx.globalAlpha = 0.3;
+    draw_tower(ctx, preview);
+    ctx.globalAlpha = 1.0;
+}
+
 function draw(ctx) {
     // Background:
     Draw.rectangle(ctx, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, BG);
@@ -196,6 +208,7 @@ function draw(ctx) {
     draw_enemies(ctx);
     // UI:
     ui.draw(ctx);
+    draw_preview(ctx);
 }
 
 function mouse_click(x, y) {
@@ -209,6 +222,21 @@ function mouse_click(x, y) {
 
 function mouse_move(x, y) {
     ui.hover(x, y);
+    let c = canvas_to_grid_int(x);
+    let r = canvas_to_grid_int(y);
+    let name = ui.selected.name;
+
+    if (!game.can_place(c, r, name)) {
+        preview = null;
+        return;
+    }
+
+    if (preview === null) {
+        preview = new Tower(c, r, name, ui.selected.icon);
+    } else {
+        preview.r = r;
+        preview.c = c;
+    }
 }
 
 function mouse_release(x, y) {
@@ -301,6 +329,7 @@ function setup_events(canvas) {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_click(x, y);
+        mouse_move(x, y);
     });
 
     canvas.addEventListener('mousemove', e => {
@@ -313,6 +342,7 @@ function setup_events(canvas) {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_release(x, y);
+        mouse_move(x, y);
     });
 
     document.addEventListener('keydown', (event) => {
