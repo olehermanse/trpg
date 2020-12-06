@@ -107,8 +107,8 @@ function draw_laser_tower(ctx, t, target = null) {
 }
 
 function draw_bank(ctx, t, target = null) {
-    const circle = fill_stroke("yellow", black);
-    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, null);
+    const s = (t.w / 2) * 0.5;
+    Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", black);
 }
 
 function draw_tower(ctx, tower) {
