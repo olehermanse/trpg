@@ -231,6 +231,7 @@ class UI extends UIRect {
     constructor(x, y, w, h, fill, stroke, padding, margin, grid_size) {
         super(x, y, w, h, fill, stroke, padding, margin);
 
+        this.stroke = null;
         this.grid_size = grid_size;
 
         const inner = this.get_padded();
@@ -241,11 +242,13 @@ class UI extends UIRect {
         this.buttons = [];
         this.tower_buttons = [];
 
-        let flow = this.inner.padded.right();
+        let flow = xy(x, y);
+        flow.x += w - grid_size;
+        flow.y += h / 2;
         {
             const btn_w = w / 10;
             const btn_h = h / 3;
-            const btn_x = flow.x - btn_w - padding;
+            const btn_x = flow.x - btn_w;
             const btn_y = flow.y - btn_h / 2;
             const button = new UIButton(btn_x, btn_y, btn_w, btn_h, fill, stroke, "Start");
             this.buttons.push(button);
@@ -267,7 +270,7 @@ class UI extends UIRect {
             this.money = money;
             this.children.push(money);
         }
-        this.next_x = this.inner.padded.left().x;
+        this.next_x = x + grid_size;
 
         // Life counter:
         {
