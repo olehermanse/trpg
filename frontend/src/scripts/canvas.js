@@ -246,6 +246,13 @@ function mouse_release(x, y) {
 }
 
 function key_down(key) {
+    if (key === "å") {
+        for (let b of ui.tower_buttons) {
+            b.show();
+        }
+        game.level = 10;
+        game.money = 10000;
+    }
     if (key === " ") {
         if (!space_pressed && game.paused) {
             on_start_click();
