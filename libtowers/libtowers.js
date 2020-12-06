@@ -33,12 +33,12 @@ function position(c, r) {
 }
 
 class Tower {
-  constructor(c, r, name, draw = null) {
+  constructor(c, r, name, price, draw = null) {
     this.name = name;
     this.c = c;
     this.r = r;
     this.draw = draw;
-    this.price = Tower.price(name);
+    this.price = price;
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
@@ -428,15 +428,22 @@ class Game {
     return true;
   }
 
+  price(name) {
+    if (name === "bank") {
+      return 100 + 100 * this.banks();
+    }
+    return Tower.price(name);
+  }
+
   can_afford(name) {
-    return (this.money >= Tower.price(name));
+    return (this.money >= this.price(name));
   }
 
   _try_place_tower(c, r, name) {
     console.assert(this.can_afford(name), "Cannot afford tower");
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
-    const tower = new Tower(c, r, name);
+    const tower = new Tower(c, r, name, this.price(name));
     const on_path = this.is_path(c, r);
 
     const save = this.tiles[c][r];
@@ -468,7 +475,7 @@ class Game {
       console.assert(towers[i] != null);
       console.assert(towers[i] != tower);
       console.assert(towers[i] === this.tiles[c][r]);
-      this.money -= Tower.price(name);
+      this.money -= this.price(name);
       return towers[i];
     }
 
@@ -478,7 +485,7 @@ class Game {
     }
     console.assert(this.tiles[c][r] === tower, "Tower not placed in tile");
     this.towers.push(tower);
-    this.money -= Tower.price(name);
+    this.money -= this.price(name);
     return tower;
   }
 

@@ -218,6 +218,9 @@ function mouse_click(x, y) {
     const tower = game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y), name);
     if (tower != null) {
         tower.draw = ui.selected.icon;
+        if (tower.name === "bank") {
+            ui.selected.price.text = game.price("bank");
+        }
     }
     ui.click(x, y);
 }
@@ -234,7 +237,7 @@ function mouse_move(x, y) {
     }
 
     if (preview === null) {
-        preview = new Tower(c, r, name, ui.selected.icon);
+        preview = new Tower(c, r, name, game.price(name), ui.selected.icon);
     } else {
         preview.r = r;
         preview.c = c;
