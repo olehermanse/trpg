@@ -511,10 +511,6 @@ class Game {
     if (!this.has_tower(c, r)) {
       return false;
     }
-    const tower = this.tiles[c][r];
-    if (tower.price >= Tower.price(name)) {
-      return false;
-    }
     return true;
   }
 
