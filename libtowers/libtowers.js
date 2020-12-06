@@ -220,7 +220,7 @@ class Game {
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
-    this.lives = 1;
+    this.lives = 3;
     this.remaining = [];
     this.money = 45;
     this.rows = rows;

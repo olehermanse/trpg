@@ -1,3 +1,4 @@
+const { grid } = require("./draw.js");
 const Draw = require("./draw.js");
 const Tower = require("../../../libtowers/libtowers.js").Tower;
 
@@ -227,8 +228,10 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-    constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0) {
+    constructor(x, y, w, h, fill, stroke, padding, margin, grid_size) {
         super(x, y, w, h, fill, stroke, padding, margin);
+
+        this.grid_size = grid_size;
 
         const inner = this.get_padded();
         this.inner = inner;
@@ -272,6 +275,13 @@ class UI extends UIRect {
             this.children.push(money);
         }
         this.next_x = this.inner.padded.left().x;
+
+        // Life counter
+
+        this.lives = new UIText(this.grid_size, padding, this.stroke, 0.3 * h, "", 8);
+        this.lives.textBaseline = "top";
+        this.lives.textAlign = "left";
+        this.children.push(this.lives);
     }
 
     add_tower_button(name, icon, on_click) {

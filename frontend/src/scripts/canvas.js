@@ -31,7 +31,7 @@ const UI_W = WIDTH;
 const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
-const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, UI_S, UI_S);
+const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, UI_S, UI_S, GRID_SIZE);
 let space_pressed = false;
 
 let preview = null;
@@ -367,6 +367,7 @@ function tick(ms) {
     ui.interest.text = "+ " + game.reward() + "";
     ui.money.text = "$ " + game.money + "";
     ui.level.text = "Lv. " + game.level;
+    ui.lives.text = "Lives: " + game.lives;
 }
 
 function start(canvas) {
