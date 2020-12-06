@@ -6,12 +6,13 @@ function xy(x, y) {
 }
 
 class UIRect {
-    constructor(x, y, w, h, c, padding = 0, margin = 0) {
+    constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0) {
         this.x = x + margin;
         this.y = y + margin;
         this.w = w - 2 * margin;
         this.h = h - 2 * margin;
-        this.c = c;
+        this.fill = fill;
+        this.stroke = stroke;
         this.padding = padding;
         this.padded = this;
         if (padding > 0) {
@@ -26,13 +27,14 @@ class UIRect {
             this.y + this.padding,
             this.w - 2 * this.padding,
             this.h - 2 * this.padding,
-            this.c,
+            this.fill,
+            this.stroke,
             0,
             0);
     }
 
     draw_self(ctx) {
-        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, null, this.c);
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, this.stroke);
     }
 
     draw(ctx) {
@@ -107,17 +109,17 @@ class UIText {
 }
 
 class UIButton extends UIRect {
-    constructor(x, y, w, h, c, label = null) {
-        super(x, y, w, h, c);
+    constructor(x, y, w, h, fill = null, stroke = null, label = null) {
+        super(x, y, w, h, fill, stroke);
         if (label === null) {
             this.label = null;
         } else {
-            this.label = new UIText(x + w / 2, y + h / 2, c, h / 2, label);
+            this.label = new UIText(x + w / 2, y + h / 2, stroke, h / 2, label);
             this.children.push(this.label);
         }
         this.on_click = null;
         this.state = "active";
-        this.base_color = c;
+        this.base_color = stroke;
         this.icon = null;
     }
 
@@ -156,10 +158,10 @@ class UIButton extends UIRect {
             }
         }
         if (rect != null) {
-            this.c = rect;
+            this.stroke = rect;
         }
         else {
-            this.c = this.base_color;
+            this.stroke = this.base_color;
         }
     }
 
@@ -225,19 +227,20 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-    constructor(x, y, w, h, c, padding = 0, margin = 0) {
-        super(x, y, w, h, c, padding, margin);
+    constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0) {
+        super(x, y, w, h, fill, stroke, padding, margin);
 
         const inner = this.get_padded();
         this.inner = inner;
-        this.inner.c = null;
+        this.inner.stroke = null;
+        this.inner.fill = null;
         this.children.push(inner);
         this.buttons = [];
         this.tower_buttons = [];
 
         let flow = this.inner.padded.right();
         {
-            const level = new UIText(flow.x - padding, flow.y, this.c, 0.3 * h);
+            const level = new UIText(flow.x - padding, flow.y, stroke, 0.3 * h);
             level.textAlign = "right";
             this.level = level;
             this.children.push(level);
@@ -248,22 +251,22 @@ class UI extends UIRect {
             const btn_h = h / 3;
             const btn_x = flow.x - btn_w - padding;
             const btn_y = flow.y - btn_h / 2;
-            const button = new UIButton(btn_x, btn_y, btn_w, btn_h, this.c, "Start");
+            const button = new UIButton(btn_x, btn_y, btn_w, btn_h, fill, stroke, "Start");
             this.buttons.push(button);
             this.start_button = button;
             this.children.push(button);
             flow = button.left();
         }
         {
-            let top = this.inner.padded.top().y + h/8;
-            const interest = new UIText(flow.x - 2 * padding, top, this.c, 0.2 * h, "", 3);
+            let top = this.inner.padded.top().y + h / 8;
+            const interest = new UIText(flow.x - 2 * padding, top, stroke, 0.2 * h, "", 3);
             interest.textAlign = "right";
             this.interest = interest;
             this.children.push(interest);
         }
         {
-            let top = this.inner.padded.top().y + 3 * h/8;
-            const money = new UIText(flow.x - 2 * padding, top, this.c, 0.2 * h);
+            let top = this.inner.padded.top().y + 3 * h / 8;
+            const money = new UIText(flow.x - 2 * padding, top, stroke, 0.2 * h);
             money.textAlign = "right";
             this.money = money;
             this.children.push(money);

@@ -31,7 +31,7 @@ const UI_W = WIDTH;
 const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
 const UI_S = GRID_SIZE / 4;
-const ui = new UI(UI_X, UI_Y, UI_W, UI_H, UI_C, UI_S, UI_S);
+const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, UI_S, UI_S);
 let space_pressed = false;
 
 let preview = null;
@@ -186,6 +186,9 @@ function draw_preview(ctx) {
         return;
     }
     ctx.globalAlpha = 0.3;
+    let pos = grid_to_canvas(preview);
+    let r = GRID_SIZE * preview.range;
+    Draw.circle(ctx, pos.x, pos.y, r, null, "black");
     draw_tower(ctx, preview);
     ctx.globalAlpha = 1.0;
 }
@@ -207,8 +210,8 @@ function draw(ctx) {
     draw_towers(ctx);
     draw_enemies(ctx);
     // UI:
-    ui.draw(ctx);
     draw_preview(ctx);
+    ui.draw(ctx);
 }
 
 function mouse_click(x, y) {

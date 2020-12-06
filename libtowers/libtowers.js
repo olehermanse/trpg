@@ -42,6 +42,7 @@ class Tower {
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
+    this.range = 3.0;
     if (this.name === "gun") {
       this.charge_time = 0.3;
       this.dps = 25;
@@ -82,7 +83,7 @@ class Tower {
       this.intensity = 0.0;
       return;
     }
-    const in_range = enemies.filter((e) => { return distance(this, e) < 3; });
+    const in_range = enemies.filter((e) => { return distance(this, e) < this.range; });
     if (this.name === "laser" && in_range.includes(this.target)) {
       return;
     }
