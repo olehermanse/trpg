@@ -160,8 +160,7 @@ class UIButton extends UIRect {
         }
         if (rect != null) {
             this.stroke = rect;
-        }
-        else {
+        } else {
             this.stroke = this.base_color;
         }
     }
@@ -228,17 +227,14 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-    constructor(x, y, w, h, fill, stroke, padding, margin, grid_size) {
-        super(x, y, w, h, fill, stroke, padding, margin);
-
-        this.stroke = null;
+    constructor(x, y, w, h, fill, stroke, grid_size) {
+        super(x, y, w, h, fill, stroke, 0, 0);
         this.grid_size = grid_size;
+        this.spacing = grid_size / 4;
 
-        const inner = this.get_padded();
-        this.inner = inner;
-        this.inner.stroke = null;
-        this.inner.fill = null;
-        this.children.push(inner);
+        this.btn_h = h - 4 * this.spacing;
+        this.btn_y = y + 2 * this.spacing;
+
         this.buttons = [];
         this.tower_buttons = [];
 
@@ -257,15 +253,15 @@ class UI extends UIRect {
             flow = button.left();
         }
         {
-            let top = this.inner.padded.top().y + h / 8;
-            const interest = new UIText(flow.x - 2 * padding, top, stroke, 0.2 * h, "", 3);
+            let top = this.btn_y + h / 8;
+            const interest = new UIText(flow.x - 2 * this.spacing, top, stroke, 0.2 * h, "", 3);
             interest.textAlign = "right";
             this.interest = interest;
             this.children.push(interest);
         }
         {
-            let top = this.inner.padded.top().y + 3 * h / 8;
-            const money = new UIText(flow.x - 2 * padding, top, stroke, 0.2 * h);
+            let top = this.btn_y + 3 * h / 8;
+            const money = new UIText(flow.x - 2 * this.spacing, top, stroke, 0.2 * h);
             money.textAlign = "right";
             this.money = money;
             this.children.push(money);
@@ -274,7 +270,7 @@ class UI extends UIRect {
 
         // Life counter:
         {
-            this.lives = new UIText(this.grid_size, padding, this.stroke, 0.3 * h, "", 8);
+            this.lives = new UIText(this.grid_size, this.spacing, this.stroke, 0.3 * h, "", 8);
             this.lives.textBaseline = "top";
             this.lives.textAlign = "left";
             this.children.push(this.lives);
@@ -282,7 +278,7 @@ class UI extends UIRect {
 
         // Level counter:
         {
-            this.level = new UIText(w - grid_size, padding, stroke, 0.3 * h);
+            this.level = new UIText(w - grid_size, this.spacing, stroke, 0.3 * h);
             this.level.textBaseline = "top";
             this.level.textAlign = "right";
             this.children.push(this.level);
@@ -290,11 +286,11 @@ class UI extends UIRect {
     }
 
     add_tower_button(name, icon, on_click) {
-        const btn_h = this.inner.padded.h;
+        const btn_h = this.btn_h;
         const btn_w = btn_h;
-        const btn_y = this.inner.padded.top().y;
+        const btn_y = this.btn_y;
 
-        const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, this.c);
+        const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, null, this.stroke, null);
 
         button.name = name;
         button.icon = icon;
@@ -312,7 +308,7 @@ class UI extends UIRect {
         this.tower_buttons.push(button);
         this.buttons.push(button);
         this.children.push(button);
-        this.next_x += btn_w + this.padding;
+        this.next_x += btn_w + this.spacing;
         return button;
     }
 
@@ -332,6 +328,10 @@ class UI extends UIRect {
         for (let button of this.buttons) {
             button.hover(x, y);
         }
+    }
+
+    draw_self(ctx) {
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, null);
     }
 }
 

@@ -30,8 +30,7 @@ const UI_Y = GRID_HEIGHT - GRID_SIZE;
 const UI_W = WIDTH;
 const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
-const UI_S = GRID_SIZE / 4;
-const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, UI_S, UI_S, GRID_SIZE);
+const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, GRID_SIZE);
 let space_pressed = false;
 
 let preview = null;
