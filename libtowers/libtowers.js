@@ -518,6 +518,9 @@ class Game {
     if (!this.has_tower(c, r)) {
       return false;
     }
+    if (this.tiles[c][r].name === name) {
+      return false;
+    }
     return true;
   }
 
