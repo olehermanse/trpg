@@ -1,4 +1,4 @@
-FROM node:8 AS build
+FROM node:14 AS build
 ADD ./ /towers
 WORKDIR /towers
 RUN rm -rf frontend/dist
