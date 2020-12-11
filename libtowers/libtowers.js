@@ -466,6 +466,7 @@ class Game {
   place_tower(c, r, name) {
     console.assert(this.can_afford(name));
     console.assert(this.can_place(c, r, name));
+    const price = this.price(name);
     if (this.has_tower(c, r)) {
       const tower = this.tiles[c][r];
       const towers = this.towers;
@@ -475,7 +476,7 @@ class Game {
       console.assert(towers[i] != null);
       console.assert(towers[i] != tower);
       console.assert(towers[i] === this.tiles[c][r]);
-      this.money -= this.price(name);
+      this.money -= price;
       return towers[i];
     }
 
@@ -485,7 +486,7 @@ class Game {
     }
     console.assert(this.tiles[c][r] === tower, "Tower not placed in tile");
     this.towers.push(tower);
-    this.money -= this.price(name);
+    this.money -= price;
     return tower;
   }
 
