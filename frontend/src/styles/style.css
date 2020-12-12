@@ -26,9 +26,14 @@ body > * {
   margin-top: 10px;
 }
 
+body > div > h1 {
+  text-align: center;
+
+}
+
 body > div > canvas {
   max-width: min(1200px, calc(100vw - 1em));
-  margin-top: 0.5em;
+  margin-top: 1.0em;
   margin-bottom: 0.2em;
 }
 
