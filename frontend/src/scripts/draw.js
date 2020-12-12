@@ -10,7 +10,7 @@ function line(ctx, x1, y1, x2, y2, strokeStyle, lineWidth = 2) {
     ctx.stroke();
 }
 
-function circle(ctx, x, y, r, fill, stroke = null) {
+function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = 2) {
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * PI);
@@ -20,6 +20,7 @@ function circle(ctx, x, y, r, fill, stroke = null) {
     }
     if (stroke != null) {
         ctx.strokeStyle = stroke;
+        ctx.lineWidth = lineWidth;
         ctx.stroke();
     }
 }
@@ -53,21 +54,14 @@ function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = 2) {
 }
 
 function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = 2) {
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + w, y);
-    ctx.lineTo(x + w, y + h);
-    ctx.lineTo(x, y + h);
-    ctx.lineTo(x, y);
-
     if (fill) {
         ctx.fillStyle = fill;
-        ctx.fill();
+        ctx.fillRect(x, y, w, h);
     }
     if (stroke) {
         ctx.strokeStyle = stroke;
         ctx.lineWidth = lineWidth;
-        ctx.stroke();
+        ctx.strokeRect(x, y, w, h);
     }
 }
 

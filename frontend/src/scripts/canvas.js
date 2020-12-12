@@ -66,7 +66,7 @@ function fill_stroke(f, s) {
 function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {
     const r = (s / 2) * 0.7;
     if (circle != null) {
-        Draw.circle(ctx, x, y, r, circle.fill, circle.stroke);
+        Draw.circle(ctx, x, y, r, circle.fill, circle.stroke, 4);
     }
     if (triangle != null) {
         Draw.triangle(ctx, x, y, r, rotation, triangle.fill, triangle.stroke);
@@ -110,7 +110,7 @@ function draw_laser_tower(ctx, t, target = null) {
 
 function draw_bank(ctx, t, target = null) {
     const s = (t.w / 2) * 0.5;
-    Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", black);
+    Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", black, 4);
 }
 
 function draw_tower(ctx, tower) {
