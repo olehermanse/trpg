@@ -79,12 +79,12 @@ function text(ctx, x, y, string, c, size) {
     ctx.fillText(string, x, y);
 }
 
-function grid(ctx, size, width, height) {
+function grid(ctx, size, x0, y0, width, height) {
     for (let x = size; x < width; x += size) {
-        line(ctx, x, 0, x, height, GRID_COLOR, 2);
+        line(ctx, x, y0, x, y0 + height, GRID_COLOR, 2);
     }
     for (let y = size; y < height; y += size) {
-        line(ctx, 0, y, width, y, GRID_COLOR, 2);
+        line(ctx, x0, y, x0 + width, y, GRID_COLOR, 2);
     }
 }
 

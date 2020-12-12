@@ -270,16 +270,16 @@ class UI extends UIRect {
 
         // Life counter:
         {
-            this.lives = new UIText(this.grid_size, this.spacing, this.stroke, 0.3 * h, "", 8);
-            this.lives.textBaseline = "top";
+            this.lives = new UIText(this.grid_size, this.grid_size, this.stroke, 0.3 * h, "", 8);
+            this.lives.textBaseline = "middle";
             this.lives.textAlign = "left";
             this.children.push(this.lives);
         }
 
         // Level counter:
         {
-            this.level = new UIText(w - grid_size, this.spacing, stroke, 0.3 * h);
-            this.level.textBaseline = "top";
+            this.level = new UIText(w - grid_size, this.grid_size, stroke, 0.3 * h);
+            this.level.textBaseline = "middle";
             this.level.textAlign = "right";
             this.children.push(this.level);
         }

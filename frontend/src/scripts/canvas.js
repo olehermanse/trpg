@@ -4,15 +4,17 @@ const Draw = require("./draw.js");
 const UI = require("./ui.js").UI;
 
 const COLUMNS = 20;
-const ROWS = 14;
+const ROWS = 13;
 const CANVAS_WIDTH = 1200;
 
 const GRID_WIDTH = CANVAS_WIDTH;
 const GRID_SIZE = GRID_WIDTH / COLUMNS;
+const GRID_START = GRID_SIZE;
 const WIDTH = CANVAS_WIDTH;
 
 const GRID_HEIGHT = ROWS * GRID_SIZE;
-const CANVAS_HEIGHT = GRID_HEIGHT + GRID_SIZE;
+const GRID_END = GRID_START + GRID_HEIGHT;
+const CANVAS_HEIGHT = GRID_END + GRID_SIZE;
 
 const FG = "rgb(256,256,256)";
 const BG = "rgb(16,16,16)";
@@ -26,7 +28,7 @@ const dark_purple = "rgb(128,0,128)";
 
 const game = new Game(COLUMNS, ROWS);
 const UI_X = 0;
-const UI_Y = GRID_HEIGHT - GRID_SIZE;
+const UI_Y = GRID_END - GRID_SIZE;
 const UI_W = WIDTH;
 const UI_H = GRID_SIZE * 2;
 const UI_C = FG;
@@ -35,22 +37,22 @@ let space_pressed = false;
 
 let preview = null;
 
-function canvas_to_grid_int(p) {
-    return Math.floor(p / GRID_SIZE);
+function canvas_to_grid_int(p, offset = 0) {
+    return Math.floor((p - offset) / GRID_SIZE);
 }
 
 function xy(x, y) {
     return { "x": x, "y": y };
 }
 
-function grid_to_canvas(p) {
+function grid_to_canvas(p, offset=0) {
     if (p === null) {
         return p;
     }
     if (isNaN(p)) {
-        return xy(grid_to_canvas(p.c), grid_to_canvas(p.r));
+        return xy(grid_to_canvas(p.c), grid_to_canvas(p.r, GRID_START));
     }
-    return (p * GRID_SIZE + GRID_SIZE / 2);
+    return (offset + p * GRID_SIZE + GRID_SIZE / 2);
 }
 
 function offset_to_canvas(p, canvas) {
@@ -127,22 +129,22 @@ function draw_towers(ctx) {
 }
 
 function draw_wall(ctx, c, r) {
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, BG);
+    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, BG);
 }
 
 function draw_path(ctx, c, r) {
     const color = "rgba(200,200,200,0.5)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
+    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_spawn(ctx, c, r) {
     const color = "rgba(0,128,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
+    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_goal(ctx, c, r) {
     const color = "rgba(200,200,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
+    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
 }
 
 function draw_tile(ctx, c, r) {
@@ -167,11 +169,10 @@ function draw_tiles(ctx) {
 }
 
 function draw_enemy(ctx, enemy) {
-    const x = grid_to_canvas(enemy.c);
-    const y = grid_to_canvas(enemy.r);
+    const pos = grid_to_canvas(enemy);
     const r = (GRID_SIZE / 2) * 0.7;
     const angle = enemy.rotation;
-    Draw.triangle(ctx, x, y, r, angle, enemy.color, "#000000");
+    Draw.triangle(ctx, pos.x, pos.y, r, angle, enemy.color, "#000000");
 }
 
 function draw_enemies(ctx) {
@@ -202,20 +203,21 @@ function draw(ctx) {
     }
 
     // Grid:
-    Draw.rectangle(ctx, 0, 0, GRID_WIDTH, GRID_HEIGHT, FG);
-    Draw.grid(ctx, GRID_SIZE, WIDTH, GRID_HEIGHT);
+    Draw.rectangle(ctx, 0, GRID_START, GRID_WIDTH, GRID_HEIGHT, FG);
+    Draw.grid(ctx, GRID_SIZE, 0, GRID_START, WIDTH, GRID_HEIGHT);
     // Game elements:
     draw_tiles(ctx);
     draw_towers(ctx);
     draw_enemies(ctx);
     // UI:
     draw_preview(ctx);
+    Draw.rectangle(ctx, 0, 0, WIDTH, GRID_START, BG);
     ui.draw(ctx);
 }
 
 function mouse_click(x, y) {
     const name = ui.selected.name;
-    const tower = game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y), name);
+    const tower = game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y, GRID_START), name);
     if (tower != null) {
         tower.draw = ui.selected.icon;
         if (tower.name === "bank") {
@@ -228,7 +230,7 @@ function mouse_click(x, y) {
 function mouse_move(x, y) {
     ui.hover(x, y);
     let c = canvas_to_grid_int(x);
-    let r = canvas_to_grid_int(y);
+    let r = canvas_to_grid_int(y, GRID_START);
     let name = ui.selected.name;
 
     if (!game.can_place(c, r, name)) {
