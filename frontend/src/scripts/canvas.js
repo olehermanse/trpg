@@ -355,7 +355,10 @@ function setup_events(canvas) {
     });
 
     document.addEventListener('keydown', (event) => {
-        event.preventDefault();
+        if (event.key === " ") {
+            // Prevent spacebar from scrolling page
+            event.preventDefault();
+        }
         key_down(event.key);
     }, false);
 
