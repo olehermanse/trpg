@@ -34,13 +34,13 @@ class UIRect {
             0);
     }
 
-    draw_self(ctx) {
-        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, this.stroke);
+    draw_children(ctx) {
+        this.children.map((c) => { c.draw(ctx); });
     }
 
     draw(ctx) {
-        this.draw_self(ctx);
-        this.children.map((c) => { c.draw(ctx); });
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, this.stroke);
+        this.draw_children(ctx);
     }
 
     center() {
@@ -145,8 +145,7 @@ class UIButton extends UIRect {
             tower.target = null;
             this.icon(ctx, tower, null);
         }
-        this.draw_self(ctx);
-        this.children.map((c) => { c.draw(ctx); });
+        super.draw(ctx);
     }
 
     set_temporary_color(label = null, rect = null) {
@@ -330,8 +329,9 @@ class UI extends UIRect {
         }
     }
 
-    draw_self(ctx) {
+    draw(ctx) {
         Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, null);
+        this.draw_children(ctx);
     }
 }
 
@@ -357,8 +357,8 @@ class HealthBar extends UIRect {
         this.remaining.y = this.y;
     }
 
-    draw_self(ctx) {
-        super.draw_self(ctx);
+    draw(ctx) {
+        super.draw(ctx);
         this.remaining.w = this.ratio * this.w;
         if (this.ratio > 0.8) {
             this.remaining.fill = this.green;
