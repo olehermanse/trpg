@@ -470,7 +470,7 @@ class Game {
     }
 
     for (let dead of died) {
-      this.money += dead.reward;
+      this.money += dead.reward();
     }
 
     let finished = [];

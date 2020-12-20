@@ -1,7 +1,12 @@
 const { limit } = require("./utils.js");
 
 class Enemy {
-  reward = 1;
+  static cost = 1;
+
+  reward() {
+    return this.__proto__.constructor.cost;
+  }
+
   constructor(c, r, path) {
     this.c = c;
     this.r = r;
@@ -101,7 +106,8 @@ class Enemy {
 }
 
 class Speedy extends Enemy {
-  reward = 4;
+  static cost = 4;
+
   constructor(c, r, path) {
     super(c, r, path);
     this.speed = this.speed * 2;
@@ -113,14 +119,40 @@ class Speedy extends Enemy {
 }
 
 class Boss extends Enemy {
-  reward = 10;
+  static cost = 50;
+
   constructor(c, r, path) {
     super(c, r, path);
     this.speed = this.speed / 2;
     this.color = "#000000";
-    this.health = 4000.0;
+    this.health = 6000.0;
     this.max_health = this.health;
     this.delay = this.delay * 2;
+  }
+}
+
+class Purple extends Enemy {
+  static cost = 50;
+
+  constructor(c, r, path) {
+    super(c, r, path);
+    this.color = "#880088";
+    this.health = 4000.0;
+    this.max_health = this.health;
+    this.delay = this.delay;
+  }
+}
+
+class Mega extends Enemy {
+  static cost = 100;
+
+  constructor(c, r, path) {
+    super(c, r, path);
+    this.speed = this.speed / 1.5;
+    this.color = "#ffffff";
+    this.health = 40000.0;
+    this.max_health = this.health;
+    this.delay = this.delay * 1.5;
   }
 }
 
@@ -143,23 +175,53 @@ class Enemies {
       default:
         break;
     }
-    let enemy_types = [Enemy, Speedy];
-    let weak = enemy_types[0];
-    let strong = enemy_types[1];
-    let enemies = [];
-
-    if (strong != null) {
-      const strong_enemies = (level - 5);
-      for (let i = 0; i < strong_enemies; ++i) {
-        enemies.push(new strong(c, r, path));
-      }
+    let few = null;
+    let many = null;
+    if (level <= 2) {
+      return this.specific(Enemy, 1, c, r, path);
+    } else if (level == 3) {
+      return this.specific(Enemy, 2, c, r, path);
+    } else if (level < 5) {
+      few = Enemy;
+    } else if (level == 10) {
+      return this.specific(Boss, 1, c, r, path);
+    } else if (level < 10) {
+      few = Speedy;
+      many = Enemy;
+    } else if (level < 15) {
+      many = Speedy;
+    } else if (level == 20) {
+      return this.specific(Boss, 4, c, r, path);
+    } else if (level < 20) {
+      few = Purple;
+    } else if (level < 25) {
+      few = Boss;
+      many = Purple;
+    } else if (level == 30) {
+      return this.specific(Mega, 1, c, r, path);
+    } else if (level < 30) {
+      many = Boss;
+    } else if (level < 35) {
+      few = Mega;
+    } else if (level < 40) {
+      many = Mega;
+    } else if (level < 45) {
+      few = Mega;
+      many = Mega;
+    } else {
+      return this.specific(Mega, level, c, r, path);
     }
-
-    if (weak != null) {
-      const weak_enemies = (level > 15) ? 0 : limit(1, level * 2 - 4, 12);
-      for (let i = 0; i < weak_enemies; ++i) {
-        enemies.push(new weak(c, r, path));
+    let enemies = [];
+    if (few != null) {
+      let n = (level % 5) + 1;
+      enemies.push(...this.specific(few, n, c, r, path));
+    }
+    if (many != null) {
+      let n = level % 10;
+      if (n === 0) {
+        n += 10;
       }
+      enemies.push(...this.specific(many, 2 * (level % 10), c, r, path));
     }
 
     enemies.reverse();
