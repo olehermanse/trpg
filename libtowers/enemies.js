@@ -125,29 +125,41 @@ class Boss extends Enemy {
 }
 
 class Enemies {
-  static create(c, r, level, path) {
+  static non_bosses(c, r, level, path) {
     let enemies = [];
 
-    if (level % 10 === 0) {
-      const bosses = (level / 10) ** 2;
-      for (let i = 0; i < bosses; ++i) {
-        enemies.push(new Boss(c, r, path));
-      }
-    } else {
-      const speedies = (level - 5);
-      for (let i = 0; i < speedies; ++i) {
-        enemies.push(new Speedy(c, r, path));
-      }
-      if (level <= 15) {
-        let basics = limit(1, level * 2 - 4, 12);
-        for (let i = 0; i < basics; ++i) {
-          enemies.push(new Enemy(c, r, path));
-        }
+    const speedies = (level - 5);
+    for (let i = 0; i < speedies; ++i) {
+      enemies.push(new Speedy(c, r, path));
+    }
+
+    if (level <= 15) {
+      let basics = limit(1, level * 2 - 4, 12);
+      for (let i = 0; i < basics; ++i) {
+        enemies.push(new Enemy(c, r, path));
       }
     }
 
     enemies.reverse();
     return enemies;
+  }
+
+  static bosses(c, r, level, path) {
+    let enemies = [];
+
+    const bosses = (level / 10) ** 2;
+    for (let i = 0; i < bosses; ++i) {
+      enemies.push(new Boss(c, r, path));
+    }
+
+    return enemies;
+  }
+
+  static create(c, r, level, path) {
+    if (level % 10 === 0) {
+      return this.bosses(c, r, level, path);
+    }
+    return this.non_bosses(c, r, level, path);
   }
 }
 
