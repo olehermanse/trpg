@@ -371,6 +371,14 @@ function setup_events(canvas) {
     }, false);
 }
 
+function number_string(num) {
+    const s = "" + num;
+    if (s.includes("e")) {
+        return s;
+    }
+    return Number(num).toLocaleString("no");
+}
+
 function tick(ms) {
     if (game.lives <= 0) {
         return;
@@ -378,8 +386,8 @@ function tick(ms) {
     if (!game.paused) {
         game.tick(ms);
     }
-    ui.interest.text = "+ " + game.reward() + "";
-    ui.money.text = "$ " + game.money + "";
+    ui.interest.text = "+ " + number_string(game.reward()) + "";
+    ui.money.text = "$ " + number_string(game.money) + "";
     ui.level.text = "Level: " + game.level;
     ui.lives.text = "Lives: " + game.lives;
 }
