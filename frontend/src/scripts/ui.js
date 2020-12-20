@@ -2,11 +2,6 @@ const { grid } = require("./draw.js");
 const Draw = require("./draw.js");
 const Tower = require("../../../libtowers/libtowers.js").Tower;
 
-const green = "#00ff00";
-const yellow = "#ffff00";
-const orange = "#ff8800";
-const red = "#ff0000";
-
 function xy(x, y) {
     return { "x": x, "y": y };
 }
@@ -340,47 +335,7 @@ class UI extends UIRect {
     }
 }
 
-function draw_healthbar(ctx, x, y, w, h, ratio) {
-    Draw.rectangle(ctx, x, y, w, h, "#ffffff", "#666666");
-    let color = null;
-    if (ratio > 0.8) {
-        color = green;
-    } else if (ratio >= 0.5) {
-        color = yellow;
-    } else if (ratio >= 0.33) {
-        color = orange;
-    } else {
-        color = red;
-    }
-    Draw.rectangle(ctx, x, y, w * ratio, h, color, null);
-}
-
-function draw_healthbar_centered(ctx, x, y, w, h, ratio) {
-    draw_healthbar(ctx, x - w / 2, y - h / 2, w, h, ratio);
-}
-
-class HealthBar extends UIRect {
-    constructor(x, y, w, h) {
-        x -= w / 2;
-        y -= h / 2;
-        super(x, y, w, h, null, null);
-        this.ratio = 1.0;
-    }
-
-    set_position(x, y) {
-        this.x = x - this.w / 2;
-        this.y = y - this.h / 2;
-    }
-
-    draw(ctx) {
-        if (this.ratio >= 1.0) {
-            return;
-        }
-        draw_healthbar(ctx, this.x, this.y, this.w, this.h, this.ratio);
-    }
-}
 
 module.exports = {
     UI,
-    HealthBar,
 };

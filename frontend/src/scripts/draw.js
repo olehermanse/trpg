@@ -82,6 +82,31 @@ function grid(ctx, size, x0, y0, width, height) {
     }
 }
 
+const green = "#00ff00";
+const yellow = "#ffff00";
+const orange = "#ff8800";
+const red = "#ff0000";
+const white = "#ffffff";
+const grey = "#666666";
+
+function healthbar(ctx, x, y, w, h, current, max) {
+    const ratio = current / max;
+    x -= w / 2;
+    y -= h / 2;
+    rectangle(ctx, x, y, w, h, white, grey);
+    let color = null;
+    if (ratio > 0.8) {
+        color = green;
+    } else if (ratio >= 0.5) {
+        color = yellow;
+    } else if (ratio >= 0.33) {
+        color = orange;
+    } else {
+        color = red;
+    }
+    rectangle(ctx, x, y, w * ratio, h, color, null);
+}
+
 module.exports = {
     circle,
     triangle,
@@ -89,4 +114,5 @@ module.exports = {
     line,
     text,
     grid,
+    healthbar,
 };

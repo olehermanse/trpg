@@ -139,12 +139,8 @@ class Enemy {
     this.travelled = 0.0;
     this.reward = 1;
     this.delay = 1.0;
-    this.healthbar = null;
   }
   tick(ms) {
-    if (this.healthbar != null) {
-      this.healthbar.ratio = this.health / this.max_health;
-    }
     const sec = (ms / 1000.0);
     this.slow_time -= sec;
     if (this.slow_time < 0.0) {

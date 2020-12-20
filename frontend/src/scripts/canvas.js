@@ -2,7 +2,6 @@ const Game = require("../../../libtowers/libtowers.js").Game;
 const Tower = require("../../../libtowers/libtowers.js").Tower;
 const Draw = require("./draw.js");
 const UI = require("./ui.js").UI;
-const HealthBar = require("./ui.js").HealthBar;
 
 const COLUMNS = 20;
 const ROWS = 13;
@@ -174,11 +173,9 @@ function draw_enemy(ctx, enemy) {
     const r = (GRID_SIZE / 2) * 0.7;
     const angle = enemy.rotation;
     Draw.triangle(ctx, pos.x, pos.y, r, angle, enemy.color, "#000000");
-    if (enemy.healthbar === null) {
-        enemy.healthbar = new HealthBar(0, 0, GRID_SIZE * 0.75, GRID_SIZE / 10);
+    if (enemy.health < enemy.max_health) {
+        Draw.healthbar(ctx, pos.x, pos.y - GRID_SIZE / 2, GRID_SIZE * 0.75, GRID_SIZE / 10, enemy.health, enemy.max_health);
     }
-    enemy.healthbar.set_position(pos.x, pos.y - GRID_SIZE / 2);
-    enemy.healthbar.draw(ctx);
 }
 
 function draw_enemies(ctx) {
