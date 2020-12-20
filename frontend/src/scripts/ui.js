@@ -358,6 +358,9 @@ class HealthBar extends UIRect {
     }
 
     draw(ctx) {
+        if (this.ratio >= 1.0) {
+            return;
+        }
         super.draw(ctx);
         this.remaining.w = this.ratio * this.w;
         if (this.ratio > 0.8) {
