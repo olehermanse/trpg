@@ -129,6 +129,7 @@ class Enemy {
     this.r = r;
     this.color = "#ff0000";
     this.rotation = 0;
+    this.target_rotation = 0;
     this.health = 100.0;
     this.max_health = this.health;
     this.path = path;
@@ -140,6 +141,11 @@ class Enemy {
     this.reward = 1;
     this.delay = 1.0;
   }
+
+  effective_speed() {
+    return this.speed * (1 - this.slow * 0.5);
+  }
+
   tick(ms) {
     const sec = (ms / 1000.0);
     this.slow_time -= sec;
@@ -151,7 +157,11 @@ class Enemy {
       this.slow = 1.0;
     }
 
-    const speed = this.speed * (1 - this.slow * 0.5);
+    if (this.rotation != this.target_rotation) {
+      return this.update_rotation(ms);
+    }
+
+    const speed = this.effective_speed();
     const step = speed * sec;
     if (this.path_index >= this.path.length) {
       this.path_index = this.path.length - 1;
@@ -166,10 +176,10 @@ class Enemy {
       this.c += step * Math.sign(dx);
       this.travelled += step;
       if (Math.sign(dx) > 0.0) {
-        this.rotation = 0.0;
+        this.target_rotation = 0.0;
       }
       else {
-        this.rotation = Math.PI;
+        this.target_rotation = Math.PI;
       }
     }
     else {
@@ -179,14 +189,35 @@ class Enemy {
       this.r += step * Math.sign(dy);
       this.travelled += step;
       if (Math.sign(dy) > 0.0) {
-        this.rotation = 3 * Math.PI / 2;
+        this.target_rotation = 3 * Math.PI / 2;
       }
       else {
-        this.rotation = Math.PI / 2;
+        this.target_rotation = Math.PI / 2;
       }
     }
     else {
       this.r = target.r;
+    }
+  }
+  update_rotation(ms){
+    console.assert(this.rotation != this.target_rotation);
+    const sec = ms / 1000;
+    const speed = this.effective_speed() * 2.0 * 2 * Math.PI;
+    const step = speed * sec;
+    const delta = this.target_rotation - this.rotation;
+    let difference = Math.abs(delta);
+    let direction = Math.sign(delta);
+    if (difference > Math.PI) {
+      difference = 2 * Math.PI - difference;
+      direction = -1 * direction;
+    }
+    if (difference <= step) {
+      this.rotation = this.target_rotation;
+      return;
+    }
+    this.rotation += step * direction;
+    if (this.rotation < 0) {
+      this.rotation += 2 * Math.PI;
     }
   }
 }
