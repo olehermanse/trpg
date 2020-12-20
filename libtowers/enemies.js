@@ -125,18 +125,40 @@ class Boss extends Enemy {
 }
 
 class Enemies {
+  static specific(mob, n, c, r, path) {
+    let enemies = [];
+    for (let i = 0; i < n; ++i) {
+      enemies.push(new mob(c, r, path));
+    }
+    return enemies;
+  }
+
   static non_bosses(c, r, level, path) {
+    switch (level) {
+      case 1:
+      case 2:
+        return this.specific(Enemy, 1, c, r, path);
+      case 3:
+        return this.specific(Enemy, 2, c, r, path);
+      default:
+        break;
+    }
+    let enemy_types = [Enemy, Speedy];
+    let weak = enemy_types[0];
+    let strong = enemy_types[1];
     let enemies = [];
 
-    const speedies = (level - 5);
-    for (let i = 0; i < speedies; ++i) {
-      enemies.push(new Speedy(c, r, path));
+    if (strong != null) {
+      const strong_enemies = (level - 5);
+      for (let i = 0; i < strong_enemies; ++i) {
+        enemies.push(new strong(c, r, path));
+      }
     }
 
-    if (level <= 15) {
-      let basics = limit(1, level * 2 - 4, 12);
-      for (let i = 0; i < basics; ++i) {
-        enemies.push(new Enemy(c, r, path));
+    if (weak != null) {
+      const weak_enemies = (level > 15) ? 0 : limit(1, level * 2 - 4, 12);
+      for (let i = 0; i < weak_enemies; ++i) {
+        enemies.push(new weak(c, r, path));
       }
     }
 
@@ -145,14 +167,8 @@ class Enemies {
   }
 
   static bosses(c, r, level, path) {
-    let enemies = [];
-
     const bosses = (level / 10) ** 2;
-    for (let i = 0; i < bosses; ++i) {
-      enemies.push(new Boss(c, r, path));
-    }
-
-    return enemies;
+    return this.specific(Boss, bosses, c, r, path);
   }
 
   static create(c, r, level, path) {
