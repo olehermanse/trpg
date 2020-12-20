@@ -2,6 +2,11 @@ const { grid } = require("./draw.js");
 const Draw = require("./draw.js");
 const Tower = require("../../../libtowers/libtowers.js").Tower;
 
+const green = "#00ff00";
+const yellow = "#ffff00";
+const orange = "#ff8800";
+const red = "#ff0000";
+
 function xy(x, y) {
     return { "x": x, "y": y };
 }
@@ -335,43 +340,43 @@ class UI extends UIRect {
     }
 }
 
+function draw_healthbar(ctx, x, y, w, h, ratio) {
+    Draw.rectangle(ctx, x, y, w, h, "#ffffff", "#666666");
+    let color = null;
+    if (ratio > 0.8) {
+        color = green;
+    } else if (ratio >= 0.5) {
+        color = yellow;
+    } else if (ratio >= 0.33) {
+        color = orange;
+    } else {
+        color = red;
+    }
+    Draw.rectangle(ctx, x, y, w * ratio, h, color, null);
+}
+
+function draw_healthbar_centered(ctx, x, y, w, h, ratio) {
+    draw_healthbar(ctx, x - w / 2, y - h / 2, w, h, ratio);
+}
+
 class HealthBar extends UIRect {
     constructor(x, y, w, h) {
         x -= w / 2;
         y -= h / 2;
-        super(x, y, w, h, "#ffffff", "#666666");
-        this.green = "#00ff00";
-        this.yellow = "#ffff00";
-        this.orange = "#ff8800";
-        this.red = "#ff0000";
-
+        super(x, y, w, h, null, null);
         this.ratio = 1.0;
-        this.remaining = new UIRect(x, y, w, h, null, null);
-        this.children.push(this.remaining);
     }
 
     set_position(x, y) {
         this.x = x - this.w / 2;
         this.y = y - this.h / 2;
-        this.remaining.x = this.x;
-        this.remaining.y = this.y;
     }
 
     draw(ctx) {
         if (this.ratio >= 1.0) {
             return;
         }
-        super.draw(ctx);
-        this.remaining.w = this.ratio * this.w;
-        if (this.ratio > 0.8) {
-            this.remaining.fill = this.green;
-        } else if (this.ratio >= 0.5) {
-            this.remaining.fill = this.yellow;
-        } else if (this.ratio >= 0.33) {
-            this.remaining.fill = this.orange;
-        } else {
-            this.remaining.fill = this.red;
-        }
+        draw_healthbar(ctx, this.x, this.y, this.w, this.h, this.ratio);
     }
 }
 
