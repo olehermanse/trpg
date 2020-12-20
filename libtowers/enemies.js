@@ -1,6 +1,7 @@
 const { limit } = require("./utils.js");
 
 class Enemy {
+  reward = 1;
   constructor(c, r, path) {
     this.c = c;
     this.r = r;
@@ -15,7 +16,6 @@ class Enemy {
     this.slow_time = 0.0;
     this.speed = 1.0;
     this.travelled = 0.0;
-    this.reward = 1;
     this.delay = 1.0;
   }
 
@@ -101,11 +101,11 @@ class Enemy {
 }
 
 class Speedy extends Enemy {
+  reward = 4;
   constructor(c, r, path) {
     super(c, r, path);
     this.speed = this.speed * 2;
     this.color = "#ffff00";
-    this.reward = 4;
     this.health = 150.0;
     this.max_health = this.health;
     this.delay = this.delay / 2;
@@ -113,11 +113,11 @@ class Speedy extends Enemy {
 }
 
 class Boss extends Enemy {
+  reward = 10;
   constructor(c, r, path) {
     super(c, r, path);
     this.speed = this.speed / 2;
     this.color = "#000000";
-    this.reward = 10;
     this.health = 4000.0;
     this.max_health = this.health;
     this.delay = this.delay * 2;

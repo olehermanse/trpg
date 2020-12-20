@@ -38,7 +38,11 @@ gulp.task("scripts", function () {
   });
 
   return b
-    .transform("babelify", { presets: ["@babel/preset-env"] })
+    .transform(
+      "babelify", {
+      presets: ["@babel/preset-env"],
+      plugins: ["@babel/plugin-proposal-class-properties"]
+    })
     .bundle()
     .pipe(source("main.js"))
     .pipe(buffer())
