@@ -165,29 +165,20 @@ class Enemies {
     return enemies;
   }
 
-  static non_bosses(c, r, level, path) {
-    switch (level) {
-      case 1:
-      case 2:
-        return this.specific(Enemy, 1, c, r, path);
-      case 3:
-        return this.specific(Enemy, 2, c, r, path);
-      default:
-        break;
-    }
+  static create(c, r, level, path) {
     let few = null;
     let many = null;
     if (level <= 2) {
       return this.specific(Enemy, 1, c, r, path);
     } else if (level == 3) {
       return this.specific(Enemy, 2, c, r, path);
-    } else if (level < 5) {
-      few = Enemy;
-    } else if (level == 10) {
-      return this.specific(Boss, 1, c, r, path);
+    } else if (level == 4) {
+      return this.specific(Enemy, 4, c, r, path);
     } else if (level < 10) {
       few = Speedy;
       many = Enemy;
+    } else if (level == 10) {
+      return this.specific(Boss, 1, c, r, path);
     } else if (level < 15) {
       many = Speedy;
     } else if (level == 20) {
@@ -205,39 +196,26 @@ class Enemies {
       few = Mega;
     } else if (level < 40) {
       many = Mega;
-    } else if (level < 45) {
-      few = Mega;
-      many = Mega;
     } else {
       return this.specific(Mega, level, c, r, path);
     }
+
+    console.assert((level % 10) != 0);
     let enemies = [];
     if (few != null) {
-      let n = (level % 5) + 1;
+      let n = 2 * (level % 5);
+      if (n === 0) {
+        n = 1;
+      }
       enemies.push(...this.specific(few, n, c, r, path));
     }
     if (many != null) {
-      let n = level % 10;
-      if (n === 0) {
-        n += 10;
-      }
-      enemies.push(...this.specific(many, 2 * (level % 10), c, r, path));
+      let n = 8 + 2 * (level % 10);
+      enemies.push(...this.specific(many, n, c, r, path));
     }
 
     enemies.reverse();
     return enemies;
-  }
-
-  static bosses(c, r, level, path) {
-    const bosses = (level / 10) ** 2;
-    return this.specific(Boss, bosses, c, r, path);
-  }
-
-  static create(c, r, level, path) {
-    if (level % 10 === 0) {
-      return this.bosses(c, r, level, path);
-    }
-    return this.non_bosses(c, r, level, path);
   }
 }
 
