@@ -363,6 +363,7 @@ function setup_events(canvas) {
     });
 
     document.addEventListener('keydown', (event) => {
+        event.preventDefault();
         key_down(event.key);
     }, false);
 
