@@ -334,27 +334,27 @@ function setup_events(canvas) {
     ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
     ui.add_tower_button("bank", draw_bank, on_bank_click).hide();
 
-    canvas.addEventListener('mousedown', e => {
+    canvas.addEventListener("mousedown", e => {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_click(x, y);
         mouse_move(x, y);
     });
 
-    canvas.addEventListener('mousemove', e => {
+    canvas.addEventListener("mousemove", e => {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_move(x, y);
     });
 
-    window.addEventListener('mouseup', e => {
+    window.addEventListener("mouseup", e => {
         const x = offset_to_canvas(e.offsetX, canvas);
         const y = offset_to_canvas(e.offsetY, canvas);
         mouse_release(x, y);
         mouse_move(x, y);
     });
 
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener("keydown", (event) => {
         if (event.key === " ") {
             // Prevent spacebar from scrolling page
             event.preventDefault();
@@ -362,7 +362,7 @@ function setup_events(canvas) {
         key_down(event.key);
     }, false);
 
-    document.addEventListener('keyup', (event) => {
+    document.addEventListener("keyup", (event) => {
         key_up(event.key);
     }, false);
 }
@@ -389,7 +389,7 @@ function tick(ms) {
 }
 
 function start(canvas) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     canvas.setAttribute("width", CANVAS_WIDTH);
     canvas.setAttribute("height", CANVAS_HEIGHT);
     setup_events(canvas);

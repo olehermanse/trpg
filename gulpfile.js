@@ -54,13 +54,13 @@ gulp.task("html", function () {
     rootpath: path.resolve("frontend/dist"),
   };
 
-  return gulp.src('./frontend/src/index.html')
+  return gulp.src("./frontend/src/index.html")
     .pipe(inlinesource(options))
-    .pipe(gulp.dest('./frontend/dist'));
+    .pipe(gulp.dest("./frontend/dist"));
 });
 
-gulp.task('copy', function (done) {
-  gulp.src('./frontend/src/favicon.ico')
-    .pipe(gulp.dest('./frontend/dist/'));
+gulp.task("copy", function (done) {
+  gulp.src("./frontend/src/favicon.ico")
+    .pipe(gulp.dest("./frontend/dist/"));
   done();
 });
