@@ -335,6 +335,44 @@ class UI extends UIRect {
     }
 }
 
+class HealthBar extends UIRect {
+    constructor(x, y, w, h) {
+        x -= w / 2;
+        y -= h / 2;
+        super(x, y, w, h, "#ffffff", "#666666");
+        this.green = "#00ff00";
+        this.yellow = "#ffff00";
+        this.orange = "#ff8800";
+        this.red = "#ff0000";
+
+        this.ratio = 1.0;
+        this.remaining = new UIRect(x, y, w, h, null, null);
+        this.children.push(this.remaining);
+    }
+
+    set_position(x, y) {
+        this.x = x - this.w / 2;
+        this.y = y - this.h / 2;
+        this.remaining.x = this.x;
+        this.remaining.y = this.y;
+    }
+
+    draw_self(ctx) {
+        super.draw_self(ctx);
+        this.remaining.w = this.ratio * this.w;
+        if (this.ratio > 0.8) {
+            this.remaining.fill = this.green;
+        } else if (this.ratio >= 0.5) {
+            this.remaining.fill = this.yellow;
+        } else if (this.ratio >= 0.33) {
+            this.remaining.fill = this.orange;
+        } else {
+            this.remaining.fill = this.red;
+        }
+    }
+}
+
 module.exports = {
     UI,
+    HealthBar,
 };

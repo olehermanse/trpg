@@ -130,6 +130,7 @@ class Enemy {
     this.color = "#ff0000";
     this.rotation = 0;
     this.health = 100.0;
+    this.max_health = this.health;
     this.path = path;
     this.path_index = 0;
     this.slow = 0.0;
@@ -138,8 +139,12 @@ class Enemy {
     this.travelled = 0.0;
     this.reward = 1;
     this.delay = 1.0;
+    this.healthbar = null;
   }
   tick(ms) {
+    if (this.healthbar != null) {
+      this.healthbar.ratio = this.health / this.max_health;
+    }
     const sec = (ms / 1000.0);
     this.slow_time -= sec;
     if (this.slow_time < 0.0) {
@@ -197,6 +202,7 @@ class Speedy extends Enemy {
     this.color = "#ffff00";
     this.reward = 4;
     this.health = 150.0;
+    this.max_health = this.health;
     this.delay = this.delay / 2;
   }
 }
@@ -208,6 +214,7 @@ class Boss extends Enemy {
     this.color = "#000000";
     this.reward = 10;
     this.health = 4000.0;
+    this.max_health = this.health;
     this.delay = this.delay * 2;
   }
 }
