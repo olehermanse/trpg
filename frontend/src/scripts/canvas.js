@@ -1,7 +1,7 @@
-const Game = require("../../../libtowers/libtowers.js").Game;
-const Tower = require("../../../libtowers/libtowers.js").Tower;
+const { Game, Tower } = require("../../../libtowers/libtowers.js");
+const { xy, fill_stroke } = require("../../../libtowers/utils.js");
 const Draw = require("./draw.js");
-const UI = require("./ui.js").UI;
+const { UI } = require("./ui.js");
 
 const COLUMNS = 20;
 const ROWS = 13;
@@ -41,10 +41,6 @@ function canvas_to_grid_int(p, offset = 0) {
     return Math.floor((p - offset) / GRID_SIZE);
 }
 
-function xy(x, y) {
-    return { "x": x, "y": y };
-}
-
 function grid_to_canvas(p, offset=0) {
     if (p === null) {
         return p;
@@ -57,10 +53,6 @@ function grid_to_canvas(p, offset=0) {
 
 function offset_to_canvas(p, canvas) {
     return (p / canvas.getBoundingClientRect().width) * WIDTH;
-}
-
-function fill_stroke(f, s) {
-    return { "fill": f, "stroke": s };
 }
 
 function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {

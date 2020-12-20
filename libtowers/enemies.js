@@ -1,12 +1,4 @@
-function limit(min, x, max) {
-  if (x < min) {
-    return min;
-  }
-  if (x > max) {
-    return max;
-  }
-  return x;
-}
+const { limit } = require("./utils.js");
 
 class Enemy {
   constructor(c, r, path) {

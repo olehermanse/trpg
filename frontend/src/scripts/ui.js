@@ -1,10 +1,7 @@
 const { grid } = require("./draw.js");
+const { xy } = require("../../../libtowers/utils.js");
 const Draw = require("./draw.js");
-const Tower = require("../../../libtowers/libtowers.js").Tower;
-
-function xy(x, y) {
-    return { "x": x, "y": y };
-}
+const { Tower } = require("../../../libtowers/libtowers.js");
 
 class UIRect {
     constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0) {

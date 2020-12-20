@@ -1,28 +1,5 @@
-const Enemies = require("./enemies.js").Enemies;
-
-function get_rotation(a, b) {
-  const rot = Math.atan2(a.r - b.r, b.c - a.c);
-  if (rot > 0.0) {
-    return rot;
-  }
-  return rot + 2 * Math.PI;
-}
-
-function seconds(ms) {
-  return (ms / 1000);
-}
-
-function dps(dps, ms) {
-  return dps * seconds(ms);
-}
-
-function distance(a, b) {
-  return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
-}
-
-function position(c, r) {
-  return { "c": c, "r": r };
-}
+const { Enemies } = require("./enemies.js");
+const { get_rotation, seconds, dps, distance, position } = require("./utils.js");
 
 class Tower {
   constructor(c, r, name, price, draw = null) {
