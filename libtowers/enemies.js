@@ -1,7 +1,7 @@
 const { limit } = require("./utils.js");
 
 class Enemy {
-  static cost = 1;
+  static cost = 2;
 
   reward() {
     return this.__proto__.constructor.cost;
