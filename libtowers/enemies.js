@@ -165,7 +165,7 @@ class Enemies {
     return enemies;
   }
 
-  static create(c, r, level, path) {
+  static create(c, r, level, lives, path) {
     let few = null;
     let many = null;
     if (level <= 2) {
@@ -204,7 +204,12 @@ class Enemies {
     let enemies = [];
     if (few != null) {
       let n = 2 * (level % 5);
-      if (n === 0) {
+      if (lives === 2) {
+        n -= 1;
+      } else if (lives === 1) {
+        n -= 2;
+      }
+      if (n <= 0) {
         n = 1;
       }
       enemies.push(...this.specific(few, n, c, r, path));

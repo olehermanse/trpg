@@ -419,7 +419,7 @@ class Game {
     console.assert(this.on_victory != null);
     console.assert(this.remaining.length === 0);
 
-    this.remaining = Enemies.create(this.spawn.c - 1, this.spawn.r, this.level, this.path);
+    this.remaining = Enemies.create(this.spawn.c - 1, this.spawn.r, this.level, this.lives, this.path);
     this.paused = false;
     this.delay = 0.0;
   }
