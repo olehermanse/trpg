@@ -182,7 +182,7 @@ class Enemies {
     } else if (level < 15) {
       many = Speedy;
     } else if (level == 20) {
-      return this.specific(Boss, 4, c, r, path);
+      return this.specific(Boss, 8, c, r, path);
     } else if (level < 20) {
       few = Purple;
     } else if (level < 25) {
