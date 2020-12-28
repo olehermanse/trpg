@@ -14,15 +14,15 @@ class Tower {
     this.range = null;
     if (this.name === "gun") {
       this.charge_time = 0.3;
-      this.dps = 25;
+      this.dps = 50;
       this.range = 3.0;
     } else if (this.name === "laser") {
       this.charge_time = 1.0;
-      this.dps = 50;
+      this.dps = 100;
       this.range = 4.0;
     } else if (this.name === "slow") {
       this.charge_time = 1.0;
-      this.dps = 5;
+      this.dps = 10;
       this.slow = 1.0;
       this.range = 2.0;
     }

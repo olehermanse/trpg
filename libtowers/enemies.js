@@ -19,9 +19,9 @@ class Enemy {
     this.path_index = 0;
     this.slow = 0.0;
     this.slow_time = 0.0;
-    this.speed = 1.0;
+    this.speed = 2.0;
     this.travelled = 0.0;
-    this.delay = 1.0;
+    this.delay = 1.0 / this.speed;
   }
 
   effective_speed() {

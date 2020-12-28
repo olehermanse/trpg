@@ -399,7 +399,6 @@ function start(canvas) {
         if (space_pressed) {
             tick(ms);
             tick(ms);
-            tick(ms);
         }
         draw(ctx);
     }, ms)
