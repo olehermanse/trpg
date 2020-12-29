@@ -1,5 +1,5 @@
 const { Game, Tower } = require("../../../libtowers/libtowers.js");
-const { xy, fill_stroke } = require("../../../libtowers/utils.js");
+const { xy, fill_stroke, number_string } = require("../../../libtowers/utils.js");
 const Draw = require("./draw.js");
 const { UI } = require("./ui.js");
 
@@ -14,14 +14,6 @@ const bright_purple = "rgb(255,0,255)";
 const dark_purple = "rgb(128,0,128)";
 
 let canvas_manager = null;
-
-function number_string(num) {
-    const s = "" + num;
-    if (s.includes("e")) {
-        return s;
-    }
-    return Number(num).toLocaleString("no");
-}
 
 function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {
     const r = (s / 2) * 0.7;
