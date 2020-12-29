@@ -112,26 +112,6 @@ function select(btn) {
     }
 }
 
-function on_rock_click(btn) {
-    select(btn);
-}
-
-function on_gun_click(btn) {
-    select(btn);
-}
-
-function on_slow_click(btn) {
-    select(btn);
-}
-
-function on_laser_click(btn) {
-    select(btn);
-}
-
-function on_bank_click(btn) {
-    select(btn);
-}
-
 class CanvasManager {
     constructor(columns=20, rows=13, width=1200) {
         this.columns = columns;
@@ -343,11 +323,11 @@ class CanvasManager {
         this.ui.start_button.on_click = on_start_click;
         this.game.on_victory = on_victory;
 
-        this.ui.add_tower_button("rock", draw_rock, on_rock_click).hide();
-        select(this.ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
-        this.ui.add_tower_button("slow", draw_slow_tower, on_slow_click).hide();
-        this.ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
-        this.ui.add_tower_button("bank", draw_bank, on_bank_click).hide();
+        this.ui.add_tower_button("rock", draw_rock, select).hide();
+        select(this.ui.add_tower_button("gun", draw_gun_tower, select));
+        this.ui.add_tower_button("slow", draw_slow_tower, select).hide();
+        this.ui.add_tower_button("laser", draw_laser_tower, select).hide();
+        this.ui.add_tower_button("bank", draw_bank, select).hide();
 
         canvas.addEventListener("mousedown", e => {
             const x = this.offset_to_canvas(e.offsetX, canvas);
