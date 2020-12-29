@@ -3,19 +3,6 @@ const { xy, fill_stroke } = require("../../../libtowers/utils.js");
 const Draw = require("./draw.js");
 const { UI } = require("./ui.js");
 
-const COLUMNS = 20;
-const ROWS = 13;
-const CANVAS_WIDTH = 1200;
-
-const GRID_WIDTH = CANVAS_WIDTH;
-const GRID_SIZE = GRID_WIDTH / COLUMNS;
-const GRID_START = GRID_SIZE;
-const WIDTH = CANVAS_WIDTH;
-
-const GRID_HEIGHT = ROWS * GRID_SIZE;
-const GRID_END = GRID_START + GRID_HEIGHT;
-const CANVAS_HEIGHT = GRID_END + GRID_SIZE;
-
 const FG = "rgb(256,256,256)";
 const BG = "rgb(16,16,16)";
 const black = BG;
@@ -26,33 +13,14 @@ const grey = "rgb(200,200,200)";
 const bright_purple = "rgb(255,0,255)";
 const dark_purple = "rgb(128,0,128)";
 
-const game = new Game(COLUMNS, ROWS);
-const UI_X = 0;
-const UI_Y = GRID_END - GRID_SIZE;
-const UI_W = WIDTH;
-const UI_H = GRID_SIZE * 2;
-const UI_C = FG;
-const ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, GRID_SIZE);
-let space_pressed = false;
+let canvas_manager = null;
 
-let preview = null;
-
-function canvas_to_grid_int(p, offset = 0) {
-    return Math.floor((p - offset) / GRID_SIZE);
-}
-
-function grid_to_canvas(p, offset=0) {
-    if (p === null) {
-        return p;
+function number_string(num) {
+    const s = "" + num;
+    if (s.includes("e")) {
+        return s;
     }
-    if (isNaN(p)) {
-        return xy(grid_to_canvas(p.c), grid_to_canvas(p.r, GRID_START));
-    }
-    return (offset + p * GRID_SIZE + GRID_SIZE / 2);
-}
-
-function offset_to_canvas(p, canvas) {
-    return (p / canvas.getBoundingClientRect().width) * WIDTH;
+    return Number(num).toLocaleString("no");
 }
 
 function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {
@@ -105,174 +73,9 @@ function draw_bank(ctx, t, target = null) {
     Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", black, 4);
 }
 
-function draw_tower(ctx, tower) {
-    const t = grid_to_canvas(tower);
-    t.w = GRID_SIZE;
-    t.rotation = tower.rotation;
-    t.intensity = tower.intensity;
-    const target = grid_to_canvas(tower.target);
-    tower.draw(ctx, t, target);
-}
-
-function draw_towers(ctx) {
-    for (let tower of game.towers) {
-        draw_tower(ctx, tower);
-    }
-}
-
-function draw_wall(ctx, c, r) {
-    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, BG);
-}
-
-function draw_path(ctx, c, r) {
-    const color = "rgba(200,200,200,0.5)";
-    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
-}
-
-function draw_spawn(ctx, c, r) {
-    const color = "rgba(0,128,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
-}
-
-function draw_goal(ctx, c, r) {
-    const color = "rgba(200,200,0,1)";
-    Draw.rectangle(ctx, c * GRID_SIZE, GRID_START + r * GRID_SIZE, GRID_SIZE, GRID_SIZE, color);
-}
-
-function draw_tile(ctx, c, r) {
-    const tile = game.tiles[c][r];
-    if (tile === "wall") {
-        draw_wall(ctx, c, r)
-    } else if (tile === "path") {
-        draw_path(ctx, c, r);
-    } else if (tile === "spawn") {
-        draw_spawn(ctx, c, r);
-    } else if (tile === "goal") {
-        draw_goal(ctx, c, r);
-    }
-}
-
-function draw_tiles(ctx) {
-    for (let c = 0; c < COLUMNS; ++c) {
-        for (let r = 0; r < ROWS; ++r) {
-            draw_tile(ctx, c, r);
-        }
-    }
-}
-
-function draw_enemy(ctx, enemy) {
-    const pos = grid_to_canvas(enemy);
-    const r = (GRID_SIZE / 2) * 0.7;
-    const angle = enemy.rotation;
-    Draw.triangle(ctx, pos.x, pos.y, r, angle, enemy.color, "#000000");
-    if (enemy.health < enemy.max_health) {
-        Draw.healthbar(ctx, pos.x, pos.y - GRID_SIZE / 2, GRID_SIZE * 0.75, GRID_SIZE / 10, enemy.health, enemy.max_health);
-    }
-}
-
-function draw_enemies(ctx) {
-    for (let enemy of game.enemies) {
-        draw_enemy(ctx, enemy);
-    }
-}
-
-function draw_preview(ctx) {
-    if (preview === null) {
-        return;
-    }
-    ctx.globalAlpha = 0.3;
-    let pos = grid_to_canvas(preview);
-    let r = GRID_SIZE * preview.range;
-    Draw.circle(ctx, pos.x, pos.y, r, null, "black");
-    draw_tower(ctx, preview);
-    ctx.globalAlpha = 1.0;
-}
-
-function draw(ctx) {
-    // Background:
-    Draw.rectangle(ctx, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, BG);
-
-    if (game.lives <= 0) {
-        Draw.text(ctx, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, "Game over", FG, CANVAS_HEIGHT / 5);
-        return;
-    }
-
-    // Grid:
-    Draw.rectangle(ctx, 0, GRID_START, GRID_WIDTH, GRID_HEIGHT, FG);
-    Draw.grid(ctx, GRID_SIZE, 0, GRID_START, WIDTH, GRID_HEIGHT);
-    // Game elements:
-    draw_tiles(ctx);
-    draw_towers(ctx);
-    draw_enemies(ctx);
-    // UI:
-    draw_preview(ctx);
-    Draw.rectangle(ctx, 0, 0, WIDTH, GRID_START, BG);
-    ui.draw(ctx);
-}
-
-function mouse_click(x, y) {
-    const name = ui.selected.name;
-    const tower = game.grid_click(canvas_to_grid_int(x), canvas_to_grid_int(y, GRID_START), name);
-    if (tower != null) {
-        tower.draw = ui.selected.icon;
-        if (tower.name === "bank") {
-            ui.selected.price.text = game.price("bank");
-        }
-    }
-    ui.click(x, y);
-}
-
-function mouse_move(x, y) {
-    ui.hover(x, y);
-    let c = canvas_to_grid_int(x);
-    let r = canvas_to_grid_int(y, GRID_START);
-    let name = ui.selected.name;
-
-    if (!game.can_place(c, r, name)) {
-        preview = null;
-        return;
-    }
-
-    if (preview === null) {
-        preview = new Tower(c, r, name, game.price(name), ui.selected.icon);
-    } else {
-        preview.r = r;
-        preview.c = c;
-    }
-}
-
-function mouse_release(x, y) {
-    ui.release(x, y);
-}
-
-function key_down(key) {
-    if (key === "å") {
-        for (let b of ui.tower_buttons) {
-            b.show();
-        }
-        game.level = 10;
-        game.money = 10000;
-    }
-    if (key === " ") {
-        if (!space_pressed && game.paused) {
-            on_start_click();
-        }
-        space_pressed = true;
-    }
-}
-
-function key_up(key) {
-    if (key === " ") {
-        space_pressed = false;
-    }
-}
-
-function on_start_click() {
-    game.start();
-    ui.start_button.transition("disabled");
-}
-
 function on_victory() {
+    const ui = canvas_manager.ui;
+    const game = canvas_manager.game;
     ui.start_button.transition("active");
     switch (game.level) {
         case 2:
@@ -292,12 +95,17 @@ function on_victory() {
     }
 }
 
+function on_start_click() {
+    canvas_manager.game.start();
+    canvas_manager.ui.start_button.transition("disabled");
+}
+
 function select(btn) {
-    ui.selected = btn;
+    canvas_manager.ui.selected = btn;
     if (btn.state != "selected") {
         btn.transition("selected");
     }
-    for (let button of ui.tower_buttons) {
+    for (let button of canvas_manager.ui.tower_buttons) {
         if (button != btn && button.state === "selected") {
             button.transition("active");
         }
@@ -324,83 +132,284 @@ function on_bank_click(btn) {
     select(btn);
 }
 
-function setup_events(canvas) {
-    ui.start_button.on_click = on_start_click;
-    game.on_victory = on_victory;
+class CanvasManager {
+    constructor(columns=20, rows=13, width=1200) {
+        this.columns = columns;
+        this.rows = rows;
+        this.width = width;
 
-    ui.add_tower_button("rock", draw_rock, on_rock_click).hide();
-    select(ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
-    ui.add_tower_button("slow", draw_slow_tower, on_slow_click).hide();
-    ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
-    ui.add_tower_button("bank", draw_bank, on_bank_click).hide();
+        this.canvas_width = width;
+        this.grid_width = width;
 
-    canvas.addEventListener("mousedown", e => {
-        const x = offset_to_canvas(e.offsetX, canvas);
-        const y = offset_to_canvas(e.offsetY, canvas);
-        mouse_click(x, y);
-        mouse_move(x, y);
-    });
+        this.grid_size = this.grid_width / this.columns;
+        this.grid_start = this.grid_size;
 
-    canvas.addEventListener("mousemove", e => {
-        const x = offset_to_canvas(e.offsetX, canvas);
-        const y = offset_to_canvas(e.offsetY, canvas);
-        mouse_move(x, y);
-    });
+        this.grid_height = this.rows * this.grid_size;
+        this.grid_end = this.grid_start + this.grid_height;
+        this.canvas_height = this.grid_end + this.grid_size;
 
-    window.addEventListener("mouseup", e => {
-        const x = offset_to_canvas(e.offsetX, canvas);
-        const y = offset_to_canvas(e.offsetY, canvas);
-        mouse_release(x, y);
-        mouse_move(x, y);
-    });
+        this.game = new Game(this.columns, this.rows);
+        const UI_X = 0;
+        const UI_Y = this.grid_end - this.grid_size;
+        const UI_W = this.width;
+        const UI_H = this.grid_size * 2;
+        const UI_C = FG;
+        this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size);
+        this.space_pressed = false;
+        this.preview = null;
+    }
 
-    document.addEventListener("keydown", (event) => {
-        if (event.key === " ") {
-            // Prevent spacebar from scrolling page
-            event.preventDefault();
+    canvas_to_grid_int(p, offset = 0) {
+        return Math.floor((p - offset) / this.grid_size);
+    }
+
+    grid_to_canvas(p, offset=0) {
+        if (p === null) {
+            return p;
         }
-        key_down(event.key);
-    }, false);
-
-    document.addEventListener("keyup", (event) => {
-        key_up(event.key);
-    }, false);
-}
-
-function number_string(num) {
-    const s = "" + num;
-    if (s.includes("e")) {
-        return s;
+        if (isNaN(p)) {
+            return xy(this.grid_to_canvas(p.c), this.grid_to_canvas(p.r, this.grid_start));
+        }
+        return (offset + p * this.grid_size + this.grid_size / 2);
     }
-    return Number(num).toLocaleString("no");
-}
 
-function tick(ms) {
-    if (game.lives <= 0) {
-        return;
+    offset_to_canvas(p, canvas) {
+        return (p / canvas.getBoundingClientRect().width) * this.width;
     }
-    if (!game.paused) {
-        game.tick(ms);
+
+    draw_tower(ctx, tower) {
+        const t = this.grid_to_canvas(tower);
+        t.w = this.grid_size;
+        t.rotation = tower.rotation;
+        t.intensity = tower.intensity;
+        const target = this.grid_to_canvas(tower.target);
+        tower.draw(ctx, t, target);
     }
-    ui.interest.text = "+ " + number_string(game.reward()) + "";
-    ui.money.text = "$ " + number_string(game.money) + "";
-    ui.level.text = "Level: " + game.level;
-    ui.lives.text = "Lives: " + game.lives;
+
+    draw_towers(ctx) {
+        for (let tower of this.game.towers) {
+            this.draw_tower(ctx, tower);
+        }
+    }
+
+    draw_wall(ctx, c, r) {
+        Draw.rectangle(ctx, c * this.grid_size, this.grid_start + r * this.grid_size, this.grid_size, this.grid_size, BG);
+    }
+
+    draw_path(ctx, c, r) {
+        const color = "rgba(200,200,200,0.5)";
+        Draw.rectangle(ctx, c * this.grid_size, this.grid_start + r * this.grid_size, this.grid_size, this.grid_size, color);
+    }
+
+    draw_spawn(ctx, c, r) {
+        const color = "rgba(0,128,0,1)";
+        Draw.rectangle(ctx, c * this.grid_size, this.grid_start + r * this.grid_size, this.grid_size, this.grid_size, color);
+    }
+
+    draw_goal(ctx, c, r) {
+        const color = "rgba(200,200,0,1)";
+        Draw.rectangle(ctx, c * this.grid_size, this.grid_start + r * this.grid_size, this.grid_size, this.grid_size, color);
+    }
+
+    draw_tile(ctx, c, r) {
+        const tile = this.game.tiles[c][r];
+        if (tile === "wall") {
+            this.draw_wall(ctx, c, r)
+        } else if (tile === "path") {
+            this.draw_path(ctx, c, r);
+        } else if (tile === "spawn") {
+            this.draw_spawn(ctx, c, r);
+        } else if (tile === "goal") {
+            this.draw_goal(ctx, c, r);
+        }
+    }
+
+    draw_tiles(ctx) {
+        for (let c = 0; c < this.columns; ++c) {
+            for (let r = 0; r < this.rows; ++r) {
+                this.draw_tile(ctx, c, r);
+            }
+        }
+    }
+
+    draw_enemy(ctx, enemy) {
+        const pos = this.grid_to_canvas(enemy);
+        const r = (this.grid_size / 2) * 0.7;
+        const angle = enemy.rotation;
+        Draw.triangle(ctx, pos.x, pos.y, r, angle, enemy.color, "#000000");
+        if (enemy.health < enemy.max_health) {
+            Draw.healthbar(ctx, pos.x, pos.y - this.grid_size / 2, this.grid_size * 0.75, this.grid_size / 10, enemy.health, enemy.max_health);
+        }
+    }
+
+    draw_enemies(ctx) {
+        for (let enemy of this.game.enemies) {
+            this.draw_enemy(ctx, enemy);
+        }
+    }
+
+    draw_preview(ctx) {
+        if (this.preview === null) {
+            return;
+        }
+        ctx.globalAlpha = 0.3;
+        let pos = this.grid_to_canvas(this.preview);
+        let r = this.grid_size * this.preview.range;
+        Draw.circle(ctx, pos.x, pos.y, r, null, "black");
+        this.draw_tower(ctx, this.preview);
+        ctx.globalAlpha = 1.0;
+    }
+
+    draw(ctx) {
+        // Background:
+        Draw.rectangle(ctx, 0, 0, this.canvas_width, this.canvas_height, BG);
+
+        if (this.game.lives <= 0) {
+            Draw.text(ctx, this.canvas_width / 2, this.canvas_height / 2, "Game over", FG, this.canvas_height / 5);
+            return;
+        }
+
+        // Grid:
+        Draw.rectangle(ctx, 0, this.grid_start, this.grid_width, this.grid_height, FG);
+        Draw.grid(ctx, this.grid_size, 0, this.grid_start, this.width, this.grid_height);
+        // Game elements:
+        this.draw_tiles(ctx);
+        this.draw_towers(ctx);
+        this.draw_enemies(ctx);
+        // UI:
+        this.draw_preview(ctx);
+        Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
+        this.ui.draw(ctx);
+    }
+
+    mouse_click(x, y) {
+        const name = this.ui.selected.name;
+        const tower = this.game.grid_click(this.canvas_to_grid_int(x), this.canvas_to_grid_int(y, this.grid_start), name);
+        if (tower != null) {
+            tower.draw = this.ui.selected.icon;
+            if (tower.name === "bank") {
+                this.ui.selected.price.text = this.game.price("bank");
+            }
+        }
+        this.ui.click(x, y);
+    }
+
+    mouse_move(x, y) {
+        this.ui.hover(x, y);
+        let c = this.canvas_to_grid_int(x);
+        let r = this.canvas_to_grid_int(y, this.grid_start);
+        let name = this.ui.selected.name;
+
+        if (!this.game.can_place(c, r, name)) {
+            this.preview = null;
+            return;
+        }
+
+        if (this.preview === null) {
+            this.preview = new Tower(c, r, name, this.game.price(name), this.ui.selected.icon);
+        } else {
+            this.preview.r = r;
+            this.preview.c = c;
+        }
+    }
+
+    mouse_release(x, y) {
+        this.ui.release(x, y);
+    }
+
+    key_down(key) {
+        if (key === "å") {
+            for (let b of this.ui.tower_buttons) {
+                b.show();
+            }
+            this.game.level = 10;
+            this.game.money = 10000;
+        }
+        if (key === " ") {
+            if (!this.space_pressed && this.game.paused) {
+                on_start_click();
+            }
+            this.space_pressed = true;
+        }
+    }
+
+    key_up(key) {
+        if (key === " ") {
+            this.space_pressed = false;
+        }
+    }
+
+    setup_events(canvas) {
+        this.ui.start_button.on_click = on_start_click;
+        this.game.on_victory = on_victory;
+
+        this.ui.add_tower_button("rock", draw_rock, on_rock_click).hide();
+        select(this.ui.add_tower_button("gun", draw_gun_tower, on_gun_click));
+        this.ui.add_tower_button("slow", draw_slow_tower, on_slow_click).hide();
+        this.ui.add_tower_button("laser", draw_laser_tower, on_laser_click).hide();
+        this.ui.add_tower_button("bank", draw_bank, on_bank_click).hide();
+
+        canvas.addEventListener("mousedown", e => {
+            const x = this.offset_to_canvas(e.offsetX, canvas);
+            const y = this.offset_to_canvas(e.offsetY, canvas);
+            this.mouse_click(x, y);
+            this.mouse_move(x, y);
+        });
+
+        canvas.addEventListener("mousemove", e => {
+            const x = this.offset_to_canvas(e.offsetX, canvas);
+            const y = this.offset_to_canvas(e.offsetY, canvas);
+            this.mouse_move(x, y);
+        });
+
+        window.addEventListener("mouseup", e => {
+            const x = this.offset_to_canvas(e.offsetX, canvas);
+            const y = this.offset_to_canvas(e.offsetY, canvas);
+            this.mouse_release(x, y);
+            this.mouse_move(x, y);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === " ") {
+                // Prevent spacebar from scrolling page
+                event.preventDefault();
+            }
+            this.key_down(event.key);
+        }, false);
+
+        document.addEventListener("keyup", (event) => {
+            this.key_up(event.key);
+        }, false);
+    }
+
+    tick(ms) {
+        if (this.game.lives <= 0) {
+            return;
+        }
+        if (!this.game.paused) {
+            this.game.tick(ms);
+        }
+        this.ui.interest.text = "+ " + number_string(this.game.reward()) + "";
+        this.ui.money.text = "$ " + number_string(this.game.money) + "";
+        this.ui.level.text = "Level: " + this.game.level;
+        this.ui.lives.text = "Lives: " + this.game.lives;
+    }
 }
 
 function start(canvas) {
+    canvas_manager = new CanvasManager();
     const ctx = canvas.getContext("2d");
-    canvas.setAttribute("width", CANVAS_WIDTH);
-    canvas.setAttribute("height", CANVAS_HEIGHT);
-    setup_events(canvas);
+    canvas.setAttribute("width", canvas_manager.canvas_width);
+    canvas.setAttribute("height", canvas_manager.canvas_height);
+    canvas_manager.setup_events(canvas);
     const ms = 10;
     window.setInterval(() => {
-        tick(ms);
-        if (space_pressed) {
-            tick(ms);
-            tick(ms);
+        canvas_manager.tick(ms);
+        if (canvas_manager.space_pressed) {
+            canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
         }
-        draw(ctx);
+        canvas_manager.draw(ctx);
     }, ms)
 }
 
