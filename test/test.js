@@ -1,4 +1,5 @@
 const Game = require("../libtowers/libtowers.js").Game;
+const { number_string } = require("../libtowers/utils.js");
 
 var assert = require("assert");
 
@@ -119,5 +120,36 @@ describe("Game", function () {
       assert.strictEqual(game.can_afford("rock"), false);
       assert.strictEqual(game.can_afford("gun"), false);
     });
+  });
+});
+
+describe("number_string", function () {
+  it("inserts spaces", function () {
+    assert.strictEqual(number_string(1000), "1 000");
+    assert.strictEqual(number_string(123456), "123 456");
+    assert.strictEqual(number_string(999000), "999 000");
+    assert.strictEqual(number_string(1000000), "1 000 000");
+    assert.strictEqual(number_string(9999999), "9 999 999");
+  });
+  it("works for zero", function () {
+    assert.strictEqual(number_string(0), "0");
+  });
+  it("works for small numbers", function () {
+    assert.strictEqual(number_string(1), "1");
+    assert.strictEqual(number_string(2), "2");
+    assert.strictEqual(number_string(3), "3");
+    assert.strictEqual(number_string(99), "99");
+    assert.strictEqual(number_string(100), "100");
+    assert.strictEqual(number_string(999), "999");
+  });
+  it("works for negative numbers", function () {
+    assert.strictEqual(number_string(-1), "-1");
+    assert.strictEqual(number_string(-2), "-2");
+    assert.strictEqual(number_string(-3), "-3");
+    assert.strictEqual(number_string(-99), "-99");
+    assert.strictEqual(number_string(-100), "-100");
+    assert.strictEqual(number_string(-999), "-999");
+    assert.strictEqual(number_string(-1000), "-1 000");
+    assert.strictEqual(number_string(-9999), "-9 999");
   });
 });
