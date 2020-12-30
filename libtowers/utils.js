@@ -18,12 +18,26 @@ function dps(dps, ms) {
   return dps * seconds(ms);
 }
 
-function number_string(num) {
+function number_string(n) {
+    const num = Number(n);
+    if (num < 0) {
+      return "-" + number_string(-1 * num);
+    }
     const s = "" + num;
-    if (s.includes("e")) {
+    if (s.includes("e") || s.length <= 3) {
         return s;
     }
-    return Number(num).toLocaleString("no");
+
+    let result = "";
+    let length = 0;
+    for (let c of s.split("").reverse()) {
+      result += c;
+      length += 1;
+      if (length % 3 === 0) {
+        result += " ";
+      }
+    }
+    return result.split("").reverse().join("").trim();
 }
 
 function distance(a, b) {
