@@ -1,3 +1,3 @@
 (() => {
-  require("./canvas.js").start(document.getElementById("towers_canvas"));
+  require("./start.js").start(document.getElementById("towers_canvas"));
 })();
