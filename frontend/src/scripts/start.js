@@ -113,7 +113,8 @@ function select(btn) {
 }
 
 function start(canvas) {
-    canvas_manager = new CanvasManager();
+    const scale = window.devicePixelRatio;
+    canvas_manager = new CanvasManager(canvas, 20, 13, 1200, scale);
     const ctx = canvas.getContext("2d");
     canvas.setAttribute("width", canvas_manager.canvas_width);
     canvas.setAttribute("height", canvas_manager.canvas_height);

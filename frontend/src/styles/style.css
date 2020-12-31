@@ -17,8 +17,12 @@ a {
   text-decoration: none;
 }
 
-body > * {
+body > *,
+body > div > canvas {
   max-width: min(1200px, calc(100vw - 1em));
+}
+
+body > * {
   padding-left: 0.5em;
   padding-right: 0.5em;
   margin-left: auto;
@@ -26,13 +30,20 @@ body > * {
   margin-top: 10px;
 }
 
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+  body > *,
+  body > div > canvas {
+    max-width: min(900px, calc(100vw - 1em));
+  }
+}
+
 body > div > h1 {
   text-align: center;
-
 }
 
 body > div > canvas {
-  max-width: min(1200px, calc(100vw - 1em));
   margin-top: 1.0em;
   margin-bottom: 0.2em;
 }
