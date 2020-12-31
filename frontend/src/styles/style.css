@@ -44,6 +44,9 @@ screen and (orientation:portrait),
     padding-left: 0em;
     padding-right: 0em;
   }
+  h1 {
+    font-size: 40px;
+  }
 }
 
 body > div > h1 {
