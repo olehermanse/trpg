@@ -35,9 +35,7 @@ body > * {
 (min-resolution: 192dpi) {
   body > *,
   body > div > canvas {
-    max-width: min(900px, calc(100vw));
-    padding-left: 0em;
-    padding-right: 0em;
+    max-width: min(900px, calc(100vw - 1em));
   }
 }
 
