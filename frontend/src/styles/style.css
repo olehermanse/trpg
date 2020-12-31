@@ -36,6 +36,8 @@ body > * {
   body > *,
   body > div > canvas {
     max-width: min(900px, calc(100vw - 1em));
+    padding-left: 0em;
+    padding-right: 0em;
   }
 }
 
