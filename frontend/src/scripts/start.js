@@ -117,8 +117,8 @@ function start(canvas) {
     let rows = 13;
     let columns = 20;
     if (window.matchMedia("screen and (orientation:portrait), (max-width: 600px)").matches) {
-        rows = 17;
-        columns = 15;
+        rows = 14;
+        columns = 8;
         if (scale > 2.0) {
             scale = 2.0;
         }
