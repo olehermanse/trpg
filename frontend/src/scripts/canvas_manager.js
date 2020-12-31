@@ -140,7 +140,7 @@ class CanvasManager {
         Draw.rectangle(ctx, 0, 0, this.canvas_width, this.canvas_height, BG);
 
         if (this.game.lives <= 0) {
-            Draw.text(ctx, this.canvas_width / 2, this.canvas_height / 2, "Game over", FG, this.canvas_height / 5);
+            Draw.text(ctx, this.canvas_width / 2, this.canvas_height / 2, "Game over", FG, this.canvas_width / 10);
             return;
         }
 
