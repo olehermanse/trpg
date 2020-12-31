@@ -39,6 +39,17 @@ body > * {
   }
 }
 
+@media
+screen and (orientation:portrait),
+(max-width: 600px) {
+  body > *,
+  body > div > canvas {
+    max-width: 100vw;
+    padding-left: 0em;
+    padding-right: 0em;
+  }
+}
+
 body > div > h1 {
   text-align: center;
 }
