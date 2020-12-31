@@ -421,6 +421,7 @@ class Game {
 
     this.remaining = Enemies.create(this.spawn.c - 1, this.spawn.r, this.level, this.lives, this.path);
     this.paused = false;
+    this.perfect = true;
     this.delay = 0.0;
   }
 
@@ -442,6 +443,9 @@ class Game {
   victory() {
     console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
+    if (this.perfect && this.lives < 3 && this.level % 5 === 0){
+      this.lives += 1;
+    }
     this.paused = true;
     this.money += this.reward();
     this.level += 1;
@@ -479,6 +483,7 @@ class Game {
       if (!died.includes(enemy) && enemy.c >= this.columns) {
         finished.push(enemy);
         this.lives -= 1;
+        this.perfect = false;
       }
     }
 
