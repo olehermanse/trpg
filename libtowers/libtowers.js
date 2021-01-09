@@ -12,6 +12,7 @@ class Tower {
     this.target = null;
     this.intensity = 0.0;
     this.range = null;
+    this.level = 1;
     if (this.name === "gun") {
       this.charge_time = 0.3;
       this.dps = 50;
@@ -38,11 +39,11 @@ class Tower {
         this.intensity = 1.0;
       }
       if (this.name === "slow") {
-        const slow_factor = this.slow * this.intensity * sec;
+        const slow_factor = this.level * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
         this.target.slow_time += 2 * slow_factor; // seconds
       }
-      this.target.health -= dps(this.dps * this.intensity, ms);
+      this.target.health -= dps(this.level * this.dps * this.intensity, ms);
       this.rotation = get_rotation(this, this.target);
     }
   }
@@ -349,6 +350,11 @@ class Game {
     const price = this.price(name);
     if (this.has_tower(c, r)) {
       const tower = this.tiles[c][r];
+      if (tower.name === name) {
+        tower.level += 1;
+        this.money -= price;
+        return tower;
+      }
       const towers = this.towers;
       const i = towers.indexOf(tower);
       this.tiles[c][r] = null;
@@ -399,7 +405,10 @@ class Game {
     if (!this.has_tower(c, r)) {
       return false;
     }
-    if (this.tiles[c][r].name === name) {
+    if (name === "rock") {
+      return false;
+    }
+    if (name === this.tiles[c][r].name && this.tiles[c][r].level >= 3) {
       return false;
     }
     return true;
@@ -429,7 +438,7 @@ class Game {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "bank") {
-        n += 1;
+        n += t.level;
       }
     }
     return n;
