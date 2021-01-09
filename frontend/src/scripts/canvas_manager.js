@@ -31,6 +31,7 @@ class CanvasManager {
         this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size);
         this.space_pressed = false;
         this.preview = null;
+        this.mouse = null;
     }
 
     canvas_to_grid_int(p, offset = 0) {
@@ -53,6 +54,7 @@ class CanvasManager {
 
     draw_tower(ctx, tower) {
         const t = this.grid_to_canvas(tower);
+        t.level = tower.level;
         t.name = tower.name;
         t.w = this.grid_size;
         t.rotation = tower.rotation;
@@ -169,11 +171,14 @@ class CanvasManager {
         this.ui.click(x, y);
     }
 
-    mouse_move(x, y) {
-        this.ui.hover(x, y);
-        let c = this.canvas_to_grid_int(x);
-        let r = this.canvas_to_grid_int(y, this.grid_start);
-        let name = this.ui.selected.name;
+    update_preview(c, r, name) {
+        if (c === null && this.preview === null) {
+            return;
+        }
+        if (c === null) {
+            c = this.preview.c;
+            r = this.preview.r;
+        }
 
         if (!this.game.can_place(c, r, name)) {
             this.preview = null;
@@ -186,6 +191,23 @@ class CanvasManager {
             this.preview.r = r;
             this.preview.c = c;
         }
+
+        if (this.game.has_tower(c, r) && this.game.tiles[c][r].name === name) {
+            this.preview.level = this.game.tiles[c][r].level + 1;
+            this.preview.rotation = this.game.tiles[c][r].rotation;
+            return;
+        }
+        this.preview.rotation = Math.PI / 2;
+        this.preview.level = 1;
+    }
+
+    mouse_move(x, y) {
+        this.mouse = xy(x, y);
+        this.ui.hover(x, y);
+        let c = this.canvas_to_grid_int(x);
+        let r = this.canvas_to_grid_int(y, this.grid_start);
+        let name = this.ui.selected.name;
+        this.update_preview(c, r, name);
     }
 
     mouse_release(x, y) {
@@ -263,6 +285,9 @@ class CanvasManager {
         }
         if (!this.game.paused) {
             this.game.tick(ms);
+            if (this.mouse != null) {
+                this.mouse_move(this.mouse.x, this.mouse.y);
+            }
         }
         this.ui.interest.text = "+ " + number_string(this.game.reward()) + "";
         this.ui.money.text = "$ " + number_string(this.game.money) + "";

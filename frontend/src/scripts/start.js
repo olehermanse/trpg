@@ -5,19 +5,22 @@ const { GREY, BLACK, GREEN, BRIGHT_BLUE, DARK_BLUE, BRIGHT_PURPLE, DARK_PURPLE }
 
 let canvas_manager = null;
 
-function draw_tower_generic(ctx, x, y, s, rotation, circle, triangle) {
-    const r = (s / 2) * 0.7;
+function draw_tower_generic(ctx, x, y, s, level, rotation, circle, triangle) {
+    let r = (s / 2) * 0.7;
     if (circle != null) {
         Draw.circle(ctx, x, y, r, circle.fill, circle.stroke, 4);
     }
     if (triangle != null) {
-        Draw.triangle(ctx, x, y, r, rotation, triangle.fill, triangle.stroke);
+        for (let i = 0; i < level; ++i) {
+            Draw.triangle(ctx, x, y, r, rotation, triangle.fill, triangle.stroke);
+            r = r / 2;
+        }
     }
 }
 
 function draw_rock(ctx, t, target = null) {
     const circle = fill_stroke(GREY, BLACK);
-    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, null);
+    draw_tower_generic(ctx, t.x, t.y, t.w, 1, t.rotation, circle, null);
 }
 
 function draw_gun_tower(ctx, t, target = null) {
@@ -27,7 +30,7 @@ function draw_gun_tower(ctx, t, target = null) {
         const stroke = GREEN;
         Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
     }
-    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
 
 function draw_slow_tower(ctx, t, target = null) {
@@ -37,7 +40,7 @@ function draw_slow_tower(ctx, t, target = null) {
         const stroke = BRIGHT_BLUE;
         Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
     }
-    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
 
 function draw_laser_tower(ctx, t, target = null) {
@@ -47,12 +50,15 @@ function draw_laser_tower(ctx, t, target = null) {
         const stroke = BRIGHT_PURPLE;
         Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
     }
-    draw_tower_generic(ctx, t.x, t.y, t.w, t.rotation, circle, triangle);
+    draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
 
 function draw_bank(ctx, t, target = null) {
-    const s = (t.w / 2) * 0.5;
-    Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", BLACK, 4);
+    let s = (t.w / 2) * 0.5;
+    for (let i = 0; i < t.level; ++i){
+        Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", BLACK, 4);
+        s = s / 2;
+    }
 }
 
 function draw_building(ctx, t, target = null) {

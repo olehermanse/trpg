@@ -137,6 +137,7 @@ class UIButton extends UIRect {
         }
         if (this.icon) {
             const tower = this.center();
+            tower.level = 1;
             tower.name = this.name;
             tower.w = this.w;
             tower.rotation = Math.PI / 2;
