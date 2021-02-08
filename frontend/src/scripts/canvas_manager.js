@@ -16,6 +16,7 @@ class CanvasManager {
         this.grid_width = this.width;
 
         this.grid_size = this.grid_width / this.columns;
+        this.line_width = this.grid_size / 20;
         this.grid_start = this.grid_size;
 
         this.grid_height = this.rows * this.grid_size;
@@ -28,7 +29,7 @@ class CanvasManager {
         const UI_W = this.width;
         const UI_H = this.grid_size * 2;
         const UI_C = FG;
-        this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size);
+        this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size, this.line_width);
         this.space_pressed = false;
         this.preview = null;
         this.mouse = null;
@@ -132,7 +133,7 @@ class CanvasManager {
         ctx.globalAlpha = 0.3;
         let pos = this.grid_to_canvas(this.preview);
         let r = this.grid_size * this.preview.range;
-        Draw.circle(ctx, pos.x, pos.y, r, null, "black");
+        Draw.circle(ctx, pos.x, pos.y, r, null, "black", this.line_width);
         this.draw_tower(ctx, this.preview);
         ctx.globalAlpha = 1.0;
     }

@@ -1,17 +1,26 @@
 const PI = 3.14159;
 const GRID_COLOR = "rgba(200,200,200,0.5)";
+const LINE_RATIO = 0.1;
 
-function line(ctx, x1, y1, x2, y2, strokeStyle, lineWidth = 2) {
+function setLineWidth(ctx, r, lineWidth) {
+    if (lineWidth === null) {
+        ctx.lineWidth = Math.round(r * LINE_RATIO);
+    } else {
+        ctx.lineWidth = lineWidth;
+    }
+}
+
+function line(ctx, x1, y1, x2, y2, strokeStyle, lineWidth) {
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = window.devicePixelRatio * lineWidth;
+    ctx.lineWidth = lineWidth;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
 }
 
-function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = 2) {
-    ctx.lineWidth = 4;
+function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = null) {
+    setLineWidth(ctx, r, lineWidth);
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * PI);
     if (fill != null) {
@@ -20,12 +29,12 @@ function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = 2) {
     }
     if (stroke != null) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.stroke();
     }
 }
 
-function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = 2) {
+function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = null) {
+    setLineWidth(ctx, r, lineWidth);
     const height = r * 2;
     const side = height * (2 / (Math.sqrt(3)));
 
@@ -46,21 +55,21 @@ function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = 2) {
     }
     if (stroke) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.stroke();
     }
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = 2) {
+function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = null) {
+    setLineWidth(ctx, w / 2, lineWidth);
+
     if (fill) {
         ctx.fillStyle = fill;
         ctx.fillRect(x, y, w, h);
     }
     if (stroke) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.strokeRect(x, y, w, h);
     }
 }
@@ -75,10 +84,10 @@ function text(ctx, x, y, string, c, size) {
 
 function grid(ctx, size, x0, y0, width, height) {
     for (let x = size; x < width; x += size) {
-        line(ctx, x, y0, x, y0 + height, GRID_COLOR, 2);
+        line(ctx, x, y0, x, y0 + height, GRID_COLOR, size / 25);
     }
     for (let y = size; y < height; y += size) {
-        line(ctx, x0, y, x0 + width, y, GRID_COLOR, 2);
+        line(ctx, x0, y, x0 + width, y, GRID_COLOR, size / 25);
     }
 }
 
