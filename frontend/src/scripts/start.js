@@ -8,7 +8,7 @@ let canvas_manager = null;
 function draw_tower_generic(ctx, x, y, s, level, rotation, circle, triangle) {
     let r = (s / 2) * 0.7;
     if (circle != null) {
-        Draw.circle(ctx, x, y, r, circle.fill, circle.stroke, 4);
+        Draw.circle(ctx, x, y, r, circle.fill, circle.stroke);
     }
     if (triangle != null) {
         for (let i = 0; i < level; ++i) {
@@ -28,7 +28,7 @@ function draw_gun_tower(ctx, t, target = null) {
     const triangle = fill_stroke(GREEN, BLACK);
     if (target != null) {
         const stroke = GREEN;
-        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
     }
     draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
@@ -38,7 +38,7 @@ function draw_slow_tower(ctx, t, target = null) {
     const triangle = fill_stroke(BRIGHT_BLUE, DARK_BLUE);
     if (target != null) {
         const stroke = BRIGHT_BLUE;
-        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
     }
     draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
@@ -48,7 +48,7 @@ function draw_laser_tower(ctx, t, target = null) {
     const triangle = fill_stroke(BRIGHT_PURPLE, DARK_PURPLE);
     if (target != null) {
         const stroke = BRIGHT_PURPLE;
-        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 5 * t.intensity);
+        Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
     }
     draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
 }
@@ -56,7 +56,7 @@ function draw_laser_tower(ctx, t, target = null) {
 function draw_bank(ctx, t, target = null) {
     let s = (t.w / 2) * 0.5;
     for (let i = 0; i < t.level; ++i){
-        Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", BLACK, 4);
+        Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", BLACK);
         s = s / 2;
     }
 }

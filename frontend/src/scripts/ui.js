@@ -4,7 +4,7 @@ const Draw = require("./draw.js");
 const { Tower } = require("../../../libtowers/libtowers.js");
 
 class UIRect {
-    constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0) {
+    constructor(x, y, w, h, fill = null, stroke = null, padding = 0, margin = 0, line_width = null) {
         this.x = x + margin;
         this.y = y + margin;
         this.w = w - 2 * margin;
@@ -16,6 +16,7 @@ class UIRect {
         if (padding > 0) {
             this.padded = this.get_padded();
         }
+        this.line_width = line_width;
         this.children = [];
     }
 
@@ -36,7 +37,7 @@ class UIRect {
     }
 
     draw(ctx) {
-        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, this.stroke);
+        Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, this.stroke, this.line_width);
         this.draw_children(ctx);
     }
 
@@ -107,8 +108,9 @@ class UIText {
 }
 
 class UIButton extends UIRect {
-    constructor(x, y, w, h, fill = null, stroke = null, label = null) {
+    constructor(x, y, w, h, fill = null, stroke = null, label = null, line_width = null) {
         super(x, y, w, h, fill, stroke);
+        this.line_width = line_width;
         if (label === null) {
             this.label = null;
         } else {
@@ -225,8 +227,9 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-    constructor(x, y, w, h, fill, stroke, grid_size) {
+    constructor(x, y, w, h, fill, stroke, grid_size, line_width) {
         super(x, y, w, h, fill, stroke, 0, 0);
+        this.line_width = line_width;
         this.grid_size = grid_size;
         this.spacing = grid_size / 4;
 
@@ -244,7 +247,7 @@ class UI extends UIRect {
             const btn_h = h / 3;
             const btn_x = flow.x - btn_w;
             const btn_y = flow.y - btn_h / 2;
-            const button = new UIButton(btn_x, btn_y, btn_w, btn_h, fill, stroke, "Start");
+            const button = new UIButton(btn_x, btn_y, btn_w, btn_h, fill, stroke, "Start", this.line_width);
             this.buttons.push(button);
             this.start_button = button;
             this.children.push(button);
@@ -288,7 +291,7 @@ class UI extends UIRect {
         const btn_w = btn_h;
         const btn_y = this.btn_y;
 
-        const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, null, this.stroke, null);
+        const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, null, this.stroke, null, this.line_width);
 
         button.name = name;
         button.icon = icon;
