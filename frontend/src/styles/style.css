@@ -66,3 +66,36 @@ body > div > canvas {
   color: grey;
   font-family:Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
+
+#instructions {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+h2 {
+  font-size: 30px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+.instructions_section {
+  display: flex;
+  margin-top: 2em;
+}
+
+.instructions_flow_left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.instructions_flow_right {
+  margin-left: 1em;
+}
+
+.instructions_section_subtext {
+  font-weight: bolder;
+  font-style: italic;
+}
