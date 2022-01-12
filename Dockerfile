@@ -6,6 +6,6 @@ RUN npm install --only=prod
 RUN npm run build
 RUN bash add_version.sh
 
-FROM nginx:stable-alpine
+FROM nginx:1.20.2
 COPY --from=build /towers/frontend/dist/index.html /usr/share/nginx/html/index.html
 COPY --from=build /towers/frontend/dist/favicon.ico /usr/share/nginx/html/favicon.ico
