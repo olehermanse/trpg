@@ -19,8 +19,7 @@ http://127.0.0.1:3000
 ### docker
 
 ```
-docker build --tag towers .
-docker run -p 80:80 --name towers --rm towers
+docker build --tag towers . && docker run -it -p 80:80 --name towers --rm towers
 ```
 
 http://127.0.0.1:80
