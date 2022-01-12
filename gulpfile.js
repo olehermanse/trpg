@@ -1,15 +1,11 @@
 var gulp = require("gulp"),
-  rename = require("gulp-rename"),
   concat = require("gulp-concat"),
-  del = require("del"),
   browserify = require("browserify"),
   source = require("vinyl-source-stream"),
   buffer = require("vinyl-buffer"),
   uglify = require("gulp-uglify"),
   sourcemaps = require("gulp-sourcemaps"),
-  babelify = require("babelify"),
   inlinesource = require("gulp-inline-source"),
-  fs = require("fs"),
   path = require("path");
 
 gulp.task("default", function (done) {
