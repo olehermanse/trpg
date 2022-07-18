@@ -60,7 +60,7 @@ class Tower {
       return;
     }
     const in_range = enemies.filter((e) => { return distance(this, e) < this.range; });
-    if (this.name === "laser" && in_range.includes(this.target)) {
+    if (["laser", "slow"].includes(this.name) && in_range.includes(this.target)) {
       return;
     }
     let new_target = null;
