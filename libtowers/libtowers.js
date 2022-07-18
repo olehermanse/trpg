@@ -449,7 +449,7 @@ class Game {
 
   reward() {
     let n = this.banks();
-    return 2 * n + Math.floor((5 * n + 10) * this.money / 100);
+    return Math.floor(2 * n) + Math.floor((5 * n + 10) * this.money / 100);
   }
 
   victory() {
