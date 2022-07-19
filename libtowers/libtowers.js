@@ -1,5 +1,11 @@
 const { Enemies } = require("./enemies.js");
-const { get_rotation, seconds, dps, distance, position } = require("./utils.js");
+const {
+  get_rotation,
+  seconds,
+  dps,
+  distance,
+  position,
+} = require("./utils.js");
 
 class Tower {
   constructor(c, r, name, price, draw = null) {
@@ -28,25 +34,29 @@ class Tower {
       this.range = 2.0;
     }
   }
-  level_factor(){
-    return 1 + (0.9 * (this.level - 1));
+  level_factor() {
+    return 1 + 0.9 * (this.level - 1);
   }
   tick(ms) {
     if (["rock", "bank"].includes(this.name)) {
       return;
     }
-    const sec = (ms / 1000);
+    const sec = ms / 1000;
     if (this.target) {
       this.intensity += sec / this.charge_time;
       if (this.intensity > 1.0) {
         this.intensity = 1.0;
       }
       if (this.name === "slow") {
-        const slow_factor = this.level_factor() * this.slow * this.intensity * sec;
+        const slow_factor =
+          this.level_factor() * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
         this.target.slow_time += 2 * slow_factor; // seconds
       }
-      this.target.health -= dps(this.level_factor() * this.dps * this.intensity, ms);
+      this.target.health -= dps(
+        this.level_factor() * this.dps * this.intensity,
+        ms
+      );
       this.rotation = get_rotation(this, this.target);
     }
   }
@@ -59,8 +69,13 @@ class Tower {
       this.intensity = 0.0;
       return;
     }
-    const in_range = enemies.filter((e) => { return distance(this, e) < this.range; });
-    if (["laser", "slow"].includes(this.name) && in_range.includes(this.target)) {
+    const in_range = enemies.filter((e) => {
+      return distance(this, e) < this.range;
+    });
+    if (
+      ["laser", "slow"].includes(this.name) &&
+      in_range.includes(this.target)
+    ) {
       return;
     }
     let new_target = null;
@@ -128,10 +143,22 @@ class Game {
     for (let i = 0; i < columns; ++i) {
       this.tiles[i][0] = this.tiles[i][rows - 1] = "wall";
     }
-    console.assert(this.tiles[this.spawn.c][this.spawn.r] === "wall", "Spawn not on wall");
-    console.assert(this.tiles[this.goal.c][this.goal.r] === "wall", "Goal not on wall");
-    console.assert(this.tiles[this.spawn.c + 1][this.spawn.r] === null, "Spawn not accessible");
-    console.assert(this.tiles[this.goal.c - 1][this.goal.r] === null, "Goal not accessible");
+    console.assert(
+      this.tiles[this.spawn.c][this.spawn.r] === "wall",
+      "Spawn not on wall"
+    );
+    console.assert(
+      this.tiles[this.goal.c][this.goal.r] === "wall",
+      "Goal not on wall"
+    );
+    console.assert(
+      this.tiles[this.spawn.c + 1][this.spawn.r] === null,
+      "Spawn not accessible"
+    );
+    console.assert(
+      this.tiles[this.goal.c - 1][this.goal.r] === null,
+      "Goal not accessible"
+    );
     this.tiles[this.spawn.c][this.spawn.r] = "spawn";
     this.tiles[this.goal.c][this.goal.r] = "goal";
     const success = this.create_path();
@@ -143,14 +170,14 @@ class Game {
       return;
     }
     const tile = this.tiles[c][r];
-    if ((tile === "spawn") || (tile === "goal")) {
+    if (tile === "spawn" || tile === "goal") {
       return;
     }
     this.tiles[c][r] = "path";
   }
 
   is_outside(c, r) {
-    return ((c < 0) || (r < 0) || (r >= this.rows) || (c >= this.columns));
+    return c < 0 || r < 0 || r >= this.rows || c >= this.columns;
   }
 
   is_inside(c, r) {
@@ -161,11 +188,11 @@ class Game {
     if (this.is_outside(c, r)) {
       return false;
     }
-    return (this.tiles[c][r] === null || this.is_path(c, r));
+    return this.tiles[c][r] === null || this.is_path(c, r);
   }
 
   is_path(c, r) {
-    return (this.tiles[c][r] === "path");
+    return this.tiles[c][r] === "path";
   }
 
   clear_path() {
@@ -279,7 +306,9 @@ class Game {
       } else {
         console.assert(false, "Bad direction during pathfinding");
       }
-      const distances = all.map((pos) => { return this.get_distance(pos.c, pos.r); })
+      const distances = all.map((pos) => {
+        return this.get_distance(pos.c, pos.r);
+      });
       const filtered = distances.filter(Number.isInteger);
       if (filtered.length === 0) {
         console.assert(this.tiles[c][r] === "spawn");
@@ -320,7 +349,7 @@ class Game {
   }
 
   can_afford(name) {
-    return (this.money >= this.price(name));
+    return this.money >= this.price(name);
   }
 
   _try_place_tower(c, r, name) {
@@ -379,7 +408,6 @@ class Game {
     return tower;
   }
 
-
   has_tower(c, r) {
     if (this.is_outside(c, r)) {
       return false;
@@ -431,7 +459,13 @@ class Game {
     console.assert(this.on_victory != null);
     console.assert(this.remaining.length === 0);
 
-    this.remaining = Enemies.create(this.spawn.c - 1, this.spawn.r, this.level, this.lives, this.path);
+    this.remaining = Enemies.create(
+      this.spawn.c - 1,
+      this.spawn.r,
+      this.level,
+      this.lives,
+      this.path
+    ).reverse();
     this.paused = false;
     this.perfect = true;
     this.delay = 0.0;
@@ -449,13 +483,13 @@ class Game {
 
   reward() {
     let n = this.banks();
-    return Math.floor(2 * n) + Math.floor((5 * n + 10) * this.money / 100);
+    return Math.floor(2 * n) + Math.floor(((5 * n + 10) * this.money) / 100);
   }
 
   victory() {
     console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
-    if (this.perfect && this.lives < 3 && this.level % 5 === 0){
+    if (this.perfect && this.lives < 3 && this.level % 5 === 0) {
       this.lives += 1;
     }
     this.paused = true;
@@ -501,7 +535,9 @@ class Game {
 
     let removed = [...died, ...finished];
 
-    this.enemies = this.enemies.filter((enemy) => { return !removed.includes(enemy); });
+    this.enemies = this.enemies.filter((enemy) => {
+      return !removed.includes(enemy);
+    });
     for (let tower of this.towers) {
       tower.pick_target(this.enemies);
     }
