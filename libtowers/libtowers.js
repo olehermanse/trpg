@@ -499,6 +499,9 @@ class Game {
   }
 
   tick(ms) {
+    if (this.lives === 0) {
+      return;
+    }
     for (let tower of this.towers) {
       tower.tick(ms);
     }
@@ -531,6 +534,10 @@ class Game {
         this.lives -= 1;
         this.perfect = false;
       }
+    }
+
+    if (this.lives === 0) {
+      return;
     }
 
     let removed = [...died, ...finished];

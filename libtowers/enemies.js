@@ -165,8 +165,6 @@ class Enemies {
   }
 
   static create(c, r, level, lives, path) {
-    let few = null;
-    let many = null;
     if (level <= 4) {
       return this.specific(Enemy, level, c, r, path);
     } else if (level < 10) {

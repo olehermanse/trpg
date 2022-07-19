@@ -55,7 +55,7 @@ function draw_laser_tower(ctx, t, target = null) {
 
 function draw_bank(ctx, t, target = null) {
     let s = (t.w / 2) * 0.5;
-    for (let i = 0; i < t.level; ++i){
+    for (let i = 0; i < t.level; ++i) {
         Draw.rectangle(ctx, t.x - s, t.y - s, 2 * s, 2 * s, "yellow", BLACK);
         s = s / 2;
     }
