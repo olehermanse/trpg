@@ -149,7 +149,7 @@ class CanvasManager {
             let cash = this.game.money;
             Draw.text(ctx, w / 2, 1 * h / 8, "Game over", BG, this.canvas_width / 12);
             Draw.text(ctx, w / 2, h / 2 + 3 * h / 10, "Level: " + level, BG, this.canvas_width / 24);
-            Draw.text(ctx, w / 2, h / 2 + 4 * h / 10, "Cash: " + cash + "$", BG, this.canvas_width / 24);
+            Draw.text(ctx, w / 2, h / 2 + 4 * h / 10, "" + number_string(cash) + "$", BG, this.canvas_width / 24);
             return;
         }
         // Background:
