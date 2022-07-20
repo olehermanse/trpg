@@ -51,7 +51,7 @@ class Tower {
         const slow_factor =
           this.level_factor() * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
-        this.target.slow_time += 2 * slow_factor; // seconds
+        this.target.slow_time += 3 * slow_factor; // seconds
       }
       this.target.health -= dps(
         this.level_factor() * this.dps * this.intensity,
