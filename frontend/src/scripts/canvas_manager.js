@@ -6,10 +6,11 @@ const { UI } = require("./ui.js");
 const { FG, BG, GREY } = require("./colors.js");
 
 class CanvasManager {
-    constructor(canvas, draw_callback, columns = 20, rows = 13, width = 1200, scale = 1.0) {
-        this.painter = new Painter(this);
-        this.draw_callback = draw_callback;
+    constructor(canvas, ctx, draw_callback, columns = 20, rows = 13, width = 1200, scale = 1.0) {
         this.canvas = canvas;
+        this.ctx = ctx;
+        this.draw_callback = draw_callback;
+        this.painter = new Painter(this);
         this.screenshot = null;
         this.columns = columns;
         this.rows = rows;
