@@ -135,11 +135,11 @@ class Shape {
 }
 
 class Tower {
-  constructor(c, r, name, price, draw = null) {
+  constructor(c, r, name, price, painter = null) {
     this.name = name;
     this.c = c;
     this.r = r;
-    this.draw = draw;
+    this.painter = painter;
     this.price = price;
     this.rotation = 0;
     this.target = null;
@@ -160,6 +160,9 @@ class Tower {
       this.slow = 1.0;
       this.range = 2.0;
     }
+  }
+  draw() {
+    this.painter.paint(this, this.target);
   }
   level_factor() {
     return 1 + 0.9 * (this.level - 1);
@@ -245,8 +248,8 @@ function randint(min, max) {
 }
 
 class Game {
-  constructor(columns, rows, draw_callback) {
-    this.draw_callback = draw_callback;
+  constructor(columns, rows, painter) {
+    this.painter = painter;
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
@@ -309,7 +312,6 @@ class Game {
         console.assert(this.can_place(rock.c, rock.r, "rock"));
         let r = this.place_tower(rock.c, rock.r, "rock");
         console.assert(r != null);
-        r.draw = this.draw_callback;
         counter += 1;
       }
     }
@@ -536,7 +538,7 @@ class Game {
     console.assert(this.can_afford(name), "Cannot afford tower");
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
-    const tower = new Tower(c, r, name, this.price(name));
+    const tower = new Tower(c, r, name, this.price(name), this.painter);
     const on_path = this.is_path(c, r);
 
     const save = this.tiles[c][r];

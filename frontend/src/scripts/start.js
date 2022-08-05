@@ -71,7 +71,7 @@ function start(canvas) {
     canvas_manager = new CanvasManager(canvas, ctx, columns, rows, 1200, scale);
     canvas.setAttribute("width", canvas_manager.canvas_width);
     canvas.setAttribute("height", canvas_manager.canvas_height);
-    let draw_function = canvas_manager.painter.get_draw_function();
+    let draw_function = Painter.draw_building;
     canvas_manager.setup_events(canvas, select, draw_function, on_start_click, on_victory);
     const ms = 10;
     window.setInterval(() => {

@@ -14,14 +14,26 @@ class Painter {
         console.assert(this.canvas_manager != null);
     }
 
+    translate(a) {
+        if (a === null) {
+            return null;
+        }
+        let b = this.canvas_manager.grid_to_canvas(a);
+        b.level = a.level;
+        b.name = a.name;
+        b.w = this.canvas_manager.grid_size;
+        b.rotation = a.rotation;
+        b.intensity = a.intensity;
+        return b;
+    }
+
     paint(obj, extra = null) {
         console.assert(this.canvas_manager != null);
         console.assert(this.canvas_manager.ctx != null);
-        Painter.draw_building(this.canvas_manager.ctx, obj, extra);
-    }
 
-    get_draw_function() {
-        return (obj, extra) => {this.paint(obj, extra);}
+        let a = this.translate(obj);
+        let b = this.translate(extra);
+        Painter.draw_building(this.canvas_manager.ctx, a, b);
     }
 
     static draw_tower_generic(ctx, x, y, s, level, rotation, circle, triangle) {
