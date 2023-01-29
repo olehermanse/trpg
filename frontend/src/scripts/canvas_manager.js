@@ -1,4 +1,4 @@
-const { xy, number_string } = require("../../../libtowers/utils.js");
+const { xy, position, number_string } = require("../../../libtowers/utils.js");
 const { Game, Tower } = require("../../../libtowers/libtowers.js");
 const Draw = require("./draw.js");
 const { Painter } = require("./painter.js");
@@ -197,9 +197,11 @@ class CanvasManager {
 
         if (this.preview === null) {
             this.preview = new Tower(c, r, name, this.game.price(name), this.painter);
+            this.preview.draw_price = true;
         } else {
             this.preview.r = r;
             this.preview.c = c;
+            this.preview.price = this.game.price(name, position(c, r));
         }
 
         if (this.game.has_tower(c, r) && this.game.tiles[c][r].name === name) {
