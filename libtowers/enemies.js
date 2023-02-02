@@ -10,8 +10,24 @@ const BLACK = "#000000";
 const WHITE = "#ffffff";
 
 class Enemy {
-  reward() {
-    return this.__proto__.constructor.cost;
+  // Accessing static constants for enemy type:
+  get reward() {
+    return this.__proto__.constructor._REWARD;
+  }
+  get color() {
+    return this.__proto__.constructor._COLOR;
+  }
+  get max_health() {
+    return this.__proto__.constructor._MAX_HEALTH;
+  }
+  get speed() {
+    return 2.0 * this.__proto__.constructor._SPEED;
+  }
+  get delay() {
+    return 1.0 / this.speed;
+  }
+  get current_speed() {
+    return this.speed * (1 - this.slow * 0.8);
   }
 
   constructor(c, r, path) {
@@ -19,18 +35,12 @@ class Enemy {
     this.r = r;
     this.rotation = 0;
     this.target_rotation = 0;
-    this.health = 100.0;
-    this.max_health = this.health;
+    this.health = this.max_health;
     this.path = path;
     this.path_index = 0;
     this.slow = 0.0;
     this.slow_time = 0.0;
     this.travelled = 0.0;
-    this.set_speed(1.0);
-  }
-
-  effective_speed() {
-    return this.speed * (1 - this.slow * 0.8);
   }
 
   tick(ms) {
@@ -47,7 +57,7 @@ class Enemy {
       return this.update_rotation(ms);
     }
 
-    const speed = this.effective_speed();
+    const speed = this.current_speed;
     const step = speed * sec;
     if (this.path_index >= this.path.length) {
       this.path_index = this.path.length - 1;
@@ -89,7 +99,7 @@ class Enemy {
   update_rotation(ms) {
     console.assert(this.rotation != this.target_rotation);
     const sec = ms / 1000;
-    const speed = this.effective_speed() * 2.0 * 2 * Math.PI;
+    const speed = this.current_speed * 2.0 * 2 * Math.PI;
     const step = speed * sec;
     const delta = this.target_rotation - this.rotation;
     let difference = Math.abs(delta);
@@ -107,71 +117,41 @@ class Enemy {
       this.rotation += 2 * Math.PI;
     }
   }
-  set_color(c) {
-    this.color = c;
-  }
-  set_health(hp) {
-    this.health = this.max_health = hp;
-  }
-  set_speed(factor) {
-    this.speed = 2.0 * factor;
-    this.delay = 1.0 / this.speed;
-  }
 }
 
 class Red extends Enemy {
-  static cost = 2;
-
-  constructor(c, r, path) {
-    super(c, r, path);
-    this.set_color(RED);
-    this.set_health(150.0);
-    this.set_speed(1.0);
-  }
+  static _REWARD = 2;
+  static _COLOR = RED;
+  static _SPEED = 1.0;
+  static _MAX_HEALTH = 150.0;
 }
 
 class Speedy extends Enemy {
-  static cost = 4;
-
-  constructor(c, r, path) {
-    super(c, r, path);
-    this.set_color(YELLOW);
-    this.set_health(150.0);
-    this.set_speed(2.0);
-  }
+  static _REWARD = 4;
+  static _COLOR = YELLOW;
+  static _SPEED = 2.0;
+  static _MAX_HEALTH = 150.0;
 }
 
 class Boss extends Enemy {
-  static cost = 50;
-
-  constructor(c, r, path) {
-    super(c, r, path);
-    this.set_color(BLACK);
-    this.set_health(6000.0);
-    this.set_speed(0.5);
-  }
+  static _REWARD = 50;
+  static _COLOR = BLACK;
+  static _SPEED = 0.5;
+  static _MAX_HEALTH = 6000.0;
 }
 
 class Purple extends Enemy {
-  static cost = 50;
-
-  constructor(c, r, path) {
-    super(c, r, path);
-    this.set_color(PURPLE);
-    this.set_health(4000.0);
-    this.set_speed(1.0);
-  }
+  static _REWARD = 50;
+  static _COLOR = PURPLE;
+  static _SPEED = 1.0;
+  static _MAX_HEALTH = 4000.0;
 }
 
 class Mega extends Enemy {
-  static cost = 100;
-
-  constructor(c, r, path) {
-    super(c, r, path);
-    this.set_color(CYAN);
-    this.set_health(40000.0);
-    this.set_speed(0.75);
-  }
+  static _REWARD = 100;
+  static _COLOR = CYAN;
+  static _SPEED = 0.75;
+  static _MAX_HEALTH = 40000.0;
 }
 
 class Enemies {
@@ -221,13 +201,12 @@ class Enemies {
       while (enemies.length < level) {
         if (enemies.length % 2 === 0)
           enemies.push(...this.specific(Boss, 1, c, r, path));
-        else
-          enemies.push(...this.specific(Purple, 1, c, r, path));
+        else enemies.push(...this.specific(Purple, 1, c, r, path));
       }
       return enemies;
     }
     if (level < 40) {
-      return this.specific(Mega, 1 + level % 10, c, r, path);
+      return this.specific(Mega, 1 + (level % 10), c, r, path);
     }
     return this.specific(Mega, 40 + (level - 40) * 4, c, r, path);
   }
