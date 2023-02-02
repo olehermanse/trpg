@@ -576,7 +576,7 @@ class Game {
       return Tower.price(selected);
     }
 
-    return Tower.price(selected) + 10;
+    return Tower.price(selected) * 2;
   }
 
   can_afford(name, position = null) {
