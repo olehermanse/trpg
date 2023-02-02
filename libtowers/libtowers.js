@@ -716,8 +716,10 @@ class Game {
   }
 
   get level_reward() {
-    let n = this.banks;
-    return Math.floor(2 * n) + Math.floor(((5 * n + 10) * this.money) / 100);
+    let n = this.banks + 1;
+    let fixed = 2 * n;
+    let interest = (n * 10) / 100;
+    return Math.floor(fixed + interest * this.money);
   }
 
   victory() {
