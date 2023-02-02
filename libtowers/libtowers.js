@@ -114,6 +114,36 @@ class Shape {
       [1],
       [1],
     ]);
+
+    // Tetris inspired:
+    shapes.push([
+      [0, 1],
+      [1, 1],
+      [1, 0],
+    ]);
+    shapes.push([
+      [1, 0],
+      [1, 1],
+      [0, 1],
+    ]);
+    shapes.push([
+      [1, 0],
+      [1, 1],
+      [1, 0],
+    ]);
+    shapes.push([
+      [0, 1],
+      [1, 1],
+      [0, 1],
+    ]);
+    shapes.push([
+      [0, 1, 1],
+      [1, 1, 0],
+    ]);
+    shapes.push([
+      [1, 1, 0],
+      [0, 1, 1],
+    ]);
     return shapes[randint(0, shapes.length - 1)];
   }
 
