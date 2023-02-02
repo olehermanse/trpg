@@ -1,8 +1,15 @@
 const { limit } = require("./utils.js");
 
-class Enemy {
-  static cost = 2;
+const RED = "#ff0000";
+const YELLOW = "#ffff00";
+const GREEN = "#00ff00";
+const CYAN = "#00ffff";
+const BLUE = "#0000ff";
+const PURPLE = "#ff00ff";
+const BLACK = "#000000";
+const WHITE = "#ffffff";
 
+class Enemy {
   reward() {
     return this.__proto__.constructor.cost;
   }
@@ -10,7 +17,6 @@ class Enemy {
   constructor(c, r, path) {
     this.c = c;
     this.r = r;
-    this.color = "#ff0000";
     this.rotation = 0;
     this.target_rotation = 0;
     this.health = 100.0;
@@ -19,9 +25,8 @@ class Enemy {
     this.path_index = 0;
     this.slow = 0.0;
     this.slow_time = 0.0;
-    this.speed = 2.0;
     this.travelled = 0.0;
-    this.delay = 1.0 / this.speed;
+    this.set_speed(1.0);
   }
 
   effective_speed() {
@@ -102,6 +107,27 @@ class Enemy {
       this.rotation += 2 * Math.PI;
     }
   }
+  set_color(c) {
+    this.color = c;
+  }
+  set_health(hp) {
+    this.health = this.max_health = hp;
+  }
+  set_speed(factor) {
+    this.speed = 2.0 * factor;
+    this.delay = 1.0 / this.speed;
+  }
+}
+
+class Red extends Enemy {
+  static cost = 2;
+
+  constructor(c, r, path) {
+    super(c, r, path);
+    this.set_color(RED);
+    this.set_health(150.0);
+    this.set_speed(1.0);
+  }
 }
 
 class Speedy extends Enemy {
@@ -109,11 +135,9 @@ class Speedy extends Enemy {
 
   constructor(c, r, path) {
     super(c, r, path);
-    this.speed = this.speed * 2;
-    this.color = "#ffff00";
-    this.health = 150.0;
-    this.max_health = this.health;
-    this.delay = this.delay / 2;
+    this.set_color(YELLOW);
+    this.set_health(150.0);
+    this.set_speed(2.0);
   }
 }
 
@@ -122,11 +146,9 @@ class Boss extends Enemy {
 
   constructor(c, r, path) {
     super(c, r, path);
-    this.speed = this.speed / 2;
-    this.color = "#000000";
-    this.health = 6000.0;
-    this.max_health = this.health;
-    this.delay = this.delay * 2;
+    this.set_color(BLACK);
+    this.set_health(6000.0);
+    this.set_speed(0.5);
   }
 }
 
@@ -135,10 +157,9 @@ class Purple extends Enemy {
 
   constructor(c, r, path) {
     super(c, r, path);
-    this.color = "#880088";
-    this.health = 4000.0;
-    this.max_health = this.health;
-    this.delay = this.delay;
+    this.set_color(PURPLE);
+    this.set_health(4000.0);
+    this.set_speed(1.0);
   }
 }
 
@@ -147,11 +168,9 @@ class Mega extends Enemy {
 
   constructor(c, r, path) {
     super(c, r, path);
-    this.speed = this.speed / 1.5;
-    this.color = "#ffffff";
-    this.health = 40000.0;
-    this.max_health = this.health;
-    this.delay = this.delay * 1.5;
+    this.set_color(CYAN);
+    this.set_health(40000.0);
+    this.set_speed(0.75);
   }
 }
 
@@ -166,11 +185,11 @@ class Enemies {
 
   static create(c, r, level, lives, path) {
     if (level <= 4) {
-      return this.specific(Enemy, level, c, r, path);
+      return this.specific(Red, level, c, r, path);
     } else if (level < 10) {
       return [
         ...this.specific(Speedy, 1 + (level % 5), c, r, path),
-        ...this.specific(Enemy, level, c, r, path),
+        ...this.specific(Red, level, c, r, path),
       ];
     }
     if (level == 10) {
