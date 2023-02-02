@@ -294,7 +294,7 @@ class CanvasManager {
                 this.mouse_move(this.mouse.x, this.mouse.y);
             }
         }
-        this.ui.interest.text = "+ " + number_string(this.game.reward()) + "";
+        this.ui.interest.text = "+ " + number_string(this.game.level_reward) + "";
         this.ui.money.text = "$ " + number_string(this.game.money) + "";
         this.ui.level.text = "Level: " + this.game.level;
         this.ui.lives.text = "Lives: " + this.game.lives;

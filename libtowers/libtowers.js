@@ -165,7 +165,7 @@ class Tower {
   draw() {
     this.painter.paint(this, this.target);
   }
-  level_factor() {
+  get level_factor() {
     return 1 + 0.9 * (this.level - 1);
   }
   tick(ms) {
@@ -180,12 +180,12 @@ class Tower {
       }
       if (this.name === "slow") {
         const slow_factor =
-          this.level_factor() * this.slow * this.intensity * sec;
+          this.level_factor * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
         this.target.slow_time += 3 * slow_factor; // seconds
       }
       this.target.health -= dps(
-        this.level_factor() * this.dps * this.intensity,
+        this.level_factor * this.dps * this.intensity,
         ms
       );
       this.rotation = get_rotation(this, this.target);
@@ -685,18 +685,18 @@ class Game {
     return n;
   }
 
-  effective_banks() {
+  get effective_banks() {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "bank") {
-        n += t.level_factor();
+        n += t.level_factor;
       }
     }
     return n;
   }
 
-  reward() {
-    let n = this.effective_banks();
+  get level_reward() {
+    let n = this.effective_banks;
     return Math.floor(2 * n) + Math.floor(((5 * n + 10) * this.money) / 100);
   }
 
@@ -707,7 +707,7 @@ class Game {
       this.lives += 1;
     }
     this.paused = true;
-    this.money += this.reward();
+    this.money += this.level_reward;
     this.level += 1;
     this.on_victory();
   }
@@ -737,7 +737,7 @@ class Game {
     }
 
     for (let dead of died) {
-      this.money += dead.reward();
+      this.money += dead.reward;
     }
 
     let finished = [];
