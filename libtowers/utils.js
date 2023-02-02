@@ -62,6 +62,20 @@ function get_rotation(a, b) {
   return rot + 2 * Math.PI;
 }
 
+function randint(min, max) {
+  return Math.floor(Math.random() * (max + 1 - min) + min);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = randint(0, i);
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
+
 module.exports = {
   xy,
   position,
@@ -72,4 +86,6 @@ module.exports = {
   distance,
   limit,
   get_rotation,
+  randint,
+  shuffle,
 };
