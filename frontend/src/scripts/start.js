@@ -79,6 +79,11 @@ function start(canvas) {
         if (canvas_manager.space_pressed) {
             canvas_manager.tick(ms);
             canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
+            canvas_manager.tick(ms);
         }
         canvas_manager.draw(ctx);
     }, ms);
