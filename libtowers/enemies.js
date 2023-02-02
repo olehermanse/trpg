@@ -1,4 +1,4 @@
-const { limit } = require("./utils.js");
+const { limit, shuffle } = require("./utils.js");
 
 const RED = "#ff0000";
 const YELLOW = "#ffff00";
@@ -137,21 +137,28 @@ class Boss extends Enemy {
   static _REWARD = 50;
   static _COLOR = BLACK;
   static _SPEED = 0.5;
-  static _MAX_HEALTH = 6000.0;
+  static _MAX_HEALTH = 8000.0;
 }
 
 class Purple extends Enemy {
   static _REWARD = 50;
   static _COLOR = PURPLE;
-  static _SPEED = 1.0;
+  static _SPEED = 1.5;
   static _MAX_HEALTH = 4000.0;
 }
 
 class Mega extends Enemy {
   static _REWARD = 100;
   static _COLOR = CYAN;
-  static _SPEED = 0.75;
-  static _MAX_HEALTH = 40000.0;
+  static _SPEED = 1.5;
+  static _MAX_HEALTH = 80000.0;
+}
+
+class Final extends Enemy {
+  static _REWARD = 100;
+  static _COLOR = CYAN;
+  static _SPEED = 3.0;
+  static _MAX_HEALTH = 40 * 80000.0;
 }
 
 class Enemies {
@@ -207,6 +214,18 @@ class Enemies {
     }
     if (level < 40) {
       return this.specific(Mega, 1 + (level % 10), c, r, path);
+    }
+    if (level === 45) {
+      return shuffle([
+        ...this.specific(Red, 45, c, r, path),
+        ...this.specific(Speedy, 45, c, r, path),
+        ...this.specific(Boss, 45, c, r, path),
+        ...this.specific(Purple, 45, c, r, path),
+        ...this.specific(Mega, 45, c, r, path),
+      ]);
+    }
+    if (level === 50) {
+      return this.specific(Final, 1, c, r, path);
     }
     return this.specific(Mega, 40 + (level - 40) * 4, c, r, path);
   }
