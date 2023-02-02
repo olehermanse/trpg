@@ -227,13 +227,6 @@ class CanvasManager {
     }
 
     key_down(key) {
-        if (key === "å") {
-            for (let b of this.ui.tower_buttons) {
-                b.show();
-            }
-            this.game.level = 10;
-            this.game.money = 10000;
-        }
         if (key === " ") {
             if (!this.space_pressed && this.game.paused) {
                 this.ui.start_button.on_click();
