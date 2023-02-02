@@ -229,7 +229,7 @@ class Enemies {
     if (level < 40) {
       return this.specific(Mega, 1 + level % 10, c, r, path);
     }
-    return this.specific(Mega, level, c, r, path);
+    return this.specific(Mega, 40 + (level - 40) * 4, c, r, path);
   }
 }
 
