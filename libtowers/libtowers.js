@@ -261,10 +261,10 @@ class Tower {
       return 20;
     }
     if (name === "slow") {
-      return 25;
+      return 50;
     }
     if (name === "laser") {
-      return 50;
+      return 100;
     }
     if (name === "bank") {
       return 100;
