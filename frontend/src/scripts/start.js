@@ -14,10 +14,8 @@ function on_victory() {
         case 5:
             ui.tower_buttons[2].show();
             break;
-        case 8:
-            ui.tower_buttons[3].show();
-            break;
         case 11:
+            ui.tower_buttons[3].show();
             ui.tower_buttons[4].show();
             break;
         default:
