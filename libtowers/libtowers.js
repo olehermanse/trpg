@@ -566,7 +566,7 @@ class Game {
 
   price(selected, position = null) {
     if (selected === "bank") {
-      return 100 + 100 * this.banks();
+      return 100 + 100 * this.banks;
     }
     let tower = this.get_tower(position);
     if (tower === null) {
@@ -705,7 +705,7 @@ class Game {
     this.delay = 0.0;
   }
 
-  banks() {
+  get banks() {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "bank") {
@@ -715,18 +715,8 @@ class Game {
     return n;
   }
 
-  get effective_banks() {
-    let n = 0;
-    for (let t of this.towers) {
-      if (t.name === "bank") {
-        n += t.level_factor;
-      }
-    }
-    return n;
-  }
-
   get level_reward() {
-    let n = this.effective_banks;
+    let n = this.banks;
     return Math.floor(2 * n) + Math.floor(((5 * n + 10) * this.money) / 100);
   }
 
