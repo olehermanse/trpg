@@ -128,7 +128,7 @@ class CanvasManager {
         let pos = this.grid_to_canvas(this.preview);
         let r = this.grid_size * this.preview.range;
         Draw.circle(ctx, pos.x, pos.y, r, null, "black", this.line_width);
-        this.painter.paint(this.preview);
+        this.painter.paint(this.preview, { draw_price: true });
         ctx.globalAlpha = 1.0;
     }
 
@@ -197,7 +197,6 @@ class CanvasManager {
 
         if (this.preview === null) {
             this.preview = new Tower(c, r, name, this.game.price(name), this.painter);
-            this.preview.draw_price = true;
         } else {
             this.preview.r = r;
             this.preview.c = c;
