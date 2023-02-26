@@ -31,6 +31,7 @@ class Enemy {
   }
 
   constructor(c, r, path) {
+    this.type = "enemy";
     this.c = c;
     this.r = r;
     this.rotation = 0;

@@ -166,12 +166,12 @@ class Shape {
 
 class Tower {
   constructor(c, r, name, price, painter = null) {
+    this.type = "tower";
     this.name = name;
     this.c = c;
     this.r = r;
     this.painter = painter;
     this.price = price;
-    this.draw_price = false;
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
@@ -191,9 +191,6 @@ class Tower {
       this.slow = 1.0;
       this.range = 2.0;
     }
-  }
-  draw() {
-    this.painter.paint(this, this.target);
   }
   get level_factor() {
     return 1 + 0.9 * (this.level - 1);
