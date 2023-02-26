@@ -63,6 +63,12 @@ class Painter {
         this.paint_tower(obj, effects);
     }
 
+    paint_all(objs, effects = null) {
+        for (let obj of objs) {
+            this.paint(obj, effects);
+        }
+    }
+
     paint_xy(type, name, pos, width, effects = null) {
         console.assert(this.canvas_manager != null);
         console.assert(this.canvas_manager.ctx != null);
