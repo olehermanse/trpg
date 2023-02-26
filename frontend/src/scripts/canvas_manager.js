@@ -58,12 +58,6 @@ class CanvasManager {
         return (p / canvas.getBoundingClientRect().width) * this.width;
     }
 
-    draw_towers() {
-        for (let tower of this.game.towers) {
-            tower.draw();
-        }
-    }
-
     draw_wall(ctx, c, r) {
         Draw.rectangle(ctx, c * this.grid_size, this.grid_start + r * this.grid_size, this.grid_size, this.grid_size, BG);
     }
@@ -117,6 +111,12 @@ class CanvasManager {
     draw_enemies(ctx) {
         for (let enemy of this.game.enemies) {
             this.draw_enemy(ctx, enemy);
+        }
+    }
+
+    draw_towers() {
+        for (let tower of this.game.towers) {
+            this.painter.paint(tower);
         }
     }
 

@@ -30,9 +30,15 @@ class Painter {
         return b;
     }
 
-    paint(obj, extra = null) {
+    paint(obj) {
         console.assert(this.canvas_manager != null);
         console.assert(this.canvas_manager.ctx != null);
+        console.assert(["tower", "enemy"].includes(obj.type));
+
+        let extra = null;
+        if (obj.type === "tower") {
+            extra = obj.target;
+        }
 
         let a = this.translate(obj);
         let b = this.translate(extra);
