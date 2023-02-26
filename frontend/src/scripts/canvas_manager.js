@@ -99,15 +99,11 @@ class CanvasManager {
     }
 
     draw_enemies() {
-        for (let enemy of this.game.enemies) {
-            this.painter.paint(enemy);
-        }
+        this.painter.paint_all(this.game.enemies);
     }
 
     draw_towers() {
-        for (let tower of this.game.towers) {
-            this.painter.paint(tower);
-        }
+        this.painter.paint_all(this.game.towers);
     }
 
     draw_preview(ctx) {
