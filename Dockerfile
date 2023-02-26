@@ -1,8 +1,9 @@
 FROM node:18 AS build
-ADD ./ /towers
 WORKDIR /towers
-RUN rm -rf frontend/dist
+COPY package-lock.json package.json ./
 RUN npm install --only=prod
+COPY . ./
+RUN rm -rf frontend/dist
 RUN npm run build
 RUN bash add_version.sh
 
