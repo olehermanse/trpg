@@ -4,7 +4,7 @@
 // to the painter object before draw is called.
 
 const { fill_stroke } = require("../../../libtowers/utils.js");
-const { GREY, BLACK, GREEN, BRIGHT_BLUE, DARK_BLUE, BRIGHT_PURPLE, DARK_PURPLE } = require("./colors.js");
+const { GREY, BLACK, GREEN, BRIGHT_BLUE, DARK_BLUE, BRIGHT_PURPLE, DARK_PURPLE, RED, YELLOW, PURPLE, CYAN } = require("./colors.js");
 const Draw = require("./draw.js");
 
 class Painter {
@@ -37,7 +37,7 @@ class Painter {
         const x = pos.x;
         const y = pos.y;
         const angle = enemy.rotation;
-        Draw.triangle(ctx, x, y, r, angle, enemy.color, "#000000");
+        Draw.triangle(ctx, x, y, r, angle, Painter.enemy_color(enemy), "#000000");
         if (enemy.health < enemy.max_health) {
             const hp = enemy.health;
             const max_hp = enemy.max_health;
@@ -82,6 +82,18 @@ class Painter {
         tower.rotation = Math.PI / 2;
         tower.target = null;
         Painter.draw_building(this.canvas_manager.ctx, tower, null, effects);
+    }
+
+    static enemy_color(enemy) {
+        const colors = {
+            "red": RED,
+            "speedy": YELLOW,
+            "boss": BLACK,
+            "purple": PURPLE,
+            "mega": CYAN,
+            "final": CYAN,
+        }
+        return colors[enemy.name];
     }
 
     static draw_tower_generic(ctx, t, circle, triangle, effects = null) {

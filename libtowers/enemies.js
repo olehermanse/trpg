@@ -1,21 +1,12 @@
 const { limit, shuffle } = require("./utils.js");
 
-const RED = "#ff0000";
-const YELLOW = "#ffff00";
-const GREEN = "#00ff00";
-const CYAN = "#00ffff";
-const BLUE = "#0000ff";
-const PURPLE = "#ff00ff";
-const BLACK = "#000000";
-const WHITE = "#ffffff";
-
 class Enemy {
   // Accessing static constants for enemy type:
   get reward() {
     return this.__proto__.constructor._REWARD;
   }
-  get color() {
-    return this.__proto__.constructor._COLOR;
+  get name() {
+    return this.__proto__.constructor._NAME;
   }
   get max_health() {
     return this.__proto__.constructor._MAX_HEALTH;
@@ -122,42 +113,42 @@ class Enemy {
 
 class Red extends Enemy {
   static _REWARD = 2;
-  static _COLOR = RED;
+  static _NAME = "red";
   static _SPEED = 1.0;
   static _MAX_HEALTH = 150.0;
 }
 
 class Speedy extends Enemy {
   static _REWARD = 4;
-  static _COLOR = YELLOW;
+  static _NAME = "speedy";
   static _SPEED = 2.0;
   static _MAX_HEALTH = 150.0;
 }
 
 class Boss extends Enemy {
   static _REWARD = 50;
-  static _COLOR = BLACK;
+  static _NAME = "boss";
   static _SPEED = 0.5;
   static _MAX_HEALTH = 8000.0;
 }
 
 class Purple extends Enemy {
   static _REWARD = 50;
-  static _COLOR = PURPLE;
+  static _NAME = "purple";
   static _SPEED = 1.5;
   static _MAX_HEALTH = 4000.0;
 }
 
 class Mega extends Enemy {
   static _REWARD = 100;
-  static _COLOR = CYAN;
+  static _NAME = "mega";
   static _SPEED = 1.5;
   static _MAX_HEALTH = 80000.0;
 }
 
 class Final extends Enemy {
   static _REWARD = 100;
-  static _COLOR = CYAN;
+  static _NAME = "final";
   static _SPEED = 3.0;
   static _MAX_HEALTH = 40 * 80000.0;
 }
