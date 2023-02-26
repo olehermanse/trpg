@@ -34,7 +34,7 @@ class CanvasManager {
         const UI_W = this.width;
         const UI_H = this.grid_size * 2;
         const UI_C = FG;
-        this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size, this.line_width);
+        this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size, this.line_width, this.painter);
         this.space_pressed = false;
         this.preview = null;
         this.mouse = null;
@@ -240,15 +240,15 @@ class CanvasManager {
         }
     }
 
-    setup_events(canvas, select, draw_building, on_start_click, on_victory) {
+    setup_events(canvas, select, on_start_click, on_victory) {
         this.ui.start_button.on_click = on_start_click;
         this.game.on_victory = on_victory;
 
-        this.ui.add_tower_button("rock", draw_building, select).hide();
-        select(this.ui.add_tower_button("gun", draw_building, select));
-        this.ui.add_tower_button("slow", draw_building, select).hide();
-        this.ui.add_tower_button("laser", draw_building, select).hide();
-        this.ui.add_tower_button("bank", draw_building, select).hide();
+        this.ui.add_tower_button("rock", select).hide();
+        select(this.ui.add_tower_button("gun", select));
+        this.ui.add_tower_button("slow", select).hide();
+        this.ui.add_tower_button("laser", select).hide();
+        this.ui.add_tower_button("bank", select).hide();
 
         canvas.addEventListener("mousedown", e => {
             const x = this.offset_to_canvas(e.offsetX, canvas);

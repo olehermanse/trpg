@@ -120,7 +120,8 @@ class UIButton extends UIRect {
         this.on_click = null;
         this.state = "active";
         this.base_color = stroke;
-        this.icon = null;
+        this.draw_tower = false;
+        this.painter = null;
     }
 
     hide() {
@@ -137,14 +138,8 @@ class UIButton extends UIRect {
         if (this.state === "hidden") {
             return;
         }
-        if (this.icon) {
-            const tower = this.center();
-            tower.level = 1;
-            tower.name = this.name;
-            tower.w = this.w;
-            tower.rotation = Math.PI / 2;
-            tower.target = null;
-            this.icon(ctx, tower, null);
+        if (this.draw_tower) {
+            this.painter.paint_xy("tower", this.name, this.center(), this.w);
         }
         super.draw(ctx);
     }
@@ -227,7 +222,7 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-    constructor(x, y, w, h, fill, stroke, grid_size, line_width) {
+    constructor(x, y, w, h, fill, stroke, grid_size, line_width, painter) {
         super(x, y, w, h, fill, stroke, 0, 0);
         this.line_width = line_width;
         this.grid_size = grid_size;
@@ -235,6 +230,8 @@ class UI extends UIRect {
 
         this.btn_h = h - 4 * this.spacing;
         this.btn_y = y + 2 * this.spacing;
+
+        this.painter = painter;
 
         this.buttons = [];
         this.tower_buttons = [];
@@ -286,7 +283,7 @@ class UI extends UIRect {
         }
     }
 
-    add_tower_button(name, icon, on_click) {
+    add_tower_button(name, on_click) {
         const btn_h = this.btn_h;
         const btn_w = btn_h;
         const btn_y = this.btn_y;
@@ -294,7 +291,8 @@ class UI extends UIRect {
         const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, null, this.stroke, null, this.line_width);
 
         button.name = name;
-        button.icon = icon;
+        button.draw_tower = true;
+        button.painter = this.painter;
         button.on_click = on_click;
 
         const x = button.right().x;
