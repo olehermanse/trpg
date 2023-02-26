@@ -29,19 +29,38 @@ class Painter {
         return b;
     }
 
+    paint_enemy(enemy, effects = null) {
+        const ctx = this.canvas_manager.ctx;
+        const pos = this.canvas_manager.grid_to_canvas(enemy);
+        const grid = this.canvas_manager.grid_size;
+        const r = (grid / 2) * 0.7;
+        const x = pos.x;
+        const y = pos.y;
+        const angle = enemy.rotation;
+        Draw.triangle(ctx, x, y, r, angle, enemy.color, "#000000");
+        if (enemy.health < enemy.max_health) {
+            const hp = enemy.health;
+            const max_hp = enemy.max_health;
+            Draw.healthbar(ctx, x, y - grid / 2, grid * 0.75, grid / 10, hp, max_hp);
+        }
+    }
+
+    paint_tower(tower, effects = null) {
+        let extra = tower.target;
+        let a = this.translate(tower);
+        let b = this.translate(extra);
+        Painter.draw_building(this.canvas_manager.ctx, a, b, effects);
+    }
+
     paint(obj, effects = null) {
         console.assert(this.canvas_manager != null);
         console.assert(this.canvas_manager.ctx != null);
         console.assert(["tower", "enemy"].includes(obj.type));
 
-        let extra = null;
-        if (obj.type === "tower") {
-            extra = obj.target;
+        if (obj.type === "enemy") {
+            return this.paint_enemy(obj, effects);
         }
-
-        let a = this.translate(obj);
-        let b = this.translate(extra);
-        Painter.draw_building(this.canvas_manager.ctx, a, b, effects);
+        this.paint_tower(obj, effects);
     }
 
     paint_xy(type, name, pos, width, effects = null) {

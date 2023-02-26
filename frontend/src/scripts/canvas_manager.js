@@ -98,19 +98,9 @@ class CanvasManager {
         }
     }
 
-    draw_enemy(ctx, enemy) {
-        const pos = this.grid_to_canvas(enemy);
-        const r = (this.grid_size / 2) * 0.7;
-        const angle = enemy.rotation;
-        Draw.triangle(ctx, pos.x, pos.y, r, angle, enemy.color, "#000000");
-        if (enemy.health < enemy.max_health) {
-            Draw.healthbar(ctx, pos.x, pos.y - this.grid_size / 2, this.grid_size * 0.75, this.grid_size / 10, enemy.health, enemy.max_health);
-        }
-    }
-
-    draw_enemies(ctx) {
+    draw_enemies() {
         for (let enemy of this.game.enemies) {
-            this.draw_enemy(ctx, enemy);
+            this.painter.paint(enemy);
         }
     }
 
