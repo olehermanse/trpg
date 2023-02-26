@@ -44,6 +44,21 @@ class Painter {
         Painter.draw_building(this.canvas_manager.ctx, a, b, effects);
     }
 
+    paint_xy(type, name, pos, width, effects = null) {
+        console.assert(this.canvas_manager != null);
+        console.assert(this.canvas_manager.ctx != null);
+        console.assert(["tower"].includes(type));
+
+        const tower = pos;
+        tower.type = type;
+        tower.name = name;
+        tower.level = 1;
+        tower.w = width;
+        tower.rotation = Math.PI / 2;
+        tower.target = null;
+        Painter.draw_building(this.canvas_manager.ctx, tower, null, effects);
+    }
+
     static draw_tower_generic(ctx, t, circle, triangle, effects = null) {
         let r = (t.w / 2) * 0.7;
         if (circle != null) {
