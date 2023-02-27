@@ -163,8 +163,8 @@ class CanvasManager {
             return;
         }
 
-        const name = this.ui.selected.name;
-        const tower = this.game.grid_click(this.canvas_to_grid_int(x), this.canvas_to_grid_int(y, this.grid_start), name);
+        const card = this.ui.selected.card;
+        const tower = this.game.grid_click(this.canvas_to_grid_int(x), this.canvas_to_grid_int(y, this.grid_start), card);
         if (tower != null) {
             tower.painter = this.painter;
             if (tower.name === "bank") {

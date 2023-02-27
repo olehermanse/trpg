@@ -561,26 +561,31 @@ class Game {
     return this.tiles[position.c][position.r];
   }
 
-  price(selected, position = null) {
-    if (selected === "bank") {
+  price(card, position = null) {
+    card = this.find_card(card);
+    let name = card.name;
+    if (name === "bank") {
       return 100 + 100 * this.banks;
     }
     let tower = this.get_tower(position);
     if (tower === null) {
-      return Tower.price(selected);
+      return Tower.price(name);
     }
-    if (tower.name != selected) {
-      return Tower.price(selected);
+    if (tower.name != name) {
+      return Tower.price(name);
     }
 
-    return Tower.price(selected) * 2;
+    return Tower.price(name) * 2;
   }
 
-  can_afford(name, position = null) {
-    return this.money >= this.price(name, position);
+  can_afford(card, position = null) {
+    card = this.find_card(card);
+    return this.money >= this.price(card.name, position);
   }
 
-  _try_place_tower(c, r, name) {
+  _try_place_tower(c, r, card) {
+    card = this.find_card(card);
+    let name = card === "rock" ? "rock" : card.name;
     if (!this.spawning) {
       console.assert(this.can_afford(name, position(c, r)), "Cannot afford tower");
     }
@@ -606,13 +611,15 @@ class Game {
     return tower;
   }
 
-  place_tower(c, r, name) {
+  place_tower(c, r, card) {
+    card = this.find_card(card);
+    let name = this.spawning ? "rock" : card.name;
     if (!this.spawning) {
       console.assert(this.can_afford(name, position(c, r)));
       console.assert(this.can_place(c, r, name));
       console.assert(this.have_card(name));
     }
-    const price = this.spawning ? 0 : this.price(name);
+    const price = this.spawning ? 0 : card.price;
     if (this.has_tower(c, r)) {
       const tower = this.tiles[c][r];
       if (tower.name === name) {
@@ -623,7 +630,7 @@ class Game {
       const towers = this.towers;
       const i = towers.indexOf(tower);
       this.tiles[c][r] = null;
-      towers[i] = this._try_place_tower(c, r, name);
+      towers[i] = this._try_place_tower(c, r, card);
       console.assert(towers[i] != null);
       console.assert(towers[i] != tower);
       console.assert(towers[i] === this.tiles[c][r]);
@@ -631,7 +638,7 @@ class Game {
       return towers[i];
     }
 
-    const tower = this._try_place_tower(c, r, name);
+    const tower = this._try_place_tower(c, r, card);
     if (tower === null) {
       return null;
     }
@@ -656,7 +663,9 @@ class Game {
     return true;
   }
 
-  can_place(c, r, name) {
+  can_place(c, r, card) {
+    card = this.find_card(card);
+    let name = card.name;
     if (!this.spawning && !this.have_card(name)) {
       return false;
     }
@@ -681,13 +690,23 @@ class Game {
     return true;
   }
 
-  grid_click(c, r, name) {
+  find_card(name) {
+    for (let card of this.inventory) {
+      if (card.name === name) {
+        return card;
+      }
+    }
+    return name;
+  }
+
+  grid_click(c, r, card) {
+    card = this.find_card(card);
     if (this.lives <= 0) {
       return;
     }
-    if (this.can_place(c, r, name)) {
+    if (this.can_place(c, r, card.name)) {
       if (this.paused || !this.is_path(c, r)) {
-        return this.place_tower(c, r, name);
+        return this.place_tower(c, r, card);
       }
     }
     return null;
