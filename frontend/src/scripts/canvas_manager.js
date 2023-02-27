@@ -35,6 +35,7 @@ class CanvasManager {
         const UI_H = this.grid_size * 2;
         const UI_C = FG;
         this.ui = new UI(UI_X, UI_Y, UI_W, UI_H, BG, UI_C, this.grid_size, this.line_width, this.painter);
+        this.ui.refresh(this.game);
         this.space_pressed = false;
         this.preview = null;
         this.mouse = null;
@@ -156,6 +157,12 @@ class CanvasManager {
     }
 
     mouse_click(x, y) {
+        this.ui.click(x, y);
+
+        if (this.ui.selected === null) {
+            return;
+        }
+
         const name = this.ui.selected.name;
         const tower = this.game.grid_click(this.canvas_to_grid_int(x), this.canvas_to_grid_int(y, this.grid_start), name);
         if (tower != null) {
@@ -164,7 +171,6 @@ class CanvasManager {
                 this.ui.selected.price.text = this.game.price("bank");
             }
         }
-        this.ui.click(x, y);
     }
 
     update_preview(c, r, name) {
@@ -203,6 +209,9 @@ class CanvasManager {
         this.ui.hover(x, y);
         let c = this.canvas_to_grid_int(x);
         let r = this.canvas_to_grid_int(y, this.grid_start);
+        if (this.ui.selected === null) {
+            return;
+        }
         let name = this.ui.selected.name;
         this.update_preview(c, r, name);
     }
@@ -226,15 +235,9 @@ class CanvasManager {
         }
     }
 
-    setup_events(canvas, select, on_start_click, on_victory) {
+    setup_events(canvas, on_start_click, on_victory) {
         this.ui.start_button.on_click = on_start_click;
         this.game.on_victory = on_victory;
-
-        this.ui.add_tower_button("rock", select).hide();
-        select(this.ui.add_tower_button("gun", select));
-        this.ui.add_tower_button("slow", select).hide();
-        this.ui.add_tower_button("laser", select).hide();
-        this.ui.add_tower_button("bank", select).hide();
 
         canvas.addEventListener("mousedown", e => {
             const x = this.offset_to_canvas(e.offsetX, canvas);

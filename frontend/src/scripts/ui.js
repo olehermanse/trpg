@@ -139,7 +139,7 @@ class UIButton extends UIRect {
             return;
         }
         if (this.draw_tower) {
-            this.painter.paint_xy("tower", this.name, this.center(), this.w);
+            this.painter.paint_xy("tower", this.name, this.center(), this.w, { draw_price: true });
         }
         super.draw(ctx);
     }
@@ -234,7 +234,15 @@ class UI extends UIRect {
         this.painter = painter;
 
         this.buttons = [];
-        this.tower_buttons = [];
+        this.inventory_buttons = [];
+
+        this.next_x = x + grid_size;
+        this.add_tower_button();
+        this.add_tower_button();
+        this.add_tower_button();
+        this.add_tower_button();
+        this.add_tower_button();
+        this.selected = null;
 
         let flow = xy(x, y);
         flow.x += w - grid_size;
@@ -264,7 +272,6 @@ class UI extends UIRect {
             this.money = money;
             this.children.push(money);
         }
-        this.next_x = x + grid_size;
 
         // Life counter:
         {
@@ -283,31 +290,46 @@ class UI extends UIRect {
         }
     }
 
-    add_tower_button(name, on_click) {
+    refresh(game) {
+        for (let i = 0; i < game.inventory.length; ++i) {
+            const card = game.inventory[i];
+            const button = this.inventory_buttons[i];
+            button.name = card.name;
+            button.show();
+        }
+        if (this.selected === null) {
+            let btn = this.inventory_buttons[0];
+            btn.on_click(btn);
+        }
+    }
+
+    add_tower_button() {
         const btn_h = this.btn_h;
         const btn_w = btn_h;
         const btn_y = this.btn_y;
 
         const button = new UIButton(this.next_x, btn_y, btn_w, btn_h, null, this.stroke, null, this.line_width);
 
-        button.name = name;
+        button.on_click = (btn) => {
+            this.selected = btn;
+            if (btn.state != "selected") {
+                btn.transition("selected");
+                this.painter.canvas_manager.preview = null;
+            }
+            for (let button of this.inventory_buttons) {
+                if (button != btn && button.state === "selected") {
+                    button.transition("active");
+                }
+            }
+        };
         button.draw_tower = true;
         button.painter = this.painter;
-        button.on_click = on_click;
 
-        const x = button.right().x;
-        const y = button.bottom().y;
-        const price = Tower.price(name);
-        const money = new UIText(x, y, "#ffff00", 0.35 * btn_h, price);
-        money.textAlign = "right";
-        money.textBaseline = "bottom";
-        button.price = money;
-        button.children.push(money);
-
-        this.tower_buttons.push(button);
+        this.inventory_buttons.push(button);
         this.buttons.push(button);
         this.children.push(button);
         this.next_x += btn_w + this.spacing;
+        button.hide()
         return button;
     }
 

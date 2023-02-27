@@ -293,6 +293,8 @@ class Game {
     this.delay = 0;
     this.path = [];
     this.tiles = [...Array(columns)].map(() => Array(rows).fill(null));
+    this.inventory = [new Card("gun", "", null, this)];
+    this.spawning = false;
     console.assert(this.tiles.length === columns);
     console.assert(this.tiles[0].length === rows);
 
@@ -325,8 +327,7 @@ class Game {
   }
 
   spawn_rocks() {
-    let money = this.money;
-    this.money = 10000;
+    this.spawning = true;
     let counter = 0;
     for (let i = 0; i < 20; ++i) {
       let shape = Shape.get_shape();
@@ -337,13 +338,12 @@ class Game {
         continue;
       shape.translate(p.c, p.r);
       for (let rock of shape.rocks) {
-        console.assert(this.can_place(rock.c, rock.r, "rock"));
         let r = this.place_tower(rock.c, rock.r, "rock");
         console.assert(r != null);
         counter += 1;
       }
     }
-    this.money = money;
+    this.spawning = false;
     return counter;
   }
 
@@ -581,7 +581,9 @@ class Game {
   }
 
   _try_place_tower(c, r, name) {
-    console.assert(this.can_afford(name, position(c, r)), "Cannot afford tower");
+    if (!this.spawning) {
+      console.assert(this.can_afford(name, position(c, r)), "Cannot afford tower");
+    }
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
     const tower = new Tower(c, r, name, this.price(name), this.painter);
@@ -605,9 +607,12 @@ class Game {
   }
 
   place_tower(c, r, name) {
-    console.assert(this.can_afford(name, position(c, r)));
-    console.assert(this.can_place(c, r, name));
-    const price = this.price(name);
+    if (!this.spawning) {
+      console.assert(this.can_afford(name, position(c, r)));
+      console.assert(this.can_place(c, r, name));
+      console.assert(this.have_card(name));
+    }
+    const price = this.spawning ? 0 : this.price(name);
     if (this.has_tower(c, r)) {
       const tower = this.tiles[c][r];
       if (tower.name === name) {
@@ -652,6 +657,9 @@ class Game {
   }
 
   can_place(c, r, name) {
+    if (!this.spawning && !this.have_card(name)) {
+      return false;
+    }
     if (!this.can_afford(name, position(c, r))) {
       return false;
     }
@@ -719,6 +727,15 @@ class Game {
     return Math.floor(fixed + interest * this.money);
   }
 
+  have_card(name) {
+    for (let x of this.inventory) {
+      if (x.name === name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   victory() {
     console.assert(this.remaining.length === 0);
     console.assert(this.paused === false);
@@ -728,6 +745,19 @@ class Game {
     this.paused = true;
     this.money += this.level_reward;
     this.level += 1;
+    if (this.level === 2) {
+      this.inventory.push(new Card("rock", "", null, this));
+    }
+    if (this.level === 5) {
+      this.inventory.push(new Card("slow", "", null, this));
+    }
+    if (this.level === 11) {
+      this.inventory.push(new Card("laser", "", null, this));
+    }
+    if (this.level === 11) {
+      this.inventory.push(new Card("bank", "", null, this));
+    }
+
     this.on_victory();
   }
 
@@ -785,6 +815,22 @@ class Game {
     if (this.remaining.length === 0 && this.enemies.length === 0) {
       this.victory();
     }
+  }
+}
+
+class Card {
+  constructor(name, description, price, game) {
+    this.name = name;
+    this.description = description;
+    this._price = price;
+    this.game = game;
+  }
+
+  get price() {
+    if (this._price != null) {
+      return this._price;
+    }
+    return this.game.price(this.name);
   }
 }
 

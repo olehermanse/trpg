@@ -79,8 +79,10 @@ class Painter {
         tower.name = name;
         tower.level = 1;
         tower.w = width;
+        tower.h = width;
         tower.rotation = Math.PI / 2;
         tower.target = null;
+        tower.price = this.canvas_manager.game.price(name);
         Painter.draw_building(this.canvas_manager.ctx, tower, null, effects);
     }
 
