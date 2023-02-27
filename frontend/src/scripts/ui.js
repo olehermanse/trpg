@@ -294,7 +294,7 @@ class UI extends UIRect {
         for (let i = 0; i < game.inventory.length; ++i) {
             const card = game.inventory[i];
             const button = this.inventory_buttons[i];
-            button.name = card.name;
+            button.name = card.name; // TODO: Remove button name
             button.card = card;
             button.show();
         }
