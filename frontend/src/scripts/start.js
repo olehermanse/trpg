@@ -6,38 +6,13 @@ let canvas_manager = null;
 function on_victory() {
     const ui = canvas_manager.ui;
     const game = canvas_manager.game;
+    ui.refresh(game);
     ui.start_button.transition("active");
-    switch (game.level) {
-        case 2:
-            ui.tower_buttons[0].show();
-            break;
-        case 5:
-            ui.tower_buttons[2].show();
-            break;
-        case 11:
-            ui.tower_buttons[3].show();
-            ui.tower_buttons[4].show();
-            break;
-        default:
-            break;
-    }
 }
 
 function on_start_click() {
     canvas_manager.game.start();
     canvas_manager.ui.start_button.transition("disabled");
-}
-
-function select(btn) {
-    canvas_manager.ui.selected = btn;
-    if (btn.state != "selected") {
-        btn.transition("selected");
-    }
-    for (let button of canvas_manager.ui.tower_buttons) {
-        if (button != btn && button.state === "selected") {
-            button.transition("active");
-        }
-    }
 }
 
 function add_legend_icon(scale, id, func) {
@@ -62,7 +37,7 @@ function start(canvas) {
     canvas_manager = new CanvasManager(canvas, ctx, columns, rows, 1200, scale);
     canvas.setAttribute("width", canvas_manager.canvas_width);
     canvas.setAttribute("height", canvas_manager.canvas_height);
-    canvas_manager.setup_events(canvas, select, on_start_click, on_victory);
+    canvas_manager.setup_events(canvas, on_start_click, on_victory);
     const ms = 10;
     window.setInterval(() => {
         canvas_manager.tick(ms);
