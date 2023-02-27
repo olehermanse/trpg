@@ -1,17 +1,17 @@
 function xy(x, y) {
-  return { "x": x, "y": y };
+  return { x: x, y: y };
 }
 
 function position(c, r) {
-  return { "c": c, "r": r };
+  return { c: c, r: r };
 }
 
 function fill_stroke(f, s) {
-  return { "fill": f, "stroke": s };
+  return { fill: f, stroke: s };
 }
 
 function seconds(ms) {
-  return (ms / 1000);
+  return ms / 1000;
 }
 
 function dps(dps, ms) {
@@ -19,25 +19,25 @@ function dps(dps, ms) {
 }
 
 function number_string(n) {
-    const num = Number(n);
-    if (num < 0) {
-      return "-" + number_string(-1 * num);
-    }
-    const s = "" + num;
-    if (s.includes("e") || s.length <= 3) {
-        return s;
-    }
+  const num = Number(n);
+  if (num < 0) {
+    return "-" + number_string(-1 * num);
+  }
+  const s = "" + num;
+  if (s.includes("e") || s.length <= 3) {
+    return s;
+  }
 
-    let result = "";
-    let length = 0;
-    for (let c of s.split("").reverse()) {
-      result += c;
-      length += 1;
-      if (length % 3 === 0) {
-        result += " ";
-      }
+  let result = "";
+  let length = 0;
+  for (let c of s.split("").reverse()) {
+    result += c;
+    length += 1;
+    if (length % 3 === 0) {
+      result += " ";
     }
-    return result.split("").reverse().join("").trim();
+  }
+  return result.split("").reverse().join("").trim();
 }
 
 function distance(a, b) {

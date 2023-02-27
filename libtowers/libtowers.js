@@ -7,7 +7,6 @@ const {
   position,
 } = require("./utils.js");
 
-
 class Shape {
   constructor(c, r, rocks) {
     this.c = c;
@@ -25,17 +24,10 @@ class Shape {
   static _get_shape() {
     let shapes = [];
     // 1x1
-    shapes.push([
-      [1],
-    ]);
+    shapes.push([[1]]);
     // 2x1
-    shapes.push([
-      [1, 1],
-    ]);
-    shapes.push([
-      [1],
-      [1],
-    ]);
+    shapes.push([[1, 1]]);
+    shapes.push([[1], [1]]);
     // 2x2
     shapes.push([
       [1, 0],
@@ -97,23 +89,10 @@ class Shape {
     ]);
 
     // 3x1 and 4x1 bars
-    shapes.push([
-      [1, 1, 1],
-    ]);
-    shapes.push([
-      [1, 1, 1, 1],
-    ]);
-    shapes.push([
-      [1],
-      [1],
-      [1],
-    ]);
-    shapes.push([
-      [1],
-      [1],
-      [1],
-      [1],
-    ]);
+    shapes.push([[1, 1, 1]]);
+    shapes.push([[1, 1, 1, 1]]);
+    shapes.push([[1], [1], [1]]);
+    shapes.push([[1], [1], [1], [1]]);
 
     // Tetris inspired:
     shapes.push([
@@ -333,9 +312,11 @@ class Game {
       let shape = Shape.get_shape();
       let h = shape.r;
       let w = shape.c;
-      let p = position(randint(2, this.columns - 2 - w), randint(2, this.rows - 2 - h));
-      if (!this.is_empty_rect(shape, p.c, p.r))
-        continue;
+      let p = position(
+        randint(2, this.columns - 2 - w),
+        randint(2, this.rows - 2 - h)
+      );
+      if (!this.is_empty_rect(shape, p.c, p.r)) continue;
       shape.translate(p.c, p.r);
       for (let rock of shape.rocks) {
         let r = this.place_tower(rock.c, rock.r, "rock");
@@ -587,7 +568,10 @@ class Game {
     card = this.find_card(card);
     let name = card === "rock" ? "rock" : card.name;
     if (!this.spawning) {
-      console.assert(this.can_afford(name, position(c, r)), "Cannot afford tower");
+      console.assert(
+        this.can_afford(name, position(c, r)),
+        "Cannot afford tower"
+      );
     }
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
