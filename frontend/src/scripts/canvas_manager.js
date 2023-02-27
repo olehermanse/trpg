@@ -212,7 +212,7 @@ class CanvasManager {
         if (this.ui.selected === null) {
             return;
         }
-        let name = this.ui.selected.name;
+        let name = this.ui.selected.card.name;
         this.update_preview(c, r, name);
     }
 
