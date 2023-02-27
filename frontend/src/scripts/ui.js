@@ -295,6 +295,7 @@ class UI extends UIRect {
             const card = game.inventory[i];
             const button = this.inventory_buttons[i];
             button.name = card.name;
+            button.card = card;
             button.show();
         }
         if (this.selected === null) {
