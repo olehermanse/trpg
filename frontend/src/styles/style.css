@@ -31,7 +31,7 @@ body > div > h1 {
 }
 
 body > div > canvas {
-  margin-top: 1.0em;
+  margin-top: 1em;
   margin-bottom: 0.2em;
 }
 
@@ -41,7 +41,7 @@ body > div > canvas {
   font-weight: bold;
   font-style: italic;
   color: grey;
-  font-family:Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
 
 #instructions {
