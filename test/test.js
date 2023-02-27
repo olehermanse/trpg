@@ -103,7 +103,7 @@ describe("Game", function () {
       game.money = 0;
       assert.strictEqual(game.towers.length, 0);
       let row = game.is_path(1, 1) ? 2 : 1;
-      game.grid_click(1, row);
+      game.grid_click(1, row, "gun");
       assert.strictEqual(game.towers.length, 0);
     });
   });
@@ -121,13 +121,11 @@ describe("Game", function () {
   describe("#can_afford()", function () {
     it("Returns true at beginning of game", function () {
       let game = new Game(4, 3);
-      assert.strictEqual(game.can_afford("rock"), true);
       assert.strictEqual(game.can_afford("gun"), true);
     });
     it("Returns false when you have no money", function () {
       let game = new Game(4, 3);
       game.money = 0;
-      assert.strictEqual(game.can_afford("rock"), false);
       assert.strictEqual(game.can_afford("gun"), false);
     });
   });
