@@ -172,7 +172,7 @@ class Tower {
     this.r = r;
     this.painter = painter;
     this.price = price;
-    this.rotation = 0;
+    this.rotation = Math.PI / 2;
     this.target = null;
     this.intensity = 0.0;
     this.range = null;
