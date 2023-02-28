@@ -3,8 +3,9 @@
 // This is purely callback based, anything which will be drawn needs a pointer
 // to the painter object before draw is called.
 
-const { fill_stroke } = require("../../../libtowers/utils.js");
+const { fill_stroke, xy, limit } = require("../../../libtowers/utils.js");
 const {
+  WHITE,
   GREY,
   BLACK,
   GREEN,
@@ -18,6 +19,9 @@ const {
   CYAN,
 } = require("./colors.js");
 const Draw = require("./draw.js");
+
+const CARD_WIDTH = 300;
+const CARD_HEIGHT = 400;
 
 class Painter {
   constructor(canvas_manager) {
@@ -96,6 +100,62 @@ class Painter {
     tower.target = null;
     tower.price = this.canvas_manager.game.price(name);
     Painter.draw_building(this.canvas_manager.ctx, tower, null, effects);
+  }
+
+  paint_card_top_left(card, pos, effects = null) {
+    let opacity = 1.0;
+    if (effects != null && "opacity" in effects) {
+      opacity = effects.opacity;
+      if (opacity <= 0.0) {
+        return;
+      }
+    }
+    const w = CARD_WIDTH;
+    const h = CARD_HEIGHT;
+    const bg = BLACK;
+    const stroke = WHITE;
+    const ctx = this.canvas_manager.ctx;
+    let x = limit(
+      this.canvas_manager.grid_size + 10,
+      pos.x,
+      this.canvas_manager.width - w - 10
+    );
+    let y = limit(
+      this.canvas_manager.grid_start + 10,
+      pos.y,
+      this.canvas_manager.grid_end - this.canvas_manager.grid_size - h - 10
+    );
+    let tmp = ctx.globalAlpha;
+    ctx.globalAlpha = opacity;
+    Draw.rectangle(ctx, x, y, w, h, bg, stroke, 2);
+    Draw.text_top_left(ctx, x + 15, y + 15, card.full_text, stroke, 28);
+    ctx.globalAlpha = tmp;
+  }
+
+  paint_card(card, pos, anchor, effects = null) {
+    console.assert(["center", "top_left", "bottom"].includes(anchor));
+    let w = CARD_WIDTH;
+    let h = CARD_HEIGHT;
+    let x = pos.x;
+    let y = pos.y;
+    if (anchor === "center") {
+      x -= w / 2;
+      y -= h / 2;
+    } else if (anchor === "bottom") {
+      x -= w / 2;
+      y -= h;
+    }
+
+    this.paint_card_top_left(card, xy(x, y), effects);
+  }
+
+  paint_tooltip(tooltip) {
+    if (tooltip === null) {
+      return;
+    }
+    this.paint_card(tooltip.card, tooltip.pos, "bottom", {
+      opacity: tooltip.opacity,
+    });
   }
 
   static enemy_color(enemy) {
@@ -212,19 +272,19 @@ class Painter {
   }
 
   static draw_building(ctx, t, target = null, effects = null) {
-    if (t.name === "bank") {
+    if (t.name === "Bank") {
       return Painter.draw_bank(ctx, t, target, effects);
     }
-    if (t.name === "laser") {
+    if (t.name === "Laser tower") {
       return Painter.draw_laser_tower(ctx, t, target, effects);
     }
-    if (t.name === "slow") {
+    if (t.name === "Slow tower") {
       return Painter.draw_slow_tower(ctx, t, target, effects);
     }
-    if (t.name === "gun") {
+    if (t.name === "Gun tower") {
       return Painter.draw_gun_tower(ctx, t, target, effects);
     }
-    if (t.name === "rock") {
+    if (t.name === "Rock") {
       return Painter.draw_rock(ctx, t, target, effects);
     }
   }

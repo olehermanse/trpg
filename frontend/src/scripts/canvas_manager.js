@@ -5,6 +5,53 @@ const { Painter } = require("./painter.js");
 const { UI } = require("./ui.js");
 const { FG, BG, GREY } = require("./colors.js");
 
+class Tooltip {
+  constructor(pos, card) {
+    this.pos = pos;
+    this.card = card;
+    this.opacity = 0.0;
+    this.fading_in = false;
+    this.fade_in_time = 0.1;
+    this.delay = 0.0;
+  }
+
+  fade_in() {
+    if (this.fading_in) {
+      return;
+    }
+    if (this.opacity <= 0.0 && this.delay <= 0.0) {
+      this.delay = 0.5;
+    }
+    this.fading_in = true;
+  }
+
+  fade_out() {
+    this.fading_in = false;
+    this.delay = 0.0;
+  }
+
+  update(ms) {
+    const s = (1.0 * ms) / 1000;
+    if (this.delay >= 0.0) {
+      this.delay -= s;
+      return;
+    }
+    const fading_in = this.fading_in;
+    if (fading_in && this.opacity >= 1.0) {
+      return;
+    }
+    if (!fading_in && this.opacity <= 0.0) {
+      return;
+    }
+    const step = (1.0 / this.fade_in_time) * s;
+    if (fading_in) {
+      this.opacity += step;
+    } else {
+      this.opacity -= 0.5 * step;
+    }
+  }
+}
+
 class CanvasManager {
   constructor(canvas, ctx, columns = 20, rows = 13, width = 1200, scale = 1.0) {
     this.canvas = canvas;
@@ -49,6 +96,7 @@ class CanvasManager {
     this.space_pressed = false;
     this.preview = null;
     this.mouse = null;
+    this.tooltip = null;
   }
 
   canvas_to_grid_int(p, offset = 0) {
@@ -219,6 +267,7 @@ class CanvasManager {
     this.draw_towers();
     this.draw_enemies(ctx);
 
+    // UI elements:
     if (this.game.lives > 0) {
       // UI:
       this.draw_preview(ctx);
@@ -230,6 +279,9 @@ class CanvasManager {
       this.screenshot.src = this.canvas.toDataURL();
       this.draw(ctx); // Screenshot taken, draw game over screen
     }
+
+    // Hover tooltips:
+    this.painter.paint_tooltip(this.tooltip);
   }
 
   mouse_click(x, y) {
@@ -247,8 +299,8 @@ class CanvasManager {
     );
     if (tower != null) {
       tower.painter = this.painter;
-      if (tower.name === "bank") {
-        this.ui.selected.price.text = this.game.price("bank");
+      if (tower.name === "Bank") {
+        this.ui.selected.price.text = this.game.price("Bank");
       }
     }
   }
@@ -284,9 +336,34 @@ class CanvasManager {
     this.preview.level = 1;
   }
 
+  update_tooltip(x, y, hovered) {
+    let found = null;
+    for (let x of hovered) {
+      if (x.tooltip_card != null) {
+        found = x;
+      }
+    }
+    if (found === null) {
+      if (this.tooltip != null) {
+        this.tooltip.fade_out();
+      }
+      return;
+    }
+    if (this.tooltip === null) {
+      this.tooltip = new Tooltip(xy(x, y), found.tooltip_card);
+      this.tooltip.fade_in();
+      return;
+    }
+    this.tooltip.pos.x = x;
+    this.tooltip.pos.y = y;
+    this.tooltip.card = found.tooltip_card;
+    this.tooltip.fade_in();
+  }
+
   mouse_move(x, y) {
     this.mouse = xy(x, y);
-    this.ui.hover(x, y);
+    let hovered = this.ui.hover(x, y);
+    this.update_tooltip(x, y, hovered);
     let c = this.canvas_to_grid_int(x);
     let r = this.canvas_to_grid_int(y, this.grid_start);
     if (this.ui.selected === null) {
@@ -361,6 +438,9 @@ class CanvasManager {
   }
 
   tick(ms) {
+    if (this.tooltip != null) {
+      this.tooltip.update(ms);
+    }
     if (this.game.lives <= 0) {
       return;
     }

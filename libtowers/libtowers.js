@@ -136,7 +136,7 @@ class Shape {
         if (base[r][c] === 0) {
           continue;
         }
-        rocks.push(new Tower(c, r, "rock"));
+        rocks.push(new Tower(c, r, "Rock"));
       }
     }
     return new Shape(columns, rows, rocks);
@@ -156,15 +156,15 @@ class Tower {
     this.intensity = 0.0;
     this.range = null;
     this.level = 1;
-    if (this.name === "gun") {
+    if (this.name === "Gun tower") {
       this.charge_time = 0.3;
       this.dps = 60; // 3 per cost
       this.range = 3.0;
-    } else if (this.name === "laser") {
+    } else if (this.name === "Laser tower") {
       this.charge_time = 1.0;
       this.dps = 100; // 2 per cost
       this.range = 4.0;
-    } else if (this.name === "slow") {
+    } else if (this.name === "Slow tower") {
       this.charge_time = 1.0;
       this.dps = 10;
       this.slow = 1.0;
@@ -175,7 +175,7 @@ class Tower {
     return 1 + 0.9 * (this.level - 1);
   }
   tick(ms) {
-    if (["rock", "bank"].includes(this.name)) {
+    if (["Rock", "Bank"].includes(this.name)) {
       return;
     }
     const sec = ms / 1000;
@@ -184,7 +184,7 @@ class Tower {
       if (this.intensity > 1.0) {
         this.intensity = 1.0;
       }
-      if (this.name === "slow") {
+      if (this.name === "Slow tower") {
         const slow_factor =
           this.level_factor * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
@@ -210,7 +210,7 @@ class Tower {
       return distance(this, e) < this.range;
     });
     if (
-      ["laser", "slow"].includes(this.name) &&
+      ["Laser tower", "Slow tower"].includes(this.name) &&
       in_range.includes(this.target)
     ) {
       return;
@@ -230,19 +230,19 @@ class Tower {
     }
   }
   static price(name) {
-    if (name === "rock") {
+    if (name === "Rock") {
       return 1;
     }
-    if (name === "gun") {
+    if (name === "Gun tower") {
       return 20;
     }
-    if (name === "slow") {
+    if (name === "Slow tower") {
       return 50;
     }
-    if (name === "laser") {
+    if (name === "Laser tower") {
       return 100;
     }
-    if (name === "bank") {
+    if (name === "Bank") {
       return 100;
     }
   }
@@ -272,7 +272,14 @@ class Game {
     this.delay = 0;
     this.path = [];
     this.tiles = [...Array(columns)].map(() => Array(rows).fill(null));
-    this.inventory = [new Card("gun", "", null, this)];
+    this.inventory = [
+      new Card(
+        "Gun tower",
+        "Deals damage.\nVery cost\neffective. Always\ntargets the\nfurthest enemy.",
+        null,
+        this
+      ),
+    ];
     this.spawning = false;
     console.assert(this.tiles.length === columns);
     console.assert(this.tiles[0].length === rows);
@@ -319,7 +326,7 @@ class Game {
       if (!this.is_empty_rect(shape, p.c, p.r)) continue;
       shape.translate(p.c, p.r);
       for (let rock of shape.rocks) {
-        let r = this.place_tower(rock.c, rock.r, "rock");
+        let r = this.place_tower(rock.c, rock.r, "Rock");
         console.assert(r != null);
         counter += 1;
       }
@@ -545,7 +552,7 @@ class Game {
   price(card, position = null) {
     card = this.find_card(card);
     let name = card.name;
-    if (name === "bank") {
+    if (name === "Bank") {
       return 100 + 100 * this.banks;
     }
     let tower = this.get_tower(position);
@@ -566,7 +573,7 @@ class Game {
 
   _try_place_tower(c, r, card) {
     card = this.find_card(card);
-    let name = card === "rock" ? "rock" : card.name;
+    let name = card === "Rock" ? "Rock" : card.name;
     if (!this.spawning) {
       console.assert(
         this.can_afford(name, position(c, r)),
@@ -597,7 +604,7 @@ class Game {
 
   place_tower(c, r, card) {
     card = this.find_card(card);
-    let name = this.spawning ? "rock" : card.name;
+    let name = this.spawning ? "Rock" : card.name;
     if (!this.spawning) {
       console.assert(this.can_afford(name, position(c, r)));
       console.assert(this.can_place(c, r, name));
@@ -665,7 +672,7 @@ class Game {
     if (!this.has_tower(c, r)) {
       return false;
     }
-    if (name === "rock") {
+    if (name === "Rock") {
       return false;
     }
     if (name === this.tiles[c][r].name && this.tiles[c][r].level >= 3) {
@@ -716,7 +723,7 @@ class Game {
   get banks() {
     let n = 0;
     for (let t of this.towers) {
-      if (t.name === "bank") {
+      if (t.name === "Bank") {
         n += t.level;
       }
     }
@@ -749,16 +756,37 @@ class Game {
     this.money += this.level_reward;
     this.level += 1;
     if (this.level === 2) {
-      this.inventory.push(new Card("rock", "", null, this));
+      this.inventory.push(
+        new Card(
+          "Rock",
+          "Blocks the path.\nBuild a maze to\nmake the enemies\nrun longer.",
+          null,
+          this
+        )
+      );
     }
     if (this.level === 5) {
-      this.inventory.push(new Card("slow", "", null, this));
+      this.inventory.push(
+        new Card(
+          "Slow tower",
+          "Slows enemies,\nbut low damage\nand range.",
+          null,
+          this
+        )
+      );
     }
     if (this.level === 11) {
-      this.inventory.push(new Card("laser", "", null, this));
+      this.inventory.push(
+        new Card(
+          "Laser tower",
+          "More damage and\nrange, but even\nmore expensive.",
+          null,
+          this
+        )
+      );
     }
     if (this.level === 11) {
-      this.inventory.push(new Card("bank", "", null, this));
+      this.inventory.push(new Card("Bank", "Cash. Money.", null, this));
     }
 
     this.on_victory();
@@ -834,6 +862,18 @@ class Card {
       return this._price;
     }
     return this.game.price(this.name);
+  }
+
+  get full_text() {
+    return (
+      "" +
+      this.name +
+      "\n\n" +
+      "Cost: " +
+      this.price +
+      "\n\n" +
+      this.description
+    );
   }
 }
 

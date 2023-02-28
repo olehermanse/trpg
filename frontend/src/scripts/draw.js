@@ -84,6 +84,14 @@ function rectangle(
 }
 
 function _text(ctx, x, y, string, c, size) {
+  if (string.includes("\n")) {
+    const strings = string.split("\n");
+    for (let s of strings) {
+      _text(ctx, x, y, s, c, size);
+      y += size * 1.2;
+    }
+    return;
+  }
   ctx.font = Math.floor(size) + "px monospace";
   ctx.fillStyle = c;
   ctx.strokeStyle = "#000000";
@@ -101,6 +109,12 @@ function text(ctx, x, y, string, c, size) {
 function text_bottom_right(ctx, x, y, string, c, size) {
   ctx.textAlign = "right";
   ctx.textBaseline = "bottom";
+  _text(ctx, x, y, string, c, size);
+}
+
+function text_top_left(ctx, x, y, string, c, size) {
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
   _text(ctx, x, y, string, c, size);
 }
 
@@ -145,6 +159,7 @@ module.exports = {
   line,
   text,
   text_bottom_right,
+  text_top_left,
   grid,
   healthbar,
 };
