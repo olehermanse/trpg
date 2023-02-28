@@ -299,9 +299,6 @@ class CanvasManager {
     );
     if (tower != null) {
       tower.painter = this.painter;
-      if (tower.name === "Bank") {
-        this.ui.selected.price.text = this.game.price("Bank");
-      }
     }
   }
 
