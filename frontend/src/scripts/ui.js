@@ -155,6 +155,7 @@ class UIButton extends UIRect {
     this.base_color = stroke;
     this.draw_tower = false;
     this.painter = null;
+    this.tooltip_card = null;
   }
 
   hide() {
@@ -242,7 +243,7 @@ class UIButton extends UIRect {
 
   hover(x, y) {
     if (this.state === "hidden") {
-      return;
+      return [];
     }
     const inside = this.is_inside(x, y);
     if (this.state === "hovered" && !inside) {
@@ -250,6 +251,10 @@ class UIButton extends UIRect {
     } else if (this.state === "active" && inside) {
       this.transition("hovered");
     }
+    if (inside) {
+      return [this];
+    }
+    return [];
   }
 }
 
@@ -351,6 +356,7 @@ class UI extends UIRect {
       const button = this.inventory_buttons[i];
       button.name = card.name; // TODO: Remove button name
       button.card = card;
+      button.tooltip_card = card;
       button.show();
     }
     if (this.selected === null) {
@@ -411,9 +417,14 @@ class UI extends UIRect {
   }
 
   hover(x, y) {
+    let match = [];
     for (let button of this.buttons) {
-      button.hover(x, y);
+      let r = button.hover(x, y);
+      if (r.length > 0) {
+        match.push(...r);
+      }
     }
+    return match;
   }
 
   draw(ctx) {
