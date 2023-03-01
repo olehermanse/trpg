@@ -1,5 +1,6 @@
 const { xy, position, number_string } = require("../../../libtowers/utils.js");
-const { Game, Tower } = require("../../../libtowers/libtowers.js");
+const { Game } = require("../../../libtowers/libtowers.js");
+const { Tower } = require("../../../libtowers/towers.js");
 const Draw = require("./draw.js");
 const { Painter } = require("./painter.js");
 const { UI } = require("./ui.js");
