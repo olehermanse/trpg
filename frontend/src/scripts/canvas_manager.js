@@ -33,7 +33,7 @@ class Tooltip {
 
   update(ms) {
     const s = (1.0 * ms) / 1000;
-    if (this.delay >= 0.0) {
+    if (this.delay > 0.0) {
       this.delay -= s;
       return;
     }
