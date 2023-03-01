@@ -15,20 +15,6 @@ function on_start_click() {
   canvas_manager.ui.start_button.transition("disabled");
 }
 
-function add_legend_icon(scale, id, func) {
-  const element = document.getElementById(id);
-  element.setAttribute("width", scale * 50);
-  element.setAttribute("height", scale * 50);
-  const context = element.getContext("2d");
-  const tower = {};
-  tower.x = scale * 25;
-  tower.y = scale * 25;
-  tower.w = scale * 50;
-  tower.rotation = Math.PI / 2;
-  tower.level = 1;
-  func(context, tower, null);
-}
-
 function start(canvas) {
   let scale = window.devicePixelRatio;
   let rows = 13;
@@ -52,11 +38,6 @@ function start(canvas) {
     }
     canvas_manager.draw(ctx);
   }, ms);
-  add_legend_icon(scale, "rock_icon", Painter.draw_rock);
-  add_legend_icon(scale, "gun_tower_icon", Painter.draw_gun_tower);
-  add_legend_icon(scale, "slow_tower_icon", Painter.draw_slow_tower);
-  add_legend_icon(scale, "laser_tower_icon", Painter.draw_laser_tower);
-  add_legend_icon(scale, "bank_icon", Painter.draw_bank);
 }
 
 module.exports = {
