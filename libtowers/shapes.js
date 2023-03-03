@@ -1,5 +1,5 @@
-const { Tower } = require("./towers.js");
-const { randint } = require("./utils.js");
+import { Tower } from "./towers.js";
+import { randint } from "./utils.js";
 
 class Shape {
   constructor(c, r, rocks) {
@@ -137,6 +137,6 @@ class Shape {
   }
 }
 
-module.exports = {
+export {
   Shape,
 };
