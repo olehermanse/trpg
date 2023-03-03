@@ -1,4 +1,4 @@
-import { limit, shuffle } from  "./utils.js";
+import { limit, shuffle } from "./utils.js";
 
 class Enemy {
   // Accessing static constants for enemy type:
@@ -223,6 +223,4 @@ class Enemies {
   }
 }
 
-export {
-  Enemies,
-};
+export { Enemies };

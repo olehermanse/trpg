@@ -122,7 +122,7 @@ class CanvasManager {
   }
 
   draw_wall(ctx, c, r) {
-      Draw.rectangle(
+    Draw.rectangle(
       ctx,
       c * this.grid_size,
       this.grid_start + r * this.grid_size,
@@ -455,6 +455,4 @@ class CanvasManager {
   }
 }
 
-export {
-  CanvasManager,
-};
+export { CanvasManager };

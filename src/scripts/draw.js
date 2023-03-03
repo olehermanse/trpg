@@ -161,7 +161,7 @@ const Draw = {
   text_bottom_right,
   text_top_left,
   grid,
-  healthbar
+  healthbar,
 };
 
-export {Draw}
+export { Draw };

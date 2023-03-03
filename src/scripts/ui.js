@@ -431,6 +431,4 @@ class UI extends UIRect {
   }
 }
 
-export {
-  UI,
-};
+export { UI };
