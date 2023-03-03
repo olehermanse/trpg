@@ -2,7 +2,7 @@
 // based on the code for drawing primitives in draw.js
 // This is purely callback based, anything which will be drawn needs a pointer
 // to the painter object before draw is called.
-import { fill_stroke, xy, limit } from '../../libtowers/utils.js';
+import { fill_stroke, xy, limit } from "../../libtowers/utils.js";
 import {
   WHITE,
   GREY,
@@ -289,6 +289,4 @@ class Painter {
   }
 }
 
-export {
-  Painter,
-};
+export { Painter };

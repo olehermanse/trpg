@@ -626,6 +626,4 @@ class Card {
   }
 }
 
-export {
-  Game
-};
+export { Game };

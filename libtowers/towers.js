@@ -105,6 +105,4 @@ class Tower {
   }
 }
 
-export {
-  Tower,
-};
+export { Tower };
