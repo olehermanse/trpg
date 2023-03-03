@@ -127,7 +127,7 @@ class Painter {
     let tmp = ctx.globalAlpha;
     ctx.globalAlpha = opacity;
     Draw.rectangle(ctx, x, y, w, h, bg, stroke, 2);
-    text_top_left(ctx, x + 15, y + 15, card.full_text, stroke, 28);
+    Draw.text_top_left(ctx, x + 15, y + 15, card.full_text, stroke, 28);
     ctx.globalAlpha = tmp;
   }
 
