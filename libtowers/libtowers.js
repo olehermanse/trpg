@@ -1,7 +1,7 @@
-const { Enemies } = require("./enemies.js");
-const { Tower } = require("./towers.js");
-const { Shape } = require("./shapes.js");
-const { get_rotation, seconds, position, randint } = require("./utils.js");
+import { Enemies } from "./enemies.js";
+import { Tower } from "./towers.js";
+import { Shape } from "./shapes.js";
+import { get_rotation, seconds, position, randint } from "./utils.js";
 
 class Game {
   constructor(columns, rows, painter) {
@@ -626,6 +626,4 @@ class Card {
   }
 }
 
-module.exports = {
-  Game,
-};
+export { Game };

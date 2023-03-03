@@ -1,7 +1,7 @@
-const Game = require("../libtowers/libtowers.js").Game;
-const { number_string } = require("../libtowers/utils.js");
+import { Game } from "../libtowers/libtowers.js";
+import { number_string } from "../libtowers/utils.js";
 
-var assert = require("assert");
+import { strict as assert } from "assert";
 
 describe("Game", function () {
   it("Can be created", function () {

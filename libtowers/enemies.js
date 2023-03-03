@@ -1,4 +1,4 @@
-const { limit, shuffle } = require("./utils.js");
+import { limit, shuffle } from "./utils.js";
 
 class Enemy {
   // Accessing static constants for enemy type:
@@ -223,6 +223,4 @@ class Enemies {
   }
 }
 
-module.exports = {
-  Enemies,
-};
+export { Enemies };

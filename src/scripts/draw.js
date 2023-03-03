@@ -152,7 +152,7 @@ function healthbar(ctx, x, y, w, h, current, max) {
   rectangle(ctx, x, y, w * ratio, h, color, null);
 }
 
-module.exports = {
+const Draw = {
   circle,
   triangle,
   rectangle,
@@ -163,3 +163,5 @@ module.exports = {
   grid,
   healthbar,
 };
+
+export { Draw };

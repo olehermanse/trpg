@@ -1,7 +1,5 @@
-const { grid } = require("./draw.js");
-const { xy } = require("../../../libtowers/utils.js");
-const Draw = require("./draw.js");
-const { Tower } = require("../../../libtowers/libtowers.js");
+import { xy } from "../../libtowers/utils.js";
+import { Draw } from "./draw.js";
 
 class UIRect {
   constructor(
@@ -433,6 +431,4 @@ class UI extends UIRect {
   }
 }
 
-module.exports = {
-  UI,
-};
+export { UI };
