@@ -17,7 +17,7 @@ const DARK_BLUE = "#330bd8";
 const BRIGHT_PURPLE = "rgb(255,0,255)";
 const DARK_PURPLE = "rgb(128,0,128)";
 
-module.exports = {
+export {
   FG,
   BG,
   BLACK,

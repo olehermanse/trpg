@@ -2,9 +2,8 @@
 // based on the code for drawing primitives in draw.js
 // This is purely callback based, anything which will be drawn needs a pointer
 // to the painter object before draw is called.
-
-const { fill_stroke, xy, limit } = require("../../../libtowers/utils.js");
-const {
+import { fill_stroke, xy, limit } from '../../libtowers/utils.js';
+import {
   WHITE,
   GREY,
   BLACK,
@@ -17,8 +16,8 @@ const {
   YELLOW,
   PURPLE,
   CYAN,
-} = require("./colors.js");
-const Draw = require("./draw.js");
+} from "./colors.js";
+import { Draw } from "./draw.js";
 
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 400;
@@ -128,7 +127,7 @@ class Painter {
     let tmp = ctx.globalAlpha;
     ctx.globalAlpha = opacity;
     Draw.rectangle(ctx, x, y, w, h, bg, stroke, 2);
-    Draw.text_top_left(ctx, x + 15, y + 15, card.full_text, stroke, 28);
+    text_top_left(ctx, x + 15, y + 15, card.full_text, stroke, 28);
     ctx.globalAlpha = tmp;
   }
 
@@ -290,6 +289,6 @@ class Painter {
   }
 }
 
-module.exports = {
+export {
   Painter,
 };

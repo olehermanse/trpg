@@ -78,7 +78,7 @@ function shuffle(array) {
   return array;
 }
 
-module.exports = {
+export {
   xy,
   position,
   fill_stroke,

@@ -1,4 +1,4 @@
-const { get_rotation, dps, distance } = require("./utils.js");
+import { get_rotation, dps, distance } from "./utils.js";
 
 class Tower {
   constructor(c, r, name, price, painter = null) {
@@ -105,6 +105,6 @@ class Tower {
   }
 }
 
-module.exports = {
+export {
   Tower,
 };

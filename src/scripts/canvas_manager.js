@@ -1,10 +1,10 @@
-const { xy, position, number_string } = require("../../../libtowers/utils.js");
-const { Game } = require("../../../libtowers/libtowers.js");
-const { Tower } = require("../../../libtowers/towers.js");
-const Draw = require("./draw.js");
-const { Painter } = require("./painter.js");
-const { UI } = require("./ui.js");
-const { FG, BG, GREY } = require("./colors.js");
+import { xy, position, number_string } from "../../libtowers/utils.js";
+import { Game } from "../..//libtowers/libtowers.js";
+import { Tower } from "../../libtowers/towers.js";
+import { Draw } from "./draw.js";
+import { Painter } from "./painter.js";
+import { UI } from "./ui.js";
+import { FG, BG, GREY } from "./colors.js";
 
 class Tooltip {
   constructor(pos, card) {
@@ -122,7 +122,7 @@ class CanvasManager {
   }
 
   draw_wall(ctx, c, r) {
-    Draw.rectangle(
+      Draw.rectangle(
       ctx,
       c * this.grid_size,
       this.grid_start + r * this.grid_size,
@@ -455,6 +455,6 @@ class CanvasManager {
   }
 }
 
-module.exports = {
+export {
   CanvasManager,
 };

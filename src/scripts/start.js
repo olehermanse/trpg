@@ -1,5 +1,5 @@
-const { CanvasManager } = require("./canvas_manager.js");
-const { Painter } = require("./painter.js");
+import { CanvasManager } from "./canvas_manager.js";
+import { Painter } from "./painter.js";
 
 let canvas_manager = null;
 
@@ -40,6 +40,4 @@ function start(canvas) {
   }, ms);
 }
 
-module.exports = {
-  start,
-};
+export { start };
