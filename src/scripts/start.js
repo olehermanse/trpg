@@ -1,5 +1,4 @@
 import { CanvasManager } from "./canvas_manager.js";
-import { Painter } from "./painter.js";
 
 let canvas_manager = null;
 
