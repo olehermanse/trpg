@@ -6,6 +6,8 @@
 
 body {
   background-color: rgb(227, 227, 227);
+  width: 100vw;
+  height: 100vh;
 }
 
 a {
@@ -13,70 +15,44 @@ a {
   text-decoration: none;
 }
 
-body > *,
-body > div > canvas {
-  max-width: min(1200px, calc(100vw - 1em));
+.main_div {
+  display: grid;
+  grid-template-columns: 50px auto 50px;
+  grid-template-rows: 50px auto 50px;
+  width: 100vw;
+  height: 100vh;
 }
 
-body > * {
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 10px;
-}
-
-body > div > h1 {
+.heading {
+  grid-column: 2 / span 1;
+  grid-row: 1 / span 1;
   text-align: center;
+  margin: auto;
 }
 
-body > div > canvas {
-  margin-top: 1em;
-  margin-bottom: 0.2em;
+.towers_canvas {
+  display: block;
+  max-width: calc(100vw - 50px - 50px);
+  max-height: calc(100vh - 50px - 50px);
+  margin: auto;
+  grid-column: 2 / span 1;
+  grid-row: 2 / span 1;
+}
+
+@media (max-width: 700px) {
+  .towers_canvas {
+    grid-column: 1 / span 3;
+    max-width: 100vw;
+  }
 }
 
 .version_number {
-  display: block;
-  text-align: right;
+  grid-column: 2 / span 1;
+  grid-row: 3 / span 1;
+  text-align: center;
+  margin: auto;
   font-weight: bold;
   font-style: italic;
   color: grey;
   font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
-}
-
-#instructions {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-h2 {
-  font-size: 30px;
-}
-
-h3 {
-  font-size: 20px;
-}
-
-.instructions_icon {
-  width: 50px;
-}
-
-.instructions_section {
-  display: flex;
-  margin-top: 2em;
-}
-
-.instructions_flow_left {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.instructions_flow_right {
-  margin-left: 1em;
-}
-
-.instructions_section_subtext {
-  font-weight: bolder;
-  font-style: italic;
 }
