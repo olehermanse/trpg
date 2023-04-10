@@ -1,5 +1,5 @@
 import { xy } from "../../libtowers/utils.js";
-import { Draw } from "./draw.js";
+import { Draw } from "./draw.ts";
 
 class UIRect {
   constructor(

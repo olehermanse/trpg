@@ -17,7 +17,7 @@ import {
   PURPLE,
   CYAN,
 } from "./colors.js";
-import { Draw } from "./draw.js";
+import { Draw } from "./draw.ts";
 
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 400;
