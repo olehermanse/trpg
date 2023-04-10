@@ -4,7 +4,7 @@ import { Tower } from "../../libtowers/towers.js";
 import { Draw } from "./draw.ts";
 import { Painter } from "./painter.js";
 import { UI } from "./ui.js";
-import { FG, BG, GREY } from "./colors.js";
+import { FG, BG, GREY } from "./colors.ts";
 
 class Tooltip {
   constructor(pos, card) {
