@@ -4,6 +4,26 @@ import { Shape } from "./shapes.js";
 import { get_rotation, seconds, position, randint } from "./utils.js";
 
 class Game {
+  painter: any;
+  paused: any;
+  on_victory: any;
+  level: any;
+  lives: any;
+  remaining: any;
+  money: any;
+  rows: any;
+  columns: any;
+  towers: any;
+  enemies: any;
+  delay: any;
+  path: any;
+  inventory: any;
+  perfect: any;
+  tiles: any;
+  spawning: any;
+  goal: any;
+  spawn: any;
+  
   constructor(columns, rows, painter) {
     this.painter = painter;
     this.paused = true;
@@ -298,7 +318,7 @@ class Game {
     return this.tiles[position.c][position.r];
   }
 
-  price(card, position = null) {
+  price(card, position = null): number {
     card = this.find_card(card);
     let name = card.name;
     if (name === "Bank") {
@@ -599,6 +619,11 @@ class Game {
 }
 
 class Card {
+  name: any;
+  description: any;
+  _price: any;
+  game: any;
+
   constructor(name, description, price, game) {
     this.name = name;
     this.description = description;
@@ -606,7 +631,7 @@ class Card {
     this.game = game;
   }
 
-  get price() {
+  get price(): number {
     if (this._price != null) {
       return this._price;
     }

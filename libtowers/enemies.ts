@@ -1,17 +1,33 @@
 import { shuffle } from "./utils.js";
 
 class Enemy {
+  type: any;
+  c: any;
+  r: any;
+  rotation: any;
+  target_rotation: any;
+  health: any;
+  path: any;
+  path_index: any;
+  slow: any;
+  slow_time: any;
+  travelled: any;
+
   // Accessing static constants for enemy type:
   get reward() {
+    //@ts-ignore
     return this.__proto__.constructor._REWARD;
   }
   get name() {
+    //@ts-ignore
     return this.__proto__.constructor._NAME;
   }
   get max_health() {
+    //@ts-ignore
     return this.__proto__.constructor._MAX_HEALTH;
   }
   get speed() {
+    //@ts-ignore
     return 2.0 * this.__proto__.constructor._SPEED;
   }
   get delay() {
@@ -162,6 +178,7 @@ class Enemies {
     return enemies;
   }
 
+  // @ts-ignore
   static create(c, r, level, lives, path) {
     if (level <= 4) {
       return this.specific(Red, level, c, r, path);

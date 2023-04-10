@@ -2,6 +2,10 @@ import { Tower } from "./towers.js";
 import { randint } from "./utils.js";
 
 class Shape {
+  c: any;
+  r: any;
+  rocks: any;
+
   constructor(c, r, rocks) {
     this.c = c;
     this.r = r;
@@ -130,7 +134,7 @@ class Shape {
         if (base[r][c] === 0) {
           continue;
         }
-        rocks.push(new Tower(c, r, "Rock"));
+        rocks.push(new Tower(c, r, "Rock", 1, null));
       }
     }
     return new Shape(columns, rows, rocks);
