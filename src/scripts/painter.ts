@@ -16,13 +16,15 @@ import {
   YELLOW,
   PURPLE,
   CYAN,
-} from "./colors.ts";
-import { Draw } from "./draw.ts";
+} from "./colors.js";
+import { Draw } from "./draw.js";
 
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 400;
 
 class Painter {
+  canvas_manager: any;
+
   constructor(canvas_manager) {
     console.assert(canvas_manager != null);
     this.canvas_manager = canvas_manager;
@@ -44,6 +46,7 @@ class Painter {
     return b;
   }
 
+  //@ts-ignore
   paint_enemy(enemy, effects = null) {
     const ctx = this.canvas_manager.ctx;
     const pos = this.canvas_manager.grid_to_canvas(enemy);
@@ -203,6 +206,7 @@ class Painter {
     }
   }
 
+  //@ts-ignore
   static draw_rock(ctx, t, target = null, effects = null) {
     const circle = fill_stroke(GREY, BLACK);
     Painter.draw_tower_generic(ctx, t, circle, null, effects);
@@ -262,6 +266,7 @@ class Painter {
     Painter.draw_tower_generic(ctx, t, circle, triangle, effects);
   }
 
+  //@ts-ignore
   static draw_bank(ctx, t, target = null, effects = null) {
     let s = (t.w / 2) * 0.5;
     for (let i = 0; i < t.level; ++i) {
