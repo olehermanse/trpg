@@ -1,12 +1,20 @@
 import { xy, position, number_string } from "../../libtowers/utils.js";
-import { Game } from "../..//libtowers/libtowers.js";
+import { Game } from "../../libtowers/libtowers.js";
 import { Tower } from "../../libtowers/towers.js";
-import { Draw } from "./draw.ts";
+import { Draw } from "./draw.js";
 import { Painter } from "./painter.js";
 import { UI } from "./ui.js";
-import { FG, BG, GREY } from "./colors.ts";
+import { FG, BG, GREY } from "./colors.js";
 
 class Tooltip {
+
+  pos: any;
+  card: any;
+  opacity: number;
+  fading_in: boolean;
+  fade_in_time: number;
+  delay: number;
+
   constructor(pos, card) {
     this.pos = pos;
     this.card = card;
@@ -54,6 +62,29 @@ class Tooltip {
 }
 
 class CanvasManager {
+  canvas: any;
+  ctx: any;
+  painter: any;
+  screenshot: any;
+  columns: number;
+  rows: number;
+  scale: number;
+  width: number;
+  canvas_width: number;
+  grid_width: number;
+  grid_size: number;
+  line_width: number;
+  grid_start: number;
+  grid_height: number;
+  grid_end: number;
+  canvas_height: number;
+  game: any;
+  ui: any;
+  space_pressed: boolean;
+  preview: any;
+  mouse: any;
+  tooltip: any;
+
   constructor(canvas, ctx, columns = 20, rows = 13, width = 1200, scale = 1.0) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -266,7 +297,7 @@ class CanvasManager {
     // Game elements:
     this.draw_tiles(ctx);
     this.draw_towers();
-    this.draw_enemies(ctx);
+    this.draw_enemies();
 
     // UI elements:
     if (this.game.lives > 0) {
