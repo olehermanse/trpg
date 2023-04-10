@@ -35,8 +35,6 @@ function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = null) {
 
 function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = null) {
   setLineWidth(ctx, r, lineWidth);
-  const height = r * 2;
-  const side = height * (2 / Math.sqrt(3));
 
   // Matrix transformation
   ctx.translate(x, y);
