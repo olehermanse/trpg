@@ -1,6 +1,21 @@
 import { get_rotation, dps, distance } from "./utils.js";
 
 class Tower {
+  type: any;
+  name: any;
+  c: any;
+  r: any;
+  painter: any;
+  price: any;
+  rotation: any;
+  target: any;
+  intensity: any;
+  range: any;
+  level: any;
+  charge_time: any;
+  dps: any;
+  slow: any;
+
   constructor(c, r, name, price, painter = null) {
     this.type = "tower";
     this.name = name;
@@ -86,7 +101,7 @@ class Tower {
       this.intensity = 0.0;
     }
   }
-  static price(name) {
+  static price(name): number {
     if (name === "Rock") {
       return 1;
     }
@@ -102,6 +117,7 @@ class Tower {
     if (name === "Bank") {
       return 100;
     }
+    return 0;
   }
 }
 
