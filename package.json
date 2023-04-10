@@ -23,7 +23,7 @@
   "homepage": "https://github.com/olehermanse/towers#readme",
   "dependencies": {
     "typescript": "^5.0.4",
-    "vite": "^4.1.0"
+    "vite": "^4.2.1"
   },
   "devDependencies": {
     "mocha": "^10.2.0"
