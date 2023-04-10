@@ -1,7 +1,19 @@
 import { xy } from "../../libtowers/utils.js";
-import { Draw } from "./draw.ts";
+import { Draw } from "./draw.js";
 
 class UIRect {
+  x: number;
+  y: any;
+  w: any;
+  h: any;
+  fill: any;
+  stroke: any;
+  padding: any;
+  margin: any;
+  line_width: any;
+  padded: any;
+  children: any;
+
   constructor(
     x,
     y,
@@ -105,6 +117,15 @@ class UIRect {
 }
 
 class UIText {
+  x: any;
+  y: any;
+  c: any;
+  text: any;
+  textAlign: any;
+  textBaseline: any;
+  font: any;
+  w: any;
+
   constructor(x, y, color, font, text = "", n = 5) {
     this.x = x;
     this.y = y;
@@ -130,6 +151,15 @@ class UIText {
 }
 
 class UIButton extends UIRect {
+  label: any;
+  on_click: any;
+  state: any;
+  base_color: any;
+  draw_tower: any;
+  painter: any;
+  tooltip_card: any;
+  name: any;
+
   constructor(
     x,
     y,
@@ -257,6 +287,21 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
+  grid_size: any;
+  spacing: any;
+  btn_h: any;
+  btn_y: any;
+  painter: any;
+  buttons: any;
+  inventory_buttons: any;
+  next_x: any;
+  selected: any;
+  start_button: any;
+  interest: any;
+  money: any;
+  lives: any;
+  level: any;
+
   constructor(x, y, w, h, fill, stroke, grid_size, line_width, painter) {
     super(x, y, w, h, fill, stroke, 0, 0);
     this.line_width = line_width;
