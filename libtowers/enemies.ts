@@ -1,17 +1,17 @@
 import { shuffle } from "./utils.js";
 
 class Enemy {
-  type: any;
-  c: any;
-  r: any;
-  rotation: any;
-  target_rotation: any;
-  health: any;
+  type: string;
+  c: number;
+  r: number;
+  rotation: number;
+  target_rotation: number;
+  health: number;
   path: any;
-  path_index: any;
-  slow: any;
-  slow_time: any;
-  travelled: any;
+  path_index: number;
+  slow: number;
+  slow_time: number;
+  travelled: number;
 
   // Accessing static constants for enemy type:
   get reward() {
@@ -37,7 +37,7 @@ class Enemy {
     return this.speed * (1 - this.slow * 0.8);
   }
 
-  constructor(c, r, path) {
+  constructor(c: number, r:number, path: any) {
     this.type = "enemy";
     this.c = c;
     this.r = r;
@@ -51,7 +51,7 @@ class Enemy {
     this.travelled = 0.0;
   }
 
-  tick(ms) {
+  tick(ms: number) {
     const sec = ms / 1000.0;
     this.slow_time -= sec;
     if (this.slow_time < 0.0) {
@@ -104,7 +104,7 @@ class Enemy {
     }
   }
 
-  update_rotation(ms) {
+  update_rotation(ms: number) {
     console.assert(this.rotation != this.target_rotation);
     const sec = ms / 1000;
     const speed = this.current_speed * 2.0 * 2 * Math.PI;
@@ -170,7 +170,7 @@ class Final extends Enemy {
 }
 
 class Enemies {
-  static specific(mob, n, c, r, path) {
+  static specific(mob, n: number, c: number, r: number, path) {
     let enemies = [];
     for (let i = 0; i < n; ++i) {
       enemies.push(new mob(c, r, path));
@@ -179,7 +179,7 @@ class Enemies {
   }
 
   // @ts-ignore
-  static create(c, r, level, lives, path) {
+  static create(c: number, r: number, level: number, lives: number, path) {
     if (level <= 4) {
       return this.specific(Red, level, c, r, path);
     } else if (level < 10) {
