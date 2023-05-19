@@ -95,7 +95,7 @@ function _text(ctx, x, y, string, c, size) {
   ctx.font = Math.floor(size) + "px monospace";
   ctx.fillStyle = c;
   ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.strokeText(string, x, y);
   ctx.fillText(string, x, y);
 }
