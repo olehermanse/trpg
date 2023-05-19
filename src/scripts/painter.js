@@ -197,7 +197,7 @@ class Painter {
         t.y + t.h / 2,
         String(t.price),
         "#ffff00",
-        20
+        t.h/3.5
       );
       ctx.globalAlpha = tmp;
     }
