@@ -2,17 +2,17 @@ import { Tower } from "./towers.js";
 import { randint } from "./utils.js";
 
 class Shape {
-  c: any;
-  r: any;
+  c: number;
+  r: number;
   rocks: any;
 
-  constructor(c, r, rocks) {
+  constructor(c: number, r: number, rocks) {
     this.c = c;
     this.r = r;
     this.rocks = rocks;
   }
 
-  translate(c, r) {
+  translate(c: number, r: number) {
     for (let rock of this.rocks) {
       rock.c += c;
       rock.r += r;
@@ -124,7 +124,7 @@ class Shape {
     return shapes[randint(0, shapes.length - 1)];
   }
 
-  static get_shape() {
+  static get_shape(): Shape {
     let base = Shape._get_shape();
     let rocks = [];
     let rows = base.length;

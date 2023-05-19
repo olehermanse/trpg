@@ -1,8 +1,8 @@
-function xy(x, y) {
+function xy(x: number, y: number) {
   return { x: x, y: y };
 }
 
-function position(c, r) {
+function position(c: number, r: number) {
   return { c: c, r: r };
 }
 
@@ -10,11 +10,11 @@ function fill_stroke(f, s) {
   return { fill: f, stroke: s };
 }
 
-function seconds(ms) {
+function seconds(ms: number) {
   return ms / 1000;
 }
 
-function dps(dps, ms) {
+function dps(dps: number, ms: number) {
   return dps * seconds(ms);
 }
 
@@ -54,7 +54,7 @@ function limit(min, x, max) {
   return x;
 }
 
-function get_rotation(a, b) {
+function get_rotation(a, b): number {
   const rot = Math.atan2(a.r - b.r, b.c - a.c);
   if (rot > 0.0) {
     return rot;
@@ -62,7 +62,7 @@ function get_rotation(a, b) {
   return rot + 2 * Math.PI;
 }
 
-function randint(min, max) {
+function randint(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1) + min);
