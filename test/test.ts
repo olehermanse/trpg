@@ -5,27 +5,27 @@ import { strict as assert } from "assert";
 
 describe("Game", function () {
   it("Can be created", function () {
-    let game = new Game(4, 3);
+    let game = new Game(4, 3, null);
     assert.strictEqual(game.rows, 3);
     assert.strictEqual(game.columns, 4);
   });
   describe("#is_empty()", function () {
     it("Returns false for walls", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.is_empty(0, 0), false);
     });
     it("Returns true for empty tiles", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.is_empty(1, 1), true);
     });
     it("Returns false for goal", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       let c = game.goal.c;
       let r = game.goal.r;
       assert.strictEqual(game.is_empty(c, r), false);
     });
     it("Returns false for spawn", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       let c = game.spawn.c;
       let r = game.spawn.r;
       assert.strictEqual(game.is_empty(c, r), false);
@@ -33,7 +33,7 @@ describe("Game", function () {
   });
   describe("#is_outside()", function () {
     it("Returns false for positions inside", function () {
-      let game = new Game(10, 20);
+      let game = new Game(10, 20, null);
       assert.strictEqual(game.is_outside(0, 0), false);
       assert.strictEqual(game.is_outside(1, 1), false);
       assert.strictEqual(game.is_outside(9, 19), false);
@@ -41,7 +41,7 @@ describe("Game", function () {
       assert.strictEqual(game.is_outside(1, 19), false);
     });
     it("Returns true for positions outside", function () {
-      let game = new Game(10, 20);
+      let game = new Game(10, 20, null);
       assert.strictEqual(game.is_outside(-1, 0), true);
       assert.strictEqual(game.is_outside(0, -1), true);
       assert.strictEqual(game.is_outside(10, 20), true);
@@ -51,7 +51,7 @@ describe("Game", function () {
   });
   describe("#place_tower()", function () {
     it("Places a tower", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.towers.length, 0);
       let p = game.find_empty_not_path();
       game.place_tower(p.c, p.r, "Gun tower");
@@ -60,7 +60,7 @@ describe("Game", function () {
   });
   describe("#grid_click()", function () {
     it("Places a tower", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.towers.length, 0);
       let p = game.find_empty_not_path();
       assert.notStrictEqual(p, null);
@@ -68,7 +68,7 @@ describe("Game", function () {
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't place a tower when dead", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.towers.length, 0);
       let p = game.find_empty_not_path();
       game.lives = 0;
@@ -76,7 +76,7 @@ describe("Game", function () {
       assert.strictEqual(game.towers.length, 0);
     });
     it("Doesn't block the path", function () {
-      let game = new Game(3, 3);
+      let game = new Game(3, 3, null);
       assert.strictEqual(game.towers.length, 0);
       let row = game.spawn.r;
       game.grid_click(1, row, "Gun tower");
@@ -84,13 +84,13 @@ describe("Game", function () {
       assert.strictEqual(game.is_empty(1, row), true);
     });
     it("Doesn't place a tower on a wall", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.towers.length, 0);
       game.grid_click(0, 0, "Gun tower");
       assert.strictEqual(game.towers.length, 0);
     });
     it("Doesn't place a tower on a tower", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       assert.strictEqual(game.towers.length, 0);
       let p = game.find_empty_not_path();
       game.grid_click(p.c, p.r, "Gun tower");
@@ -99,7 +99,7 @@ describe("Game", function () {
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't place a tower when you have no money", function () {
-      let game = new Game(5, 5);
+      let game = new Game(5, 5, null);
       game.money = 0;
       assert.strictEqual(game.towers.length, 0);
       let row = game.is_path(1, 1) ? 2 : 1;
@@ -109,22 +109,22 @@ describe("Game", function () {
   });
   describe("#is_empty()", function () {
     it("Returns true by default", function () {
-      let game = new Game(4, 3);
+      let game = new Game(4, 3, null);
       assert.strictEqual(game.is_empty(1, 1), true);
     });
     it("Returns false for wall", function () {
-      let game = new Game(10, 10);
+      let game = new Game(10, 10, null);
       assert.strictEqual(game.is_empty(0, 0), false);
       assert.strictEqual(game.tiles[0][0], "wall");
     });
   });
   describe("#can_afford()", function () {
     it("Returns true at beginning of game", function () {
-      let game = new Game(4, 3);
+      let game = new Game(4, 3, null);
       assert.strictEqual(game.can_afford("Gun tower"), true);
     });
     it("Returns false when you have no money", function () {
-      let game = new Game(4, 3);
+      let game = new Game(4, 3, null);
       game.money = 0;
       assert.strictEqual(game.can_afford("Gun tower"), false);
     });
