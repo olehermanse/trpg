@@ -7,7 +7,7 @@ https://tpg.oleherman.com
 Start the development server:
 
 ```
-npm run dev-server
+node server.js
 ```
 
 For development purposes it defaults to port 3000:
