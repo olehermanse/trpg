@@ -20,8 +20,10 @@ function start(canvas) {
   let columns = 20;
   const ctx = canvas.getContext("2d");
   canvas_manager = new CanvasManager(canvas, ctx, columns, rows, 1200, scale);
-  canvas.setAttribute("width", canvas_manager.real_width);
-  canvas.setAttribute("height", canvas_manager.real_height);
+  // canvas.style.width = `${canvas_manager.width}px`;
+  // canvas.style.height = `${canvas_manager.height}px`;
+  canvas.width = canvas_manager.real_width;
+  canvas.height = canvas_manager.real_height;
   canvas_manager.setup_events(canvas, on_start_click, on_victory);
   const ms = 10;
   window.setInterval(() => {
