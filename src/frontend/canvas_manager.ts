@@ -70,14 +70,14 @@ class CanvasManager {
   rows: number;
   scale: number;
   width: number;
-  canvas_width: number;
+  real_width: number;
+  real_height: number;
   grid_width: number;
   grid_size: number;
   line_width: number;
   grid_start: number;
   grid_height: number;
   grid_end: number;
-  canvas_height: number;
   game: any;
   ui: any;
   space_pressed: boolean;
@@ -95,16 +95,15 @@ class CanvasManager {
     this.scale = scale;
     this.width = this.scale * width;
 
-    this.canvas_width = this.width;
     this.grid_width = this.width;
-
     this.grid_size = this.grid_width / this.columns;
     this.line_width = this.grid_size / 20;
     this.grid_start = this.grid_size;
-
     this.grid_height = this.rows * this.grid_size;
     this.grid_end = this.grid_start + this.grid_height;
-    this.canvas_height = this.grid_end + this.grid_size;
+
+    this.real_width = this.width;
+    this.real_height = this.grid_end + this.grid_size;
 
     this.game = new Game(this.columns, this.rows, this.painter);
     this.game.spawn_rocks();
@@ -242,8 +241,8 @@ class CanvasManager {
 
   draw(ctx) {
     if (this.game.lives <= 0 && this.screenshot != null) {
-      let w = this.canvas_width;
-      let h = this.canvas_height;
+      let w = this.real_width;
+      let h = this.real_height;
       Draw.rectangle(ctx, 0, 0, w, h, GREY);
       ctx.drawImage(this.screenshot, w / 4, h / 4, w / 2, h / 2);
       let level = this.game.level;
@@ -254,7 +253,7 @@ class CanvasManager {
         (1 * h) / 8,
         "Game over",
         BG,
-        this.canvas_width / 12
+        this.real_width / 12
       );
       Draw.text(
         ctx,
@@ -262,7 +261,7 @@ class CanvasManager {
         h / 2 + (3 * h) / 10,
         "Level: " + level,
         BG,
-        this.canvas_width / 24
+        this.real_width / 24
       );
       Draw.text(
         ctx,
@@ -270,12 +269,12 @@ class CanvasManager {
         h / 2 + (4 * h) / 10,
         "" + number_string(cash) + "$",
         BG,
-        this.canvas_width / 24
+        this.real_width / 24
       );
       return;
     }
     // Background:
-    Draw.rectangle(ctx, 0, 0, this.canvas_width, this.canvas_height, BG);
+    Draw.rectangle(ctx, 0, 0, this.real_width, this.real_height, BG);
 
     // Grid:
     Draw.rectangle(
