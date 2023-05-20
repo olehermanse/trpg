@@ -1,4 +1,4 @@
-import { xy } from "../../libtowers/utils.js";
+import { xy } from "../libtowers/utils.js";
 import { Draw } from "./draw.js";
 
 class UIRect {

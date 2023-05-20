@@ -1,4 +1,4 @@
-import { Game } from "../libtowers/libtowers.js";
+import { Game } from "../src/libtowers/libtowers.js";
 
 // example.test.js
 import { expect, test, describe } from "vitest";
