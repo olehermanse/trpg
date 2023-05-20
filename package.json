@@ -7,7 +7,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run build:typescript && npm run build:vite",
+    "build:typescript": "tsc",
+    "build:vite": "vite build",
     "test": "vitest",
     "preview": "vite preview"
   },
@@ -23,11 +25,11 @@
   "homepage": "https://github.com/olehermanse/tpg#readme",
   "dependencies": {
     "@types/node": "^20.2.1",
+    "express": "^4.18.2",
     "typescript": "^5.0.4",
     "vite": "^4.3.8"
   },
   "devDependencies": {
-    "express": "^4.18.2",
     "vitest": "^0.31.1"
   }
 }
