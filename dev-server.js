@@ -1,11 +1,10 @@
-const express = require("express");
+import express from "express";
 const app = express();
 
-app.use(express.static("frontend/dist"));
-app.use(express.static("frontend/dist/scripts"));
+app.use(express.static("dist"));
 
-// Start server on port 3000:
-const port = 3000;
+// Start server on port 80:
+const port = 80;
 app.listen(port, function () {
   console.log("towers dev-server listening on port " + port);
 });
