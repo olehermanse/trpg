@@ -1,5 +1,5 @@
 FROM node:18 AS build
-WORKDIR /tpg
+WORKDIR /towers
 COPY package-lock.json package.json ./
 RUN npm install --only=prod
 COPY . ./

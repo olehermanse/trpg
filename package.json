@@ -1,7 +1,7 @@
 {
-  "name": "tpg",
+  "name": "towers",
   "version": "0.2.0",
-  "description": "https://tpg.oleherman.com",
+  "description": "https://towers.oleherman.com",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/olehermanse/tpg.git"
+    "url": "git+https://github.com/olehermanse/towers.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/olehermanse/tpg/issues"
+    "url": "https://github.com/olehermanse/towers/issues"
   },
-  "homepage": "https://github.com/olehermanse/tpg#readme",
+  "homepage": "https://github.com/olehermanse/towers#readme",
   "dependencies": {
     "@types/node": "^20.2.1",
     "express": "^4.18.2",
