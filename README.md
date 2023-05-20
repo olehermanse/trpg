@@ -1,6 +1,6 @@
-# Towers
+# TPG
 
-https://towers.oleherman.com
+https://tpg.oleherman.com
 
 ## Development server
 
@@ -19,7 +19,7 @@ http://127.0.0.1:3000
 ### docker
 
 ```
-docker build --tag towers . && docker run -it -p 80:80 --name towers --rm towers
+docker build --tag tpg . && docker run -it -p 80:80 --name tpg --rm tpg
 ```
 
 http://127.0.0.1:80
