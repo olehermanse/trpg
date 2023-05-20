@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "test": "mocha",
+    "test": "vitest",
     "preview": "vite preview"
   },
   "repository": {
@@ -27,7 +27,6 @@
     "vite": "^4.3.8"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.1",
-    "mocha": "^10.2.0"
+    "vitest": "^0.31.1"
   }
 }
