@@ -120,7 +120,7 @@ class Painter {
     let x = limit(
       this.canvas_manager.grid_size + 10,
       pos.x,
-      this.canvas_manager.real_width - w - 10
+      this.canvas_manager.width - w - 10
     );
     let y = limit(
       this.canvas_manager.grid_start + 10,
