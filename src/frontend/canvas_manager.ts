@@ -70,6 +70,7 @@ class CanvasManager {
   rows: number;
   scale: number;
   width: number;
+  height: number;
   real_width: number;
   real_height: number;
   grid_width: number;
@@ -93,23 +94,23 @@ class CanvasManager {
     this.columns = columns;
     this.rows = rows;
     this.scale = scale;
-    this.width = this.scale * width;
+    this.width = width;
+    this.real_width = Math.floor(this.scale * this.width);
 
-    this.grid_width = this.width;
+    this.grid_width = this.real_width;
     this.grid_size = this.grid_width / this.columns;
     this.line_width = this.grid_size / 20;
     this.grid_start = this.grid_size;
     this.grid_height = this.rows * this.grid_size;
     this.grid_end = this.grid_start + this.grid_height;
-
-    this.real_width = this.width;
     this.real_height = this.grid_end + this.grid_size;
+    this.height = this.real_height / scale;
 
     this.game = new Game(this.columns, this.rows, this.painter);
     this.game.spawn_rocks();
     const UI_X = 0;
     const UI_Y = this.grid_end - this.grid_size;
-    const UI_W = this.width;
+    const UI_W = this.real_width;
     const UI_H = this.grid_size * 2;
     const UI_C = FG;
     this.ui = new UI(
@@ -148,7 +149,7 @@ class CanvasManager {
   }
 
   offset_to_canvas(p, canvas) {
-    return (p / canvas.getBoundingClientRect().width) * this.width;
+    return (p / canvas.getBoundingClientRect().width) * this.real_width;
   }
 
   draw_wall(ctx, c, r) {
@@ -290,7 +291,7 @@ class CanvasManager {
       this.grid_size,
       0,
       this.grid_start,
-      this.width,
+      this.real_width,
       this.grid_height
     );
     // Game elements:
@@ -302,10 +303,10 @@ class CanvasManager {
     if (this.game.lives > 0) {
       // UI:
       this.draw_preview(ctx);
-      Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
+      Draw.rectangle(ctx, 0, 0, this.real_width, this.grid_start, BG);
       this.ui.draw(ctx);
     } else {
-      Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
+      Draw.rectangle(ctx, 0, 0, this.real_width, this.grid_start, BG);
       this.screenshot = new Image();
       this.screenshot.src = this.canvas.toDataURL();
       this.draw(ctx); // Screenshot taken, draw game over screen
