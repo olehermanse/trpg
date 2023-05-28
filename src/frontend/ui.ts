@@ -133,7 +133,7 @@ class UIText {
     this.text = text;
     this.textAlign = "center";
     this.textBaseline = "middle";
-    this.font = "" + Math.floor(font) + "px monospace";
+    this.font = font;
     this.w = 0.6 * font * n;
   }
 
@@ -142,11 +142,7 @@ class UIText {
   }
 
   draw(ctx) {
-    ctx.font = this.font;
-    ctx.textAlign = this.textAlign;
-    ctx.textBaseline = this.textBaseline;
-    ctx.fillStyle = this.c;
-    ctx.fillText(this.text, this.x, this.y);
+    Draw.fill_text(ctx, this.text, this.x, this.y, this.c, this.font, this.textAlign, this.textBaseline);
   }
 }
 
