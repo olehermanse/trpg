@@ -1,4 +1,4 @@
-import type { XY, CR } from "../libtowers/interfaces";
+import type { XY, CR, FillStroke } from "../libtowers/interfaces";
 
 function xy(x: number, y: number): XY {
   return { x: x, y: y };
@@ -8,19 +8,19 @@ function position(c: number, r: number): CR {
   return { c: c, r: r };
 }
 
-function fill_stroke(f, s) {
+function fill_stroke(f: string, s: string): FillStroke {
   return { fill: f, stroke: s };
 }
 
-function seconds(ms: number) {
+function seconds(ms: number): number {
   return ms / 1000;
 }
 
-function dps(dps: number, ms: number) {
+function dps(dps: number, ms: number): number {
   return dps * seconds(ms);
 }
 
-function number_string(n) {
+function number_string(n: number | string): string {
   const num = Number(n);
   if (num < 0) {
     return "-" + number_string(-1 * num);
@@ -42,11 +42,11 @@ function number_string(n) {
   return result.split("").reverse().join("").trim();
 }
 
-function distance(a, b) {
+function distance(a: CR, b: CR): number {
   return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
 }
 
-function limit(min, x, max) {
+function limit(min: number, x: number, max: number): number {
   if (x < min) {
     return min;
   }
@@ -56,7 +56,7 @@ function limit(min, x, max) {
   return x;
 }
 
-function get_rotation(a, b): number {
+function get_rotation(a: CR, b: CR): number {
   const rot = Math.atan2(a.r - b.r, b.c - a.c);
   if (rot > 0.0) {
     return rot;
@@ -70,7 +70,7 @@ function randint(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function shuffle(array: any) {
+function shuffle(array: any[]): any[] {
   for (let i = array.length - 1; i > 0; i--) {
     const j = randint(0, i);
     const temp = array[i];
@@ -81,11 +81,11 @@ function shuffle(array: any) {
 }
 
 class TextWrapper {
-  original: String;
-  remaining: String;
-  word: String;
-  words: String[];
-  lines: String[];
+  original: string;
+  remaining: string;
+  word: string;
+  words: string[];
+  lines: string[];
   line_length: number;
   fragment_length: number;
 
@@ -106,7 +106,7 @@ class TextWrapper {
     }
   }
 
-  line_overflow() {
+  line_overflow(): boolean {
     const line = this.words.join(" ") + " " + this.word;
     return line.length > this.line_length;
   }
@@ -126,7 +126,7 @@ class TextWrapper {
     this.word = "";
   }
 
-  get_fragments(word) {
+  get_fragments(word: string): string[] {
     let fragments = [];
     if (word.includes("-")) {
       for (let fragment of word.split("-")) {
@@ -152,7 +152,8 @@ class TextWrapper {
       this.word = fragment;
       this.push_word();
     }
-    // By this point, we have pushed 2 or more words, and this.word is empty
+    // By this point, we have pushed 2 or more words,
+    // and this.word is empty
   }
 
   main_loop() {
@@ -167,7 +168,7 @@ class TextWrapper {
     this.push_line();
   }
 
-  run() {
+  run(): string {
     if (this.original === "" || this.original.includes("\n")) {
       return this.original;
     }
@@ -179,7 +180,7 @@ class TextWrapper {
   }
 }
 
-function text_wrap(text: any, line_length: any) {
+function text_wrap(text: any, line_length: any): string {
   let tw = new TextWrapper(text, line_length);
   return tw.run();
 }
