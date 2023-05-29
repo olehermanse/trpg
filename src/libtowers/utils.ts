@@ -68,7 +68,7 @@ function randint(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function shuffle(array) {
+function shuffle(array: any) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = randint(0, i);
     const temp = array[i];
@@ -76,6 +76,94 @@ function shuffle(array) {
     array[j] = temp;
   }
   return array;
+}
+
+class TextWrapper {
+  original: String;
+  remaining: String;
+  word: String;
+  words: String[];
+  lines: String[];
+  line_length: number;
+  fragment_length: number;
+
+  constructor(text, line_length) {
+    this.original = text;
+    this.remaining = text.trim().replace("  ", " ");
+    this.word = "";
+    this.words = [];
+    this.lines = [];
+    this.line_length = line_length;
+    this.fragment_length = line_length - 1;
+  }
+
+  push_line() {
+    if (this.words.length > 0) {
+      this.lines.push(this.words.join(" "));
+      this.words = [];
+    }
+  }
+
+  line_overflow() {
+    const line = this.words.join(" ") + " " + this.word;
+    return line.length > this.line_length;
+  }
+
+  push_word() {
+    if (this.word === "") {
+      return;
+    }
+    if (this.word.length > this.line_length) {
+      this.fragment_word();
+      return;
+    }
+    if (this.line_overflow()) {
+      this.push_line();
+    }
+    this.words.push(this.word);
+    this.word = "";
+  }
+
+  fragment_word() {
+    while (this.word.length > 0) {
+      this.push_line();
+      let fragment = this.word.slice(0, this.fragment_length);
+      if (this.word.length > this.fragment_length) {
+        fragment = fragment + "-";
+      }
+      this.word = this.word.slice(this.fragment_length);
+      this.words.push(fragment);
+    }
+    // By this point, we have pushed 2 or more words, and this.word is empty
+  }
+
+  main_loop() {
+    for (let c of this.remaining) {
+      if (c === " ") {
+        this.push_word();
+      } else {
+        this.word = this.word + c;
+      }
+    }
+    this.push_word();
+    this.push_line();
+  }
+
+  run() {
+    if (this.original === "" || this.original.includes("\n")) {
+      return this.original;
+    }
+    if (this.remaining === "") {
+      return "";
+    }
+    this.main_loop();
+    return this.lines.join("\n");
+  }
+}
+
+function text_wrap(text: any, line_length: any) {
+  let tw = new TextWrapper(text, line_length);
+  return tw.run();
 }
 
 export {
@@ -90,4 +178,5 @@ export {
   get_rotation,
   randint,
   shuffle,
+  text_wrap,
 };
