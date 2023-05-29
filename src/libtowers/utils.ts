@@ -124,15 +124,31 @@ class TextWrapper {
     this.word = "";
   }
 
-  fragment_word() {
-    while (this.word.length > 0) {
-      this.push_line();
-      let fragment = this.word.slice(0, this.fragment_length);
-      if (this.word.length > this.fragment_length) {
-        fragment = fragment + "-";
+  get_fragments(word) {
+    let fragments = [];
+    if (word.includes("-")) {
+      for (let fragment of word.split("-")) {
+        if (fragment.length > this.fragment_length) {
+          fragments.push(...this.get_fragments(fragment));
+        } else {
+          fragments.push(fragment);
+        }
       }
-      this.word = this.word.slice(this.fragment_length);
-      this.words.push(fragment);
+      return fragments;
+    }
+    while (word.length > 0) {
+      let fragment = word.slice(0, this.fragment_length);
+      fragments.push(fragment);
+      word = word.slice(this.fragment_length);
+    }
+    return fragments;
+  }
+
+  fragment_word() {
+    const fragments = this.get_fragments(this.word).join("-\n").split("\n");
+    for (let fragment of fragments) {
+      this.word = fragment;
+      this.push_word();
     }
     // By this point, we have pushed 2 or more words, and this.word is empty
   }

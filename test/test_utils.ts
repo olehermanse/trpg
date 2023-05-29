@@ -41,4 +41,9 @@ describe("text_wrap", () => {
     expect(text_wrap("A brown fox.", 5)).toBe("A\nbrown\nfox.");
     expect(text_wrap("abcdefghij 123 456.", 8)).toBe("abcdefg-\nhij 123\n456.");
   });
+  test("reuse dashes for fragments", () => {
+    expect(text_wrap("abc-def", 4)).toBe("abc-\ndef");
+    expect(text_wrap("abc-def", 5)).toBe("abc-\ndef");
+    expect(text_wrap("ab-cd-ef", 4)).toBe("ab-\ncd-\nef");
+  });
 });
