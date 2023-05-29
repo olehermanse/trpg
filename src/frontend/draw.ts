@@ -2,29 +2,17 @@ const PI = 3.14159;
 const LINE_RATIO = 0.1;
 const SCALE = window.devicePixelRatio;
 
-interface XY {
-  x: number;
-  y: number;
-}
+import type { XY, XYR, XYWH } from "../libtowers/interfaces";
 
-interface XYR extends XY {
-  r: number;
-}
-
-interface XYWH extends XY {
-  w: number;
-  h: number;
-}
-
-function sxy(x: number, y: number):XY {
+function sxy(x: number, y: number): XY {
   const obj: XY = {
-    x : x * SCALE,
-    y : y * SCALE,
+    x: x * SCALE,
+    y: y * SCALE,
   };
   return obj;
 }
 
-function sxyr(x: number, y: number, r: number):XYR {
+function sxyr(x: number, y: number, r: number): XYR {
   const obj: XYR = {
     x: x * SCALE,
     y: y * SCALE,
@@ -33,7 +21,7 @@ function sxyr(x: number, y: number, r: number):XYR {
   return obj;
 }
 
-function sxywh(x: number, y: number, w: number, h: number):XYWH {
+function sxywh(x: number, y: number, w: number, h: number): XYWH {
   const obj: XYWH = {
     x: x * SCALE,
     y: y * SCALE,
