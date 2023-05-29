@@ -1,8 +1,10 @@
-function xy(x: number, y: number) {
+import type { XY, CR } from "../libtowers/interfaces";
+
+function xy(x: number, y: number): XY {
   return { x: x, y: y };
 }
 
-function position(c: number, r: number) {
+function position(c: number, r: number): CR {
   return { c: c, r: r };
 }
 
