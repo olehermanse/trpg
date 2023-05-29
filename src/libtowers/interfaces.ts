@@ -16,3 +16,8 @@ export interface CR {
   c: number;
   r: number;
 }
+
+export interface FillStroke {
+  fill: string;
+  stroke: string;
+}
