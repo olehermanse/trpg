@@ -1,7 +1,13 @@
 import { Enemies } from "./enemies.js";
 import { Tower } from "./towers.js";
 import { Shape } from "./shapes.js";
-import { get_rotation, seconds, position, randint } from "./utils.js";
+import {
+  get_rotation,
+  seconds,
+  position,
+  randint,
+  text_wrap,
+} from "./utils.js";
 
 class Game {
   painter: any;
@@ -23,7 +29,7 @@ class Game {
   spawning: any;
   goal: any;
   spawn: any;
-  
+
   constructor(columns, rows, painter) {
     this.painter = painter;
     this.paused = true;
@@ -44,7 +50,7 @@ class Game {
     this.inventory = [
       new Card(
         "Gun tower",
-        "Deals damage.\nVery cost\neffective. Always\ntargets the\nfurthest enemy.",
+        "Deals damage. Very cost effective. Always targets the furthest enemy.",
         null,
         this
       ),
@@ -528,7 +534,7 @@ class Game {
       this.inventory.push(
         new Card(
           "Rock",
-          "Blocks the path.\nBuild a maze to\nmake the enemies\nrun longer.",
+          "Blocks the path. Build a maze to make the enemies run longer.",
           null,
           this
         )
@@ -538,7 +544,7 @@ class Game {
       this.inventory.push(
         new Card(
           "Slow tower",
-          "Slows enemies,\nbut low damage\nand range.",
+          "Slows enemies, but low damage and range.",
           null,
           this
         )
@@ -548,7 +554,7 @@ class Game {
       this.inventory.push(
         new Card(
           "Laser tower",
-          "More damage and\nrange, but even\nmore expensive.",
+          "More damage and range, but even more expensive.",
           null,
           this
         )
@@ -626,7 +632,7 @@ class Card {
 
   constructor(name, description, price, game) {
     this.name = name;
-    this.description = description;
+    this.description = text_wrap(description, 18);
     this._price = price;
     this.game = game;
   }
