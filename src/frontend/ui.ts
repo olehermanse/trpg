@@ -1,18 +1,20 @@
 import { xy } from "../libtowers/utils.js";
+import { ClickCallback, XY } from "../libtowers/interfaces";
 import { Draw } from "./draw.js";
+import { Game, Card } from "../libtowers/libtowers.js";
 
 class UIRect {
   x: number;
-  y: any;
-  w: any;
-  h: any;
-  fill: any;
-  stroke: any;
-  padding: any;
-  margin: any;
-  line_width: any;
-  padded: any;
-  children: any;
+  y: number;
+  w: number;
+  h: number;
+  fill: string | null;
+  stroke: string | null;
+  padding: number;
+  margin: number;
+  line_width: number | null;
+  padded: UIRect;
+  children: any[];
 
   constructor(
     x,
@@ -53,13 +55,13 @@ class UIRect {
     );
   }
 
-  draw_children(ctx) {
+  draw_children(ctx: CanvasRenderingContext2D) {
     this.children.map((c) => {
       c.draw(ctx);
     });
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     Draw.rectangle(
       ctx,
       this.x,
@@ -73,35 +75,35 @@ class UIRect {
     this.draw_children(ctx);
   }
 
-  center() {
+  center(): XY {
     return xy(this.x + this.w / 2, this.y + this.h / 2);
   }
 
-  top_left() {
+  top_left(): XY {
     return xy(this.x, this.y);
   }
 
-  top_right() {
+  top_right(): XY {
     return xy(this.x + this.w, this.y);
   }
 
-  bottom_left() {
+  bottom_left(): XY {
     return xy(this.x, this.y + this.h);
   }
 
-  bottom_right() {
+  bottom_right(): XY {
     return xy(this.x + this.w, this.y + this.h);
   }
 
-  top() {
+  top(): XY {
     return xy(this.x + this.w / 2, this.y);
   }
 
-  bottom() {
+  bottom(): XY {
     return xy(this.x + this.w / 2, this.y + this.h);
   }
 
-  left() {
+  left(): XY {
     return xy(this.x, this.y + this.h / 2);
   }
 
@@ -109,7 +111,7 @@ class UIRect {
     return xy(this.x + this.w, this.y + this.h / 2);
   }
 
-  is_inside(x, y) {
+  is_inside(x: number, y: number): boolean {
     return (
       x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h
     );
@@ -117,16 +119,23 @@ class UIRect {
 }
 
 class UIText {
-  x: any;
-  y: any;
-  c: any;
-  text: any;
-  textAlign: any;
-  textBaseline: any;
-  font: any;
-  w: any;
+  x: number;
+  y: number;
+  c: string;
+  text: string;
+  textAlign: string;
+  textBaseline: string;
+  font: number;
+  w: number;
 
-  constructor(x, y, color, font, text = "", n = 5) {
+  constructor(
+    x: number,
+    y: number,
+    color: string,
+    font: number,
+    text: string = "",
+    n: number = 5
+  ) {
     this.x = x;
     this.y = y;
     this.c = color;
@@ -137,24 +146,34 @@ class UIText {
     this.w = 0.6 * font * n;
   }
 
-  left() {
+  left(): XY {
     return xy(this.x - this.w, this.y);
   }
 
-  draw(ctx) {
-    Draw.fill_text(ctx, this.text, this.x, this.y, this.c, this.font, this.textAlign, this.textBaseline);
+  draw(ctx: CanvasRenderingContext2D) {
+    Draw.fill_text(
+      ctx,
+      this.text,
+      this.x,
+      this.y,
+      this.c,
+      this.font,
+      this.textAlign,
+      this.textBaseline
+    );
   }
 }
 
 class UIButton extends UIRect {
-  label: any;
-  on_click: any;
-  state: any;
-  base_color: any;
-  draw_tower: any;
+  label: UIText | null;
+  on_click: ClickCallback;
+  state: string;
+  base_color: string;
+  draw_tower: boolean;
   painter: any;
-  tooltip_card: any;
-  name: any;
+  tooltip_card: Card | null;
+  name: string;
+  card: Card | null; // TODO remove this in favor of tooltip_card
 
   constructor(
     x,
@@ -192,7 +211,7 @@ class UIButton extends UIRect {
     }
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     if (this.state === "hidden") {
       return;
     }
@@ -219,7 +238,7 @@ class UIButton extends UIRect {
     }
   }
 
-  transition(state) {
+  transition(state: string) {
     console.assert(this.state != state);
     this.state = state;
     const blue = "rgba(0,128,255,1)";
@@ -240,7 +259,7 @@ class UIButton extends UIRect {
     }
   }
 
-  click(x, y) {
+  click(x: number, y: number) {
     if (this.state === "hidden") {
       return;
     }
@@ -249,7 +268,7 @@ class UIButton extends UIRect {
     }
   }
 
-  release(x, y) {
+  release(x: number, y: number) {
     if (this.state === "hidden") {
       return;
     }
@@ -265,11 +284,11 @@ class UIButton extends UIRect {
     }
   }
 
-  hover(x, y) {
+  hover(x: number, y: number): any[] {
     if (this.state === "hidden") {
       return [];
     }
-    const inside = this.is_inside(x, y);
+    const inside: boolean = this.is_inside(x, y);
     if (this.state === "hovered" && !inside) {
       this.transition("active");
     } else if (this.state === "active" && inside) {
@@ -283,22 +302,32 @@ class UIButton extends UIRect {
 }
 
 class UI extends UIRect {
-  grid_size: any;
-  spacing: any;
-  btn_h: any;
-  btn_y: any;
+  grid_size: number;
+  spacing: number;
+  btn_h: number;
+  btn_y: number;
   painter: any;
-  buttons: any;
-  inventory_buttons: any;
-  next_x: any;
-  selected: any;
-  start_button: any;
-  interest: any;
-  money: any;
-  lives: any;
-  level: any;
+  buttons: any[];
+  inventory_buttons: any[];
+  next_x: number;
+  selected: UIButton | null;
+  start_button: UIButton;
+  interest: UIText;
+  money: UIText;
+  lives: UIText;
+  level: UIText;
 
-  constructor(x, y, w, h, fill, stroke, grid_size, line_width, painter) {
+  constructor(
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    fill: string,
+    stroke: string,
+    grid_size: number,
+    line_width: number,
+    painter: any
+  ) {
     super(x, y, w, h, fill, stroke, 0, 0);
     this.line_width = line_width;
     this.grid_size = grid_size;
@@ -320,7 +349,7 @@ class UI extends UIRect {
     this.add_tower_button();
     this.selected = null;
 
-    let flow = xy(x, y);
+    let flow: XY = xy(x, y);
     flow.x += w - grid_size;
     flow.y += h / 2;
     {
@@ -389,7 +418,7 @@ class UI extends UIRect {
     }
   }
 
-  refresh(game) {
+  refresh(game: Game) {
     for (let i = 0; i < game.inventory.length; ++i) {
       const card = game.inventory[i];
       const button = this.inventory_buttons[i];
@@ -420,7 +449,7 @@ class UI extends UIRect {
       this.line_width
     );
 
-    button.on_click = (btn) => {
+    button.on_click = (btn: UIButton) => {
       this.selected = btn;
       if (btn.state != "selected") {
         btn.transition("selected");
@@ -443,19 +472,19 @@ class UI extends UIRect {
     return button;
   }
 
-  click(x, y) {
+  click(x: number, y: number) {
     for (let button of this.buttons) {
       button.click(x, y);
     }
   }
 
-  release(x, y) {
+  release(x: number, y: number) {
     for (let button of this.buttons) {
       button.release(x, y);
     }
   }
 
-  hover(x, y) {
+  hover(x: number, y: number) {
     let match = [];
     for (let button of this.buttons) {
       let r = button.hover(x, y);
@@ -466,7 +495,7 @@ class UI extends UIRect {
     return match;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     Draw.rectangle(ctx, this.x, this.y, this.w, this.h, this.fill, null);
     this.draw_children(ctx);
   }

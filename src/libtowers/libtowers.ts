@@ -8,29 +8,30 @@ import {
   randint,
   text_wrap,
 } from "./utils.js";
+import type { CR } from "../libtowers/interfaces";
 
 class Game {
   painter: any;
-  paused: any;
+  paused: boolean;
   on_victory: any;
-  level: any;
-  lives: any;
-  remaining: any;
-  money: any;
-  rows: any;
-  columns: any;
-  towers: any;
-  enemies: any;
-  delay: any;
-  path: any;
-  inventory: any;
-  perfect: any;
-  tiles: any;
-  spawning: any;
-  goal: any;
-  spawn: any;
+  level: number;
+  lives: number;
+  remaining: any[];
+  money: number;
+  rows: number;
+  columns: number;
+  towers: any[];
+  enemies: any[];
+  delay: number;
+  path: any[];
+  inventory: Card[];
+  perfect: boolean;
+  tiles: any[][];
+  spawning: boolean;
+  goal: CR;
+  spawn: CR;
 
-  constructor(columns, rows, painter) {
+  constructor(columns: number, rows: number, painter: any) {
     this.painter = painter;
     this.paused = true;
     this.on_victory = null;
@@ -110,7 +111,7 @@ class Game {
     return counter;
   }
 
-  is_empty_rect(shape, col, row) {
+  is_empty_rect(shape: Shape, col: number, row: number): boolean {
     let start_c = col - 1;
     let start_r = row - 1;
     let w = shape.c + 2;
@@ -127,7 +128,7 @@ class Game {
     return true;
   }
 
-  place_path(c, r) {
+  place_path(c: number, r: number) {
     if (this.is_outside(c, r)) {
       return;
     }
@@ -138,15 +139,15 @@ class Game {
     this.tiles[c][r] = "path";
   }
 
-  is_outside(c, r) {
+  is_outside(c: number, r: number): boolean {
     return c < 0 || r < 0 || r >= this.rows || c >= this.columns;
   }
 
-  is_inside(c, r) {
+  is_inside(c: number, r: number): boolean {
     return !this.is_outside(c, r);
   }
 
-  is_empty(c, r) {
+  is_empty(c: number, r: number): boolean {
     if (this.is_outside(c, r)) {
       return false;
     }
@@ -164,7 +165,7 @@ class Game {
     return null;
   }
 
-  is_path(c, r) {
+  is_path(c: number, r: number) {
     return this.tiles[c][r] === "path";
   }
 
@@ -179,7 +180,7 @@ class Game {
     }
   }
 
-  set_path(path) {
+  set_path(path: any[]) {
     this.path = path;
     for (let pos of path) {
       this.place_path(pos.c, pos.r);
@@ -199,7 +200,7 @@ class Game {
     }
   }
 
-  fill_distances(c, r, distance) {
+  fill_distances(c: number, r: number, distance: number) {
     console.assert(Number.isInteger(c));
     console.assert(Number.isInteger(r));
     console.assert(Number.isInteger(distance));
@@ -237,7 +238,7 @@ class Game {
     this.fill_distances(c + 1, r, distance + 1);
   }
 
-  get_distance(c, r) {
+  get_distance(c: number, r: number) {
     if (this.is_outside(c, r)) {
       return null;
     }
@@ -249,7 +250,7 @@ class Game {
     return tile;
   }
 
-  find_path(start_c, start_r) {
+  find_path(start_c: number, start_r: number) {
     const PI = Math.PI;
     const target = position(this.goal.c - 1, this.goal.r);
     let visited = [];
@@ -314,7 +315,7 @@ class Game {
     return true;
   }
 
-  get_tower(position) {
+  get_tower(position: CR) {
     if (position === null) {
       return null;
     }
@@ -341,12 +342,12 @@ class Game {
     return Tower.price(name) * 2;
   }
 
-  can_afford(card, position = null) {
+  can_afford(card, position: null | CR = null) {
     card = this.find_card(card);
     return this.money >= this.price(card.name, position);
   }
 
-  _try_place_tower(c, r, card) {
+  _try_place_tower(c: number, r: number, card) {
     card = this.find_card(card);
     let name = card === "Rock" ? "Rock" : card.name;
     if (!this.spawning) {
@@ -377,7 +378,7 @@ class Game {
     return tower;
   }
 
-  place_tower(c, r, card) {
+  place_tower(c: number, r: number, card) {
     card = this.find_card(card);
     let name = this.spawning ? "Rock" : card.name;
     if (!this.spawning) {
@@ -414,7 +415,7 @@ class Game {
     return tower;
   }
 
-  has_tower(c, r) {
+  has_tower(c: number, r: number): boolean {
     if (this.is_outside(c, r)) {
       return false;
     }
@@ -429,7 +430,7 @@ class Game {
     return true;
   }
 
-  can_place(c, r, card) {
+  can_place(c: number, r: number, card): boolean {
     card = this.find_card(card);
     let name = card.name;
     if (!this.spawning && !this.have_card(name)) {
@@ -456,7 +457,7 @@ class Game {
     return true;
   }
 
-  find_card(name) {
+  find_card(name: string) {
     for (let card of this.inventory) {
       if (card.name === name) {
         return card;
@@ -465,10 +466,10 @@ class Game {
     return name;
   }
 
-  grid_click(c, r, card) {
+  grid_click(c: number, r: number, card): Tower | null {
     card = this.find_card(card);
     if (this.lives <= 0) {
-      return;
+      return null;
     }
     if (this.can_place(c, r, card.name)) {
       if (this.paused || !this.is_path(c, r)) {
@@ -495,7 +496,7 @@ class Game {
     this.delay = 0.0;
   }
 
-  get banks() {
+  get banks(): number {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "Bank") {
@@ -506,13 +507,13 @@ class Game {
   }
 
   get level_reward() {
-    let n = this.banks + 1;
+    let n: number = this.banks + 1;
     let fixed = 2 * n;
     let interest = (n * 10) / 100;
     return Math.floor(fixed + interest * this.money);
   }
 
-  have_card(name) {
+  have_card(name: string) {
     for (let x of this.inventory) {
       if (x.name === name) {
         return true;
@@ -567,7 +568,7 @@ class Game {
     this.on_victory();
   }
 
-  tick(ms) {
+  tick(ms: number) {
     if (this.lives === 0) {
       return;
     }
@@ -625,12 +626,12 @@ class Game {
 }
 
 class Card {
-  name: any;
-  description: any;
-  _price: any;
-  game: any;
+  name: string;
+  description: string;
+  _price: number;
+  game: Game;
 
-  constructor(name, description, price, game) {
+  constructor(name: string, description: string, price: number, game: Game) {
     this.name = name;
     this.description = text_wrap(description, 18);
     this._price = price;
@@ -657,4 +658,4 @@ class Card {
   }
 }
 
-export { Game };
+export { Game, Card };

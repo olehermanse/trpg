@@ -1,21 +1,21 @@
 import { xy, position, number_string } from "../libtowers/utils.js";
-import { Game } from "../libtowers/libtowers.js";
+import { Game, Card } from "../libtowers/libtowers.js";
 import { Tower } from "../libtowers/towers.js";
 import { Draw } from "./draw.js";
 import { Painter } from "./painter.js";
 import { UI } from "./ui.js";
 import { FG, BG, GREY } from "./colors.js";
+import type { XY, CR, Callback } from "../libtowers/interfaces";
 
 class Tooltip {
-
-  pos: any;
-  card: any;
+  pos: XY;
+  card: Card;
   opacity: number;
   fading_in: boolean;
   fade_in_time: number;
   delay: number;
 
-  constructor(pos, card) {
+  constructor(pos: XY, card: Card) {
     this.pos = pos;
     this.card = card;
     this.opacity = 0.0;
@@ -62,10 +62,10 @@ class Tooltip {
 }
 
 class CanvasManager {
-  canvas: any;
-  ctx: any;
-  painter: any;
-  screenshot: any;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  painter: Painter;
+  screenshot: HTMLImageElement;
   columns: number;
   rows: number;
   scale: number;
@@ -79,14 +79,21 @@ class CanvasManager {
   grid_start: number;
   grid_height: number;
   grid_end: number;
-  game: any;
-  ui: any;
+  game: Game;
+  ui: UI;
   space_pressed: boolean;
-  preview: any;
-  mouse: any;
-  tooltip: any;
+  preview: Tower;
+  mouse: XY;
+  tooltip: Tooltip;
 
-  constructor(canvas, ctx, columns = 20, rows = 13, width = 1200, scale = 1.0) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    columns: number = 20,
+    rows: number = 13,
+    width: number = 1200,
+    scale: number = 1.0
+  ) {
     this.canvas = canvas;
     this.ctx = ctx;
     this.painter = new Painter(this);
@@ -131,28 +138,28 @@ class CanvasManager {
     this.tooltip = null;
   }
 
-  canvas_to_grid_int(p, offset = 0) {
+  canvas_to_grid_int(p: number, offset: number = 0) {
     return Math.floor((p - offset) / this.grid_size);
   }
 
-  grid_to_canvas(p, offset = 0) {
+  grid_to_canvas(p: null | number | CR, offset: number = 0) {
     if (p === null) {
       return p;
     }
-    if (isNaN(p)) {
-      return xy(
-        this.grid_to_canvas(p.c),
-        this.grid_to_canvas(p.r, this.grid_start)
-      );
+    if (typeof p == "number") {
+      return offset + p * this.grid_size + this.grid_size / 2;
     }
-    return offset + p * this.grid_size + this.grid_size / 2;
+    return xy(
+      this.grid_to_canvas(p.c),
+      this.grid_to_canvas(p.r, this.grid_start)
+    );
   }
 
-  offset_to_canvas(p, canvas) {
+  offset_to_canvas(p: number, canvas: HTMLCanvasElement) {
     return (p / canvas.getBoundingClientRect().width) * this.width;
   }
 
-  draw_wall(ctx, c, r) {
+  draw_wall(ctx: CanvasRenderingContext2D, c: number, r: number) {
     Draw.rectangle(
       ctx,
       c * this.grid_size,
@@ -163,7 +170,7 @@ class CanvasManager {
     );
   }
 
-  draw_path(ctx, c, r) {
+  draw_path(ctx: CanvasRenderingContext2D, c: number, r: number) {
     const color = "rgba(200,200,200,0.5)";
     Draw.rectangle(
       ctx,
@@ -175,7 +182,7 @@ class CanvasManager {
     );
   }
 
-  draw_spawn(ctx, c, r) {
+  draw_spawn(ctx: CanvasRenderingContext2D, c: number, r: number) {
     const color = "rgba(0,128,0,1)";
     Draw.rectangle(
       ctx,
@@ -187,7 +194,7 @@ class CanvasManager {
     );
   }
 
-  draw_goal(ctx, c, r) {
+  draw_goal(ctx: CanvasRenderingContext2D, c: number, r: number) {
     const color = "rgba(200,200,0,1)";
     Draw.rectangle(
       ctx,
@@ -199,7 +206,7 @@ class CanvasManager {
     );
   }
 
-  draw_tile(ctx, c, r) {
+  draw_tile(ctx: CanvasRenderingContext2D, c: number, r: number) {
     const tile = this.game.tiles[c][r];
     if (tile === "wall") {
       this.draw_wall(ctx, c, r);
@@ -212,7 +219,7 @@ class CanvasManager {
     }
   }
 
-  draw_tiles(ctx) {
+  draw_tiles(ctx: CanvasRenderingContext2D) {
     for (let c = 0; c < this.columns; ++c) {
       for (let r = 0; r < this.rows; ++r) {
         this.draw_tile(ctx, c, r);
@@ -228,7 +235,7 @@ class CanvasManager {
     this.painter.paint_all(this.game.towers);
   }
 
-  draw_preview(ctx) {
+  draw_preview(ctx: CanvasRenderingContext2D) {
     if (this.preview === null) {
       return;
     }
@@ -240,7 +247,7 @@ class CanvasManager {
     ctx.globalAlpha = 1.0;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     if (this.game.lives <= 0 && this.screenshot != null) {
       let w = this.width;
       let h = this.height;
@@ -248,14 +255,7 @@ class CanvasManager {
       Draw.image(ctx, this.screenshot, w / 4, h / 4, w / 2, h / 2);
       let level = this.game.level;
       let cash = this.game.money;
-      Draw.text(
-        ctx,
-        w / 2,
-        (1 * h) / 8,
-        "Game over",
-        BG,
-        this.width / 12
-      );
+      Draw.text(ctx, w / 2, (1 * h) / 8, "Game over", BG, this.width / 12);
       Draw.text(
         ctx,
         w / 2,
@@ -316,7 +316,7 @@ class CanvasManager {
     this.painter.paint_tooltip(this.tooltip);
   }
 
-  mouse_click(x, y) {
+  mouse_click(x: number, y: number) {
     this.ui.click(x, y);
 
     if (this.ui.selected === null) {
@@ -334,7 +334,7 @@ class CanvasManager {
     }
   }
 
-  update_preview(c, r, name) {
+  update_preview(c: number, r: number, name: string) {
     if (c === null && this.preview === null) {
       return;
     }
@@ -365,7 +365,7 @@ class CanvasManager {
     this.preview.level = 1;
   }
 
-  update_tooltip(x, y, hovered) {
+  update_tooltip(x: number, y: number, hovered: any[]) {
     let found = null;
     for (let x of hovered) {
       if (x.tooltip_card != null) {
@@ -389,7 +389,7 @@ class CanvasManager {
     this.tooltip.fade_in();
   }
 
-  mouse_move(x, y) {
+  mouse_move(x: number, y: number) {
     this.mouse = xy(x, y);
     let hovered = this.ui.hover(x, y);
     this.update_tooltip(x, y, hovered);
@@ -402,26 +402,30 @@ class CanvasManager {
     this.update_preview(c, r, name);
   }
 
-  mouse_release(x, y) {
+  mouse_release(x: number, y: number) {
     this.ui.release(x, y);
   }
 
-  key_down(key) {
+  key_down(key: string) {
     if (key === " ") {
       if (!this.space_pressed && this.game.paused) {
-        this.ui.start_button.on_click();
+        this.ui.start_button.on_click(this.ui.start_button);
       }
       this.space_pressed = true;
     }
   }
 
-  key_up(key) {
+  key_up(key: string) {
     if (key === " ") {
       this.space_pressed = false;
     }
   }
 
-  setup_events(canvas, on_start_click, on_victory) {
+  setup_events(
+    canvas: HTMLCanvasElement,
+    on_start_click: Callback,
+    on_victory: Callback
+  ) {
     this.ui.start_button.on_click = on_start_click;
     this.game.on_victory = on_victory;
 
