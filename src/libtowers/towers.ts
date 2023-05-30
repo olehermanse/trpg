@@ -1,22 +1,29 @@
 import { get_rotation, dps, distance } from "./utils.js";
+import { Enemy } from "./enemies.js";
 
 class Tower {
-  type: any;
-  name: any;
-  c: any;
-  r: any;
+  type: string;
+  name: string;
+  c: number;
+  r: number;
   painter: any;
-  price: any;
-  rotation: any;
-  target: any;
-  intensity: any;
-  range: any;
-  level: any;
-  charge_time: any;
-  dps: any;
-  slow: any;
+  price: number;
+  rotation: number;
+  target: Enemy | null;
+  intensity: number;
+  range: number;
+  level: number;
+  charge_time: number;
+  dps: number;
+  slow: number;
 
-  constructor(c, r, name, price, painter = null) {
+  constructor(
+    c: number,
+    r: number,
+    name: string,
+    price: number,
+    painter: any = null
+  ) {
     this.type = "tower";
     this.name = name;
     this.c = c;

@@ -7,37 +7,37 @@ class Enemy {
   rotation: number;
   target_rotation: number;
   health: number;
-  path: any;
+  path: any[];
   path_index: number;
   slow: number;
   slow_time: number;
   travelled: number;
 
   // Accessing static constants for enemy type:
-  get reward() {
+  get reward(): number {
     //@ts-ignore
     return this.__proto__.constructor._REWARD;
   }
-  get name() {
+  get name(): string {
     //@ts-ignore
     return this.__proto__.constructor._NAME;
   }
-  get max_health() {
+  get max_health(): number {
     //@ts-ignore
     return this.__proto__.constructor._MAX_HEALTH;
   }
-  get speed() {
+  get speed(): number {
     //@ts-ignore
     return 2.0 * this.__proto__.constructor._SPEED;
   }
-  get delay() {
+  get delay(): number {
     return 1.0 / this.speed;
   }
-  get current_speed() {
+  get current_speed(): number {
     return this.speed * (1 - this.slow * 0.8);
   }
 
-  constructor(c: number, r:number, path: any) {
+  constructor(c: number, r: number, path: any) {
     this.type = "enemy";
     this.c = c;
     this.r = r;
@@ -170,7 +170,7 @@ class Final extends Enemy {
 }
 
 class Enemies {
-  static specific(mob, n: number, c: number, r: number, path) {
+  static specific(mob: any, n: number, c: number, r: number, path: any[]) {
     let enemies = [];
     for (let i = 0; i < n; ++i) {
       enemies.push(new mob(c, r, path));
@@ -240,4 +240,4 @@ class Enemies {
   }
 }
 
-export { Enemies };
+export { Enemies, Enemy };

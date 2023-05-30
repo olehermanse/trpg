@@ -21,3 +21,7 @@ export interface FillStroke {
   fill: string;
   stroke: string;
 }
+
+export type Callback = () => void;
+
+export type ClickCallback = (any) => void;

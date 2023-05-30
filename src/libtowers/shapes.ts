@@ -4,9 +4,9 @@ import { randint } from "./utils.js";
 class Shape {
   c: number;
   r: number;
-  rocks: any;
+  rocks: any[];
 
-  constructor(c: number, r: number, rocks) {
+  constructor(c: number, r: number, rocks: any[]) {
     this.c = c;
     this.r = r;
     this.rocks = rocks;
