@@ -134,7 +134,7 @@ class Shape {
         if (base[r][c] === 0) {
           continue;
         }
-        rocks.push(new Tower(c, r, "Rock", 1, null));
+        rocks.push(new Tower(c, r, "Rock", 1));
       }
     }
     return new Shape(columns, rows, rocks);

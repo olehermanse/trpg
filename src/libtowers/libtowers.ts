@@ -31,8 +31,7 @@ class Game {
   goal: CR;
   spawn: CR;
 
-  constructor(columns: number, rows: number, painter: any) {
-    this.painter = painter;
+  constructor(columns: number, rows: number) {
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
@@ -358,7 +357,7 @@ class Game {
     }
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
-    const tower = new Tower(c, r, name, this.price(name), this.painter);
+    const tower = new Tower(c, r, name, this.price(name));
     const on_path = this.is_path(c, r);
 
     const save = this.tiles[c][r];

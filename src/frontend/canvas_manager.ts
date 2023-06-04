@@ -113,7 +113,7 @@ class CanvasManager {
     this.height = this.grid_end + this.grid_size;
     this.real_height = this.height * scale;
 
-    this.game = new Game(this.columns, this.rows, this.painter);
+    this.game = new Game(this.columns, this.rows);
     this.game.spawn_rocks();
     const UI_X = 0;
     const UI_Y = this.grid_end - this.grid_size;
@@ -324,14 +324,11 @@ class CanvasManager {
     }
 
     const card = this.ui.selected.card;
-    const tower = this.game.grid_click(
+    this.game.grid_click(
       this.canvas_to_grid_int(x),
       this.canvas_to_grid_int(y, this.grid_start),
       card
     );
-    if (tower != null) {
-      tower.painter = this.painter;
-    }
   }
 
   update_preview(c: number, r: number, name: string) {
@@ -349,7 +346,7 @@ class CanvasManager {
     }
 
     if (this.preview === null) {
-      this.preview = new Tower(c, r, name, this.game.price(name), this.painter);
+      this.preview = new Tower(c, r, name, this.game.price(name));
     } else {
       this.preview.r = r;
       this.preview.c = c;

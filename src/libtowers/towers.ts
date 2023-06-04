@@ -21,14 +21,12 @@ class Tower {
     c: number,
     r: number,
     name: string,
-    price: number,
-    painter: any = null
+    price: number
   ) {
     this.type = "tower";
     this.name = name;
     this.c = c;
     this.r = r;
-    this.painter = painter;
     this.price = price;
     this.rotation = Math.PI / 2;
     this.target = null;
