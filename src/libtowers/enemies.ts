@@ -1,4 +1,4 @@
-import { shuffle } from "./utils.js";
+import { shuffle } from "./utils";
 
 class Enemy {
   type: string;

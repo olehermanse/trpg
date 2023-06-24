@@ -1,7 +1,7 @@
-import { xy } from "../libtowers/utils.js";
+import { xy } from "../libtowers/utils";
 import { ClickCallback, XY } from "../libtowers/interfaces";
-import { Draw } from "./draw.js";
-import { Game, Card } from "../libtowers/libtowers.js";
+import { Draw } from "./draw";
+import { Game, Card } from "../libtowers/libtowers";
 
 class UIRect {
   x: number;

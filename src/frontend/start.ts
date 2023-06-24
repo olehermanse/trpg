@@ -1,4 +1,4 @@
-import { CanvasManager } from "./canvas_manager.js";
+import { CanvasManager } from "./canvas_manager";
 
 let canvas_manager = null;
 

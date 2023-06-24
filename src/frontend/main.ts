@@ -1,3 +1,3 @@
-import { start } from './start.js';
+import { start } from "./start";
 
 start(document.getElementById("towers_canvas"));
