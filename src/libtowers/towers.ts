@@ -1,5 +1,5 @@
-import { get_rotation, dps, distance } from "./utils.js";
-import { Enemy } from "./enemies.js";
+import { get_rotation, dps, distance } from "./utils";
+import { Enemy } from "./enemies";
 
 class Tower {
   type: string;
@@ -17,12 +17,7 @@ class Tower {
   dps: number;
   slow: number;
 
-  constructor(
-    c: number,
-    r: number,
-    name: string,
-    price: number
-  ) {
+  constructor(c: number, r: number, name: string, price: number) {
     this.type = "tower";
     this.name = name;
     this.c = c;

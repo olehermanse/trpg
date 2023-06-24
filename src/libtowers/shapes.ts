@@ -1,5 +1,5 @@
-import { Tower } from "./towers.js";
-import { randint } from "./utils.js";
+import { Tower } from "./towers";
+import { randint } from "./utils";
 
 class Shape {
   c: number;

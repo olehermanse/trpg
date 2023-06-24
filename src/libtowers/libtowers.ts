@@ -1,13 +1,7 @@
-import { Enemies } from "./enemies.js";
-import { Tower } from "./towers.js";
-import { Shape } from "./shapes.js";
-import {
-  get_rotation,
-  seconds,
-  position,
-  randint,
-  text_wrap,
-} from "./utils.js";
+import { Enemies } from "./enemies";
+import { Tower } from "./towers";
+import { Shape } from "./shapes";
+import { get_rotation, seconds, position, randint, text_wrap } from "./utils";
 import type { CR } from "../libtowers/interfaces";
 
 class Game {
