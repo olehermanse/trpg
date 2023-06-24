@@ -17,10 +17,10 @@ class UIRect {
   children: any[];
 
   constructor(
-    x,
-    y,
-    w,
-    h,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
     fill = null,
     stroke = null,
     padding = 0,
