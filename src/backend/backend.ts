@@ -6,61 +6,87 @@ for await (const conn of server) {
   handleHttp(conn).catch(console.error);
 }
 
+function illegalURL(path) {
+  return (
+    !path.startsWith("/") ||
+    path.includes("..") ||
+    path.includes("//") ||
+    path.includes(" ") ||
+    path.includes(";") ||
+    path.includes(",") ||
+    path.includes("'") ||
+    path.includes('"') ||
+    path.includes("*")
+  );
+}
+
+function getContentType(path: string): string {
+  if (path === "/index.html") {
+    return "text/html";
+  }
+  if (path === "/favicon.ico") {
+    return "image/x-icon";
+  }
+  if (path.endsWith(".js")) {
+    return "application/javascript";
+  }
+  if (path.endsWith(".css")) {
+    return "text/css";
+  }
+  return "";
+}
+
+async function notFound(requestEvent) {
+  const notFoundResponse = new Response("404 Not Found", { status: 404 });
+  await requestEvent.respondWith(notFoundResponse);
+}
+
+async function handleAPI(requestEvent) {
+  await notFound(requestEvent);
+}
+
+async function handleFile(requestEvent, filepath) {
+  if (filepath === "/") {
+    filepath = "/index.html";
+  }
+
+  const contentType: string = getContentType(filepath);
+  if (contentType === "") {
+    await notFound(requestEvent);
+    return;
+  }
+
+  // Try opening the file
+  let file;
+  try {
+    file = await Deno.open(`./dist${filepath}`, { read: true });
+  } catch {
+    await notFound(requestEvent);
+    return;
+  }
+
+  const readableStream = file.readable;
+  const headers: HeadersInit = { "content-type": contentType };
+  const response = new Response(readableStream, { headers: headers });
+  await requestEvent.respondWith(response);
+  return;
+}
+
 async function handleHttp(conn: Deno.Conn) {
   const httpConn = Deno.serveHttp(conn);
   for await (const requestEvent of httpConn) {
-    // Use the request pathname as filepath
     const url = new URL(requestEvent.request.url);
     let filepath = decodeURIComponent(url.pathname);
 
-    if (
-      !filepath.startsWith("/") ||
-      filepath.includes("..") ||
-      filepath.includes("//") ||
-      filepath.includes(" ") ||
-      filepath.includes(";") ||
-      filepath.includes(",") ||
-      filepath.includes("'") ||
-      filepath.includes('"') ||
-      filepath.includes("*")
-    ) {
-      const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      await requestEvent.respondWith(notFoundResponse);
+    if (illegalURL(filepath)) {
+      await notFound(requestEvent);
+      continue;
     }
-
-    if (filepath === "/") {
-      filepath = "/index.html";
-    }
-
-    let headers = {};
-    if (filepath === "/index.html") {
-      headers["content-type"] = "text/html";
-    } else if (filepath === "/favicon.ico") {
-      headers["content-type"] = "image/x-icon";
-    } else if (filepath.endsWith(".js")) {
-      headers["content-type"] = "application/javascript";
-    } else if (filepath.endsWith(".css")) {
-      headers["content-type"] = "text/css";
-    } else {
-      const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      await requestEvent.respondWith(notFoundResponse);
-    }
-
-    // Try opening the file
-    let file;
-    try {
-      file = await Deno.open(`./dist${filepath}`, { read: true });
-    } catch {
-      // If the file cannot be opened, return a "404 Not Found" response
-      const notFoundResponse = new Response("404 Not Found", { status: 404 });
-      await requestEvent.respondWith(notFoundResponse);
+    if (filepath.startsWith("/api/")) {
+      await handleAPI(requestEvent, filepath);
       continue;
     }
 
-    // Build a readable stream so the file doesn't have to be fully loaded into
-    // memory while we send it
-    const readableStream = file.readable;
-    const response = new Response(readableStream, { headers: headers });
-    await requestEvent.respondWith(response);
+    await handleFile(requestEvent, filepath);
   }
 }
