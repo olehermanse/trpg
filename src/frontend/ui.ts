@@ -127,7 +127,6 @@ class UI extends UIRect {
       const button = this.inventory_buttons[i];
       button.name = card.name; // TODO: Remove button name
       button.card = card;
-      button.tooltip_card = card;
       button.show();
     }
     if (this.selected === null) {

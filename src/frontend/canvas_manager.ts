@@ -365,7 +365,7 @@ class CanvasManager {
   update_tooltip(x: number, y: number, hovered: any[]) {
     let found = null;
     for (let x of hovered) {
-      if (x.tooltip_card != null) {
+      if (x.card != null) {
         found = x;
       }
     }
@@ -376,13 +376,13 @@ class CanvasManager {
       return;
     }
     if (this.tooltip === null) {
-      this.tooltip = new Tooltip(xy(x, y), found.tooltip_card);
+      this.tooltip = new Tooltip(xy(x, y), found.card);
       this.tooltip.fade_in();
       return;
     }
     this.tooltip.pos.x = x;
     this.tooltip.pos.y = y;
-    this.tooltip.card = found.tooltip_card;
+    this.tooltip.card = found.card;
     this.tooltip.fade_in();
   }
 
