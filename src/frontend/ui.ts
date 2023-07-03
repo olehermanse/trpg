@@ -169,7 +169,7 @@ class UIButton extends UIRect {
   on_click: ClickCallback;
   state: string;
   base_color: string;
-  draw_tower: boolean;
+  draw_icon_callback: any; // TODO make type for draw icon callback
   painter: any;
   tooltip_card: Card | null;
   name: string;
@@ -196,7 +196,7 @@ class UIButton extends UIRect {
     this.on_click = null;
     this.state = "active";
     this.base_color = stroke;
-    this.draw_tower = false;
+    this.draw_icon_callback = null;
     this.painter = null;
     this.tooltip_card = null;
   }
@@ -215,10 +215,8 @@ class UIButton extends UIRect {
     if (this.state === "hidden") {
       return;
     }
-    if (this.draw_tower) {
-      this.painter.paint_xy("tower", this.name, this.center(), this.w, {
-        draw_price: true,
-      });
+    if (this.draw_icon_callback != null) {
+      this.draw_icon_callback(this.center(), this.w);
     }
     super.draw(ctx);
   }
@@ -461,8 +459,13 @@ class UI extends UIRect {
         }
       }
     };
-    button.draw_tower = true;
     button.painter = this.painter;
+    const callback = (pos: XY, size: number) => {
+      this.painter.paint_xy("tower", button.name, pos, size, {
+        draw_price: true,
+      });
+    };
+    button.draw_icon_callback = callback;
 
     this.inventory_buttons.push(button);
     this.buttons.push(button);
