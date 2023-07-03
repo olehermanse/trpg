@@ -1,4 +1,4 @@
-import { shuffle } from "./utils";
+import { shuffle } from "../libbasic/utils";
 
 class Enemy {
   type: string;

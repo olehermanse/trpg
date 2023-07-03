@@ -1,6 +1,6 @@
-import { xy } from "../libtowers/utils";
-import { ClickCallback, XY } from "../libtowers/interfaces";
-import { Draw } from "./draw";
+import { xy } from "../libbasic/utils";
+import { ClickCallback, XY } from "../libbasic/interfaces";
+import { Draw } from "../libdraw/draw";
 import { Game, Card } from "../libtowers/libtowers";
 
 class UIRect {

@@ -1,5 +1,5 @@
 import { Tower } from "./towers";
-import { randint } from "./utils";
+import { randint } from "../libbasic/utils";
 
 class Shape {
   c: number;

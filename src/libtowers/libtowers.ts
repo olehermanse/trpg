@@ -1,8 +1,14 @@
 import { Enemies } from "./enemies";
 import { Tower } from "./towers";
 import { Shape } from "./shapes";
-import { get_rotation, seconds, position, randint, text_wrap } from "./utils";
-import type { CR } from "../libtowers/interfaces";
+import {
+  get_rotation,
+  seconds,
+  position,
+  randint,
+  text_wrap,
+} from "../libbasic/utils";
+import type { CR } from "../libbasic/interfaces";
 
 class Game {
   painter: any;
