@@ -1,4 +1,4 @@
-import { get_rotation, dps, distance } from "./utils";
+import { get_rotation, dps, distance } from "../libbasic/utils";
 import { Enemy } from "./enemies";
 
 class Tower {

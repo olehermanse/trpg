@@ -1,4 +1,4 @@
-import type { XY, CR, FillStroke } from "../libtowers/interfaces";
+import type { XY, CR, FillStroke } from "./interfaces";
 
 function xy(x: number, y: number): XY {
   return { x: x, y: y };

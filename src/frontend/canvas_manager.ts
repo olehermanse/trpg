@@ -1,11 +1,11 @@
-import { xy, position, number_string } from "../libtowers/utils";
+import { xy, position, number_string } from "../libbasic/utils";
 import { Game, Card } from "../libtowers/libtowers";
 import { Tower } from "../libtowers/towers";
-import { Draw } from "./draw";
+import { Draw } from "../libdraw/draw";
 import { Painter } from "./painter";
 import { UI } from "./ui";
-import { FG, BG, GREY } from "./colors";
-import type { XY, CR, Callback } from "../libtowers/interfaces";
+import { FG, BG, GREY } from "../libdraw/colors";
+import type { XY, CR, Callback } from "../libbasic/interfaces";
 
 class Tooltip {
   pos: XY;

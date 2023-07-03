@@ -2,7 +2,7 @@
 // based on the code for drawing primitives in draw.js
 // This is purely callback based, anything which will be drawn needs a pointer
 // to the painter object before draw is called.
-import { fill_stroke, xy, limit } from "../libtowers/utils";
+import { fill_stroke, xy, limit } from "../libbasic/utils";
 import {
   WHITE,
   GREY,
@@ -16,8 +16,8 @@ import {
   YELLOW,
   PURPLE,
   CYAN,
-} from "./colors";
-import { Draw } from "./draw";
+} from "../libdraw/colors";
+import { Draw } from "../libdraw/draw";
 
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 400;
