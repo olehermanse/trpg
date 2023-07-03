@@ -171,9 +171,8 @@ class UIButton extends UIRect {
   base_color: string;
   draw_icon_callback: any; // TODO make type for draw icon callback
   painter: any;
-  tooltip_card: Card | null;
   name: string;
-  card: Card | null; // TODO remove this in favor of tooltip_card
+  card: Card | null;
 
   constructor(
     x,
@@ -198,7 +197,7 @@ class UIButton extends UIRect {
     this.base_color = stroke;
     this.draw_icon_callback = null;
     this.painter = null;
-    this.tooltip_card = null;
+    this.card = null;
   }
 
   hide() {
