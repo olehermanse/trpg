@@ -1,65 +1,12 @@
 import { xy, position, number_string } from "../libbasic/utils";
-import { Game, Card } from "../libtowers/libtowers";
+import { Game } from "../libtowers/libtowers";
 import { Tower } from "../libtowers/towers";
 import { Draw } from "../libdraw/draw";
 import { Painter } from "./painter";
 import { UI } from "./ui";
+import { UITooltip } from "../libdraw/ui_elements";
 import { FG, BG, GREY } from "../libdraw/colors";
 import type { XY, CR, Callback } from "../libbasic/interfaces";
-
-class Tooltip {
-  pos: XY;
-  card: Card;
-  opacity: number;
-  fading_in: boolean;
-  fade_in_time: number;
-  delay: number;
-
-  constructor(pos: XY, card: Card) {
-    this.pos = pos;
-    this.card = card;
-    this.opacity = 0.0;
-    this.fading_in = false;
-    this.fade_in_time = 0.1;
-    this.delay = 0.0;
-  }
-
-  fade_in() {
-    if (this.fading_in) {
-      return;
-    }
-    if (this.opacity <= 0.0 && this.delay <= 0.0) {
-      this.delay = 0.5;
-    }
-    this.fading_in = true;
-  }
-
-  fade_out() {
-    this.fading_in = false;
-    this.delay = 0.0;
-  }
-
-  update(ms) {
-    const s = (1.0 * ms) / 1000;
-    if (this.delay > 0.0) {
-      this.delay -= s;
-      return;
-    }
-    const fading_in = this.fading_in;
-    if (fading_in && this.opacity >= 1.0) {
-      return;
-    }
-    if (!fading_in && this.opacity <= 0.0) {
-      return;
-    }
-    const step = (1.0 / this.fade_in_time) * s;
-    if (fading_in) {
-      this.opacity += step;
-    } else {
-      this.opacity -= 0.5 * step;
-    }
-  }
-}
 
 class CanvasManager {
   canvas: HTMLCanvasElement;
@@ -84,7 +31,7 @@ class CanvasManager {
   space_pressed: boolean;
   preview: Tower;
   mouse: XY;
-  tooltip: Tooltip;
+  tooltip: UITooltip;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -376,7 +323,7 @@ class CanvasManager {
       return;
     }
     if (this.tooltip === null) {
-      this.tooltip = new Tooltip(xy(x, y), found.card);
+      this.tooltip = new UITooltip(xy(x, y), found.card);
       this.tooltip.fade_in();
       return;
     }
