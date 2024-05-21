@@ -1,4 +1,4 @@
-import { shuffle } from "../libbasic/utils";
+import { shuffle } from "@olehermanse/utils/funcs.js";
 
 class Enemy {
   type: string;

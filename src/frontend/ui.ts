@@ -1,6 +1,6 @@
-import { xy } from "../libbasic/utils";
+import { xy } from "@olehermanse/utils/funcs.js";
 import { XY } from "@olehermanse/utils";
-import { Draw } from "../libdraw/draw";
+import { Draw } from "@olehermanse/utils/draw.js";
 import { Game } from "../libtowers/libtowers";
 import { UIButton, UIRect, UIText } from "../libdraw/ui_elements";
 

@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": false, // TODO: Make this true & fix errors
     "resolveJsonModule": true,
     "isolatedModules": true,

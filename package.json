@@ -4,6 +4,9 @@
   "description": "https://towers.oleherman.com",
   "main": "index.js",
   "private": true,
+  "author": "",
+  "license": "MIT",
+  "homepage": "https://github.com/olehermanse/towers#readme",
   "scripts": {
     "build": "npm run build:vite",
     "build:vite": "vite build",
@@ -14,12 +17,9 @@
     "type": "git",
     "url": "git+https://github.com/olehermanse/towers.git"
   },
-  "author": "",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/olehermanse/towers/issues"
   },
-  "homepage": "https://github.com/olehermanse/towers#readme",
   "dependencies": {
     "@olehermanse/utils": "0.0.16",
     "typescript": "^5.4.5",
