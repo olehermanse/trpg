@@ -6,7 +6,7 @@ import { Painter } from "./painter";
 import { UI } from "./ui";
 import { UITooltip } from "../libdraw/ui_elements";
 import { FG, BG, GREY } from "../libdraw/colors";
-import type { XY, CR, Callback } from "../libbasic/interfaces";
+import type { XY, CR, Callback } from "@olehermanse/utils";
 
 class CanvasManager {
   canvas: HTMLCanvasElement;

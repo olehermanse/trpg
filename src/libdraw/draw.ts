@@ -2,7 +2,7 @@ const PI = 3.14159;
 const LINE_RATIO = 0.1;
 const SCALE = window.devicePixelRatio;
 
-import type { XY, XYR, XYWH } from "../libbasic/interfaces";
+import type { XY, XYR, XYWH } from "@olehermanse/utils";
 
 function sxy(x: number, y: number): XY {
   const obj: XY = {

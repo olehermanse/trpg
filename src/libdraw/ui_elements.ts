@@ -1,5 +1,5 @@
 import { xy } from "../libbasic/utils";
-import { ClickCallback, XY } from "../libbasic/interfaces";
+import { ClickCallback, XY } from "@olehermanse/utils";
 import { Draw } from "../libdraw/draw";
 import { Card } from "../libtowers/libtowers";
 

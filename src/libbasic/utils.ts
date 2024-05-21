@@ -1,4 +1,4 @@
-import type { XY, CR, FillStroke } from "./interfaces";
+import type { XY, CR, FillStroke } from "@olehermanse/utils";
 
 function xy(x: number, y: number): XY {
   return { x: x, y: y };
