@@ -8,7 +8,7 @@ import {
   randint,
   text_wrap,
 } from "../libbasic/utils";
-import type { CR } from "../libbasic/interfaces";
+import type { CR } from "@olehermanse/utils";
 
 class Game {
   painter: any;
