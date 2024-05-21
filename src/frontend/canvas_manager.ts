@@ -1,11 +1,11 @@
-import { xy, position, number_string } from "../libbasic/utils";
+import { xy, position, number_string } from "@olehermanse/utils/funcs.js";
 import { Game } from "../libtowers/libtowers";
 import { Tower } from "../libtowers/towers";
-import { Draw } from "../libdraw/draw";
+import { Draw } from "@olehermanse/utils/draw.js";
 import { Painter } from "./painter";
 import { UI } from "./ui";
 import { UITooltip } from "../libdraw/ui_elements";
-import { FG, BG, GREY } from "../libdraw/colors";
+import { FG, BG, GREY } from "@olehermanse/utils/colors.js";
 import type { XY, CR, Callback } from "@olehermanse/utils";
 
 class CanvasManager {

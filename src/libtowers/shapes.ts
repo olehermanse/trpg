@@ -1,5 +1,5 @@
 import { Tower } from "./towers";
-import { randint } from "../libbasic/utils";
+import { randint } from "@olehermanse/utils/funcs.js";
 
 class Shape {
   c: number;

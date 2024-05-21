@@ -7,7 +7,7 @@ import {
   position,
   randint,
   text_wrap,
-} from "../libbasic/utils";
+} from  "@olehermanse/utils/funcs.js";
 import type { CR } from "@olehermanse/utils";
 
 class Game {

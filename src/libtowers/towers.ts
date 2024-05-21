@@ -1,4 +1,4 @@
-import { get_rotation, dps, distance } from "../libbasic/utils";
+import { get_rotation, dps, distance } from "@olehermanse/utils/funcs.js";
 import { Enemy } from "./enemies";
 
 class Tower {

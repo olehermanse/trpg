@@ -1,6 +1,6 @@
-import { xy } from "../libbasic/utils";
+import { xy } from "@olehermanse/utils/funcs.js";
 import { ClickCallback, XY } from "@olehermanse/utils";
-import { Draw } from "../libdraw/draw";
+import { Draw } from  "@olehermanse/utils/draw.js";
 import { Card } from "../libtowers/libtowers";
 
 class UIRect {
