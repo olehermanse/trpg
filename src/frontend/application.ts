@@ -109,7 +109,8 @@ class Application {
   key_up(_key: string) {
   }
 
-  tick(_ms: number) {
+  tick(ms: number) {
+    this.game.tick(ms);
   }
 }
 
