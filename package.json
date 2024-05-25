@@ -1,12 +1,12 @@
 {
-  "name": "towers",
+  "name": "trpg",
   "version": "0.2.0",
-  "description": "https://towers.oleherman.com",
+  "description": "https://trpg.oleherman.com",
   "main": "index.js",
   "private": true,
   "author": "",
   "license": "MIT",
-  "homepage": "https://github.com/olehermanse/towers#readme",
+  "homepage": "https://github.com/olehermanse/trpg#readme",
   "scripts": {
     "build": "npm run build:vite",
     "build:vite": "vite build",
@@ -15,10 +15,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/olehermanse/towers.git"
+    "url": "git+https://github.com/olehermanse/trpg.git"
   },
   "bugs": {
-    "url": "https://github.com/olehermanse/towers/issues"
+    "url": "https://github.com/olehermanse/trpg/issues"
   },
   "dependencies": {
     "@olehermanse/utils": "0.0.16",

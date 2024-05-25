@@ -1,3 +1,3 @@
 import { start } from "./start";
 
-start(document.getElementById("towers_canvas"));
+start(document.getElementById("trpg_canvas"));
