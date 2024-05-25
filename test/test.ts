@@ -1,4 +1,4 @@
-import { Game } from "../src/libtrpg/game";
+import { Game } from "../src/libtrpg/game.ts";
 
 // example.test.js
 import { describe, expect, test } from "vitest";

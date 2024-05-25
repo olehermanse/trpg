@@ -4,14 +4,14 @@ import { CR, XY } from "@olehermanse/utils";
 
 // TODO: Move these to utils package
 
-export function cr(c, r): CR {
+export function cr(c: number, r:number): CR {
   return { c: c, r: r };
 }
 
 export class WH {
   width: number;
   height: number;
-  constructor(width, height) {
+  constructor(width: number, height:number ) {
     this.width = width;
     this.height = height;
   }
@@ -22,7 +22,7 @@ export class Grid {
   height: number;
   columns: number;
   rows: number;
-  constructor(width, height, columns, rows) {
+  constructor(width: number, height: number, columns: number, rows: number) {
     this.width = width;
     this.height = height;
     this.columns = columns;
@@ -51,7 +51,7 @@ export class OXY {
   }
 }
 
-export function oxy(ox: numberm, oy: number, source: HTMLCanvasElement): OXY {
+export function oxy(ox: number, oy: number, source: HTMLCanvasElement): OXY {
   return new OXY(ox, oy, source);
 }
 
