@@ -2,11 +2,19 @@ import { Game } from "../src/libtrpg/game.ts";
 
 // example.test.js
 import { describe, expect, test } from "vitest";
+import { Grid } from "../src/todo_utils.ts";
 
 describe("Game", () => {
-  test("can be created with columns and rows", () => {
-    let game = new Game(4, 3);
-    expect(game.rows).toBe(3);
-    expect(game.columns).toBe(4);
+  test("can be created", () => {
+    let game = new Game(new Grid(400, 300, 4, 3));
+    expect(game).not.toBe(null);
+    expect(game).toBeInstanceOf(Game);
+  });
+  test("to have correct dimensions", () => {
+    let game = new Game(new Grid(400, 300, 4, 3));
+    expect(game.grid.columns).toBe(4);
+    expect(game.grid.rows).toBe(3);
+    expect(game.grid.cell_width).toBe(100);
+    expect(game.grid.cell_height).toBe(100);
   });
 });
