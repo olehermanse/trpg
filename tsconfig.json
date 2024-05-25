@@ -3,8 +3,9 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "dom"],
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "strict": false, // TODO: Make this true & fix errors
     "resolveJsonModule": true,
     "isolatedModules": true,

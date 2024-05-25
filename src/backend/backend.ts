@@ -6,7 +6,7 @@ for await (const conn of server) {
   handleHttp(conn).catch(console.error);
 }
 
-function illegalURL(path) {
+function illegalURL(path: string) {
   return (
     !path.startsWith("/") ||
     path.includes("..") ||
@@ -36,16 +36,16 @@ function getContentType(path: string): string {
   return "";
 }
 
-async function notFound(requestEvent) {
+async function notFound(requestEvent: any) {
   const notFoundResponse = new Response("404 Not Found", { status: 404 });
   await requestEvent.respondWith(notFoundResponse);
 }
 
-async function handleAPI(requestEvent) {
+async function handleAPI(requestEvent: any) {
   await notFound(requestEvent);
 }
 
-async function handleFile(requestEvent, filepath) {
+async function handleFile(requestEvent: any, filepath: string) {
   if (filepath === "/") {
     filepath = "/index.html";
   }
@@ -83,7 +83,7 @@ async function handleHttp(conn: Deno.Conn) {
       continue;
     }
     if (filepath.startsWith("/api/")) {
-      await handleAPI(requestEvent, filepath);
+      await handleAPI(requestEvent);
       continue;
     }
 

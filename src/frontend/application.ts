@@ -1,12 +1,10 @@
-import { Game } from "../libtrpg/game";
-import { Painter } from "./painter";
+import { Game } from "../libtrpg/game.ts";
+import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import { Draw } from "@olehermanse/utils/draw.js";
-import { OXY, oxy } from "../todo_utils";
+import { OXY, oxy } from "../todo_utils.ts";
 
 class Application {
   canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   painter: Painter;
   columns: number;
   rows: number;
@@ -20,7 +18,7 @@ class Application {
   line_width: number;
   grid_height: number;
   game: Game;
-  mouse: XY;
+  mouse: XY | null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -32,8 +30,7 @@ class Application {
     scale: number = 1.0,
   ) {
     this.canvas = canvas;
-    this.ctx = ctx;
-    this.painter = new Painter(this);
+    this.painter = new Painter(this, ctx);
     this.columns = columns;
     this.rows = rows;
     this.scale = scale;
@@ -50,21 +47,21 @@ class Application {
     this.game = new Game(this.columns, this.rows);
     this.mouse = null;
 
-    canvas.addEventListener("mousedown", (e) => {
-      const offset: OXY = oxy(e.offsetX, e.offsetY, canvas);
+    canvas.addEventListener("mousedown", (event:any) => {
+      const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_click(pos);
       this.mouse_move(pos);
     });
 
-    canvas.addEventListener("mousemove", (e) => {
-      const offset: OXY = oxy(e.offsetX, e.offsetY, canvas);
+    canvas.addEventListener("mousemove", (event:any) => {
+      const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_move(pos);
     });
 
-    window.addEventListener("mouseup", (e) => {
-      const offset: OXY = oxy(e.offsetX, e.offsetY, canvas);
+    window.addEventListener("mouseup", (event:any) => {
+      const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_release(pos);
       this.mouse_move(pos);
@@ -72,7 +69,7 @@ class Application {
 
     document.addEventListener(
       "keydown",
-      (event) => {
+      (event:any) => {
         if (event.key === " ") {
           // Prevent spacebar from scrolling page
           event.preventDefault();
@@ -84,7 +81,7 @@ class Application {
 
     document.addEventListener(
       "keyup",
-      (event) => {
+      (event:any) => {
         this.key_up(event.key);
       },
       false,
@@ -92,17 +89,7 @@ class Application {
   }
 
   draw() {
-    Draw.rectangle(this.ctx, 0, 0, this.width, this.height, "black", "black");
-    Draw.rectangle(this.ctx, 0, 0, 100, 100, "white", "white");
-    Draw.rectangle(
-      this.ctx,
-      this.width - 100,
-      this.height - 100,
-      100,
-      100,
-      "white",
-      "white",
-    );
+    this.painter.draw();
   }
 
   mouse_click(_pos: XY) {
