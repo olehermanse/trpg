@@ -1,7 +1,7 @@
 import { Game } from "../libtrpg/game.ts";
 import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import { OXY, oxy } from "../todo_utils.ts";
+import { Grid, OXY, oxy } from "../todo_utils.ts";
 
 class Application {
   canvas: HTMLCanvasElement;
@@ -44,23 +44,24 @@ class Application {
     this.line_width = this.grid_size / 20;
     this.grid_height = this.rows * this.grid_size;
 
-    this.game = new Game(this.columns, this.rows);
+    const grid = new Grid(this.width, this.height, this.columns, this.rows);
+    this.game = new Game(grid);
     this.mouse = null;
 
-    canvas.addEventListener("mousedown", (event:any) => {
+    canvas.addEventListener("mousedown", (event: any) => {
       const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_click(pos);
       this.mouse_move(pos);
     });
 
-    canvas.addEventListener("mousemove", (event:any) => {
+    canvas.addEventListener("mousemove", (event: any) => {
       const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_move(pos);
     });
 
-    window.addEventListener("mouseup", (event:any) => {
+    window.addEventListener("mouseup", (event: any) => {
       const offset: OXY = oxy(event.offsetX, event.offsetY, canvas);
       const pos: XY = offset.to_xy(this);
       this.mouse_release(pos);
@@ -69,7 +70,7 @@ class Application {
 
     document.addEventListener(
       "keydown",
-      (event:any) => {
+      (event: any) => {
         if (event.key === " ") {
           // Prevent spacebar from scrolling page
           event.preventDefault();
@@ -81,7 +82,7 @@ class Application {
 
     document.addEventListener(
       "keyup",
-      (event:any) => {
+      (event: any) => {
         this.key_up(event.key);
       },
       false,
@@ -92,7 +93,8 @@ class Application {
     this.painter.draw();
   }
 
-  mouse_click(_pos: XY) {
+  mouse_click(pos: XY) {
+    this.game.click(pos);
   }
 
   mouse_release(_pos: XY) {

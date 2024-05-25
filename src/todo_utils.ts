@@ -4,17 +4,21 @@ import { CR, XY } from "@olehermanse/utils";
 
 // TODO: Move these to utils package
 
-export function cr(c: number, r:number): CR {
+export function cr(c: number, r: number): CR {
   return { c: c, r: r };
 }
 
 export class WH {
   width: number;
   height: number;
-  constructor(width: number, height:number ) {
+  constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
   }
+}
+
+export function wh(width: number, height: number): WH {
+  return new WH(width, height);
 }
 
 export class Grid {
@@ -28,10 +32,14 @@ export class Grid {
     this.columns = columns;
     this.rows = rows;
   }
-}
 
-export function wh(width: number, height: number): WH {
-  return new WH(width, height);
+  get cell_width(): number {
+    return this.width / this.columns;
+  }
+
+  get cell_height(): number {
+    return this.height / this.rows;
+  }
 }
 
 export class OXY {
