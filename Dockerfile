@@ -1,4 +1,4 @@
-FROM node:18 AS build
+FROM node:20 AS build
 WORKDIR /towers
 COPY package-lock.json package.json ./
 RUN npm install --only=prod
@@ -13,7 +13,7 @@ RUN rm -rf dist
 RUN npm run build
 RUN bash add_version.sh
 
-FROM node:18 AS test
+FROM node:20 AS test
 WORKDIR /towers
 COPY --from=build /towers /towers
 COPY test test
