@@ -1,4 +1,4 @@
-import { get_rotation, dps, distance } from "@olehermanse/utils/funcs.js";
+import { distance, dps, get_rotation } from "@olehermanse/utils/funcs.js";
 import { Enemy } from "./enemies";
 
 class Tower {
@@ -57,14 +57,14 @@ class Tower {
         this.intensity = 1.0;
       }
       if (this.name === "Slow tower") {
-        const slow_factor =
-          this.level_factor * this.slow * this.intensity * sec;
+        const slow_factor = this.level_factor * this.slow * this.intensity *
+          sec;
         this.target.slow += slow_factor; // squares per second
         this.target.slow_time += 3 * slow_factor; // seconds
       }
       this.target.health -= dps(
         this.level_factor * this.dps * this.intensity,
-        ms
+        ms,
       );
       this.rotation = get_rotation(this, this.target);
     }

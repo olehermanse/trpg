@@ -29,7 +29,7 @@ class UI extends UIRect {
     stroke: string,
     grid_size: number,
     line_width: number,
-    painter: any
+    painter: any,
   ) {
     super(x, y, w, h, fill, stroke, 0, 0);
     this.line_width = line_width;
@@ -68,7 +68,7 @@ class UI extends UIRect {
         fill,
         stroke,
         "Start",
-        this.line_width
+        this.line_width,
       );
       this.buttons.push(button);
       this.start_button = button;
@@ -83,7 +83,7 @@ class UI extends UIRect {
         stroke,
         0.2 * h,
         "",
-        3
+        3,
       );
       interest.textAlign = "right";
       this.interest = interest;
@@ -105,7 +105,7 @@ class UI extends UIRect {
         this.stroke,
         0.3 * h,
         "",
-        8
+        8,
       );
       this.lives.textBaseline = "middle";
       this.lives.textAlign = "left";
@@ -148,7 +148,7 @@ class UI extends UIRect {
       null,
       this.stroke,
       null,
-      this.line_width
+      this.line_width,
     );
 
     button.on_click = (btn: UIButton) => {

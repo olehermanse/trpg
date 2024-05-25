@@ -2,20 +2,20 @@
 // based on the code for drawing primitives in draw.js
 // This is purely callback based, anything which will be drawn needs a pointer
 // to the painter object before draw is called.
-import { fill_stroke, xy, limit } from "@olehermanse/utils/funcs.js";
+import { fill_stroke, limit, xy } from "@olehermanse/utils/funcs.js";
 import {
-  WHITE,
-  GREY,
   BLACK,
-  GREEN,
   BRIGHT_BLUE,
-  DARK_BLUE,
   BRIGHT_PURPLE,
-  DARK_PURPLE,
-  RED,
-  YELLOW,
-  PURPLE,
   CYAN,
+  DARK_BLUE,
+  DARK_PURPLE,
+  GREEN,
+  GREY,
+  PURPLE,
+  RED,
+  WHITE,
+  YELLOW,
 } from "@olehermanse/utils/colors.js";
 import { Draw } from "@olehermanse/utils/draw.js";
 
@@ -120,12 +120,12 @@ class Painter {
     let x = limit(
       this.canvas_manager.grid_size + 10,
       pos.x,
-      this.canvas_manager.width - w - 10
+      this.canvas_manager.width - w - 10,
     );
     let y = limit(
       this.canvas_manager.grid_start + 10,
       pos.y,
-      this.canvas_manager.grid_end - this.canvas_manager.grid_size - h - 10
+      this.canvas_manager.grid_end - this.canvas_manager.grid_size - h - 10,
     );
     let tmp = ctx.globalAlpha;
     ctx.globalAlpha = opacity;
@@ -186,7 +186,7 @@ class Painter {
           r,
           t.rotation,
           triangle.fill,
-          triangle.stroke
+          triangle.stroke,
         );
         r = r / 2;
       }
@@ -200,7 +200,7 @@ class Painter {
         t.y + t.h / 2,
         String(t.price),
         "#ffff00",
-        t.h / 3.5
+        t.h / 3.5,
       );
       ctx.globalAlpha = tmp;
     }
@@ -224,7 +224,7 @@ class Painter {
         target.x,
         target.y,
         stroke,
-        0.1 * t.w * t.intensity
+        0.1 * t.w * t.intensity,
       );
     }
     Painter.draw_tower_generic(ctx, t, circle, triangle, effects);
@@ -242,7 +242,7 @@ class Painter {
         target.x,
         target.y,
         stroke,
-        0.1 * t.w * t.intensity
+        0.1 * t.w * t.intensity,
       );
     }
     Painter.draw_tower_generic(ctx, t, circle, triangle, effects);
@@ -260,7 +260,7 @@ class Painter {
         target.x,
         target.y,
         stroke,
-        0.1 * t.w * t.intensity
+        0.1 * t.w * t.intensity,
       );
     }
     Painter.draw_tower_generic(ctx, t, circle, triangle, effects);

@@ -1,7 +1,7 @@
 import { Game } from "../src/libtowers/libtowers";
 
 // example.test.js
-import { expect, test, describe } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe("Game", () => {
   test("can be created with columns and rows", () => {

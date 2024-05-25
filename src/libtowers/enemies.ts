@@ -215,9 +215,9 @@ class Enemies {
     if (level <= 30) {
       let enemies = [];
       while (enemies.length < level) {
-        if (enemies.length % 2 === 0)
+        if (enemies.length % 2 === 0) {
           enemies.push(...this.specific(Boss, 1, c, r, path));
-        else enemies.push(...this.specific(Purple, 1, c, r, path));
+        } else enemies.push(...this.specific(Purple, 1, c, r, path));
       }
       return enemies;
     }

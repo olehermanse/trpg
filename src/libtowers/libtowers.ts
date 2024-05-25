@@ -3,11 +3,11 @@ import { Tower } from "./towers";
 import { Shape } from "./shapes";
 import {
   get_rotation,
-  seconds,
   position,
   randint,
+  seconds,
   text_wrap,
-} from  "@olehermanse/utils/funcs.js";
+} from "@olehermanse/utils/funcs.js";
 import type { CR } from "@olehermanse/utils";
 
 class Game {
@@ -52,7 +52,7 @@ class Game {
         "Gun tower",
         "Deals damage. Very cost effective. Always targets the furthest enemy.",
         null,
-        this
+        this,
       ),
     ];
     this.spawning = false;
@@ -67,19 +67,19 @@ class Game {
     }
     console.assert(
       this.tiles[this.spawn.c][this.spawn.r] === "wall",
-      "Spawn not on wall"
+      "Spawn not on wall",
     );
     console.assert(
       this.tiles[this.goal.c][this.goal.r] === "wall",
-      "Goal not on wall"
+      "Goal not on wall",
     );
     console.assert(
       this.tiles[this.spawn.c + 1][this.spawn.r] === null,
-      "Spawn not accessible"
+      "Spawn not accessible",
     );
     console.assert(
       this.tiles[this.goal.c - 1][this.goal.r] === null,
-      "Goal not accessible"
+      "Goal not accessible",
     );
     this.tiles[this.spawn.c][this.spawn.r] = "spawn";
     this.tiles[this.goal.c][this.goal.r] = "goal";
@@ -96,7 +96,7 @@ class Game {
       let w = shape.c;
       let p = position(
         randint(2, this.columns - 2 - w),
-        randint(2, this.rows - 2 - h)
+        randint(2, this.rows - 2 - h),
       );
       if (!this.is_empty_rect(shape, p.c, p.r)) continue;
       shape.translate(p.c, p.r);
@@ -352,7 +352,7 @@ class Game {
     if (!this.spawning) {
       console.assert(
         this.can_afford(name, position(c, r)),
-        "Cannot afford tower"
+        "Cannot afford tower",
       );
     }
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
@@ -488,7 +488,7 @@ class Game {
       this.spawn.r,
       this.level,
       this.lives,
-      this.path
+      this.path,
     ).reverse();
     this.paused = false;
     this.perfect = true;
@@ -536,8 +536,8 @@ class Game {
           "Rock",
           "Blocks the path. Build a maze to make the enemies run longer.",
           null,
-          this
-        )
+          this,
+        ),
       );
     }
     if (this.level === 5) {
@@ -546,8 +546,8 @@ class Game {
           "Slow tower",
           "Slows enemies, but low damage and range.",
           null,
-          this
-        )
+          this,
+        ),
       );
     }
     if (this.level === 11) {
@@ -556,8 +556,8 @@ class Game {
           "Laser tower",
           "More damage and range, but even more expensive.",
           null,
-          this
-        )
+          this,
+        ),
       );
     }
     if (this.level === 11) {
@@ -657,4 +657,4 @@ class Card {
   }
 }
 
-export { Game, Card };
+export { Card, Game };

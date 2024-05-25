@@ -1,12 +1,12 @@
-import { xy, position, number_string } from "@olehermanse/utils/funcs.js";
+import { number_string, position, xy } from "@olehermanse/utils/funcs.js";
 import { Game } from "../libtowers/libtowers";
 import { Tower } from "../libtowers/towers";
 import { Draw } from "@olehermanse/utils/draw.js";
 import { Painter } from "./painter";
 import { UI } from "./ui";
 import { UITooltip } from "../libdraw/ui_elements";
-import { FG, BG, GREY } from "@olehermanse/utils/colors.js";
-import type { XY, CR, Callback } from "@olehermanse/utils";
+import { BG, FG, GREY } from "@olehermanse/utils/colors.js";
+import type { Callback, CR, XY } from "@olehermanse/utils";
 
 class CanvasManager {
   canvas: HTMLCanvasElement;
@@ -39,7 +39,7 @@ class CanvasManager {
     columns: number = 20,
     rows: number = 13,
     width: number = 1200,
-    scale: number = 1.0
+    scale: number = 1.0,
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
@@ -76,7 +76,7 @@ class CanvasManager {
       UI_C,
       this.grid_size,
       this.line_width,
-      this.painter
+      this.painter,
     );
     this.ui.refresh(this.game);
     this.space_pressed = false;
@@ -98,7 +98,7 @@ class CanvasManager {
     }
     return xy(
       this.grid_to_canvas(p.c),
-      this.grid_to_canvas(p.r, this.grid_start)
+      this.grid_to_canvas(p.r, this.grid_start),
     );
   }
 
@@ -113,7 +113,7 @@ class CanvasManager {
       this.grid_start + r * this.grid_size,
       this.grid_size,
       this.grid_size,
-      BG
+      BG,
     );
   }
 
@@ -125,7 +125,7 @@ class CanvasManager {
       this.grid_start + r * this.grid_size,
       this.grid_size,
       this.grid_size,
-      color
+      color,
     );
   }
 
@@ -137,7 +137,7 @@ class CanvasManager {
       this.grid_start + r * this.grid_size,
       this.grid_size,
       this.grid_size,
-      color
+      color,
     );
   }
 
@@ -149,7 +149,7 @@ class CanvasManager {
       this.grid_start + r * this.grid_size,
       this.grid_size,
       this.grid_size,
-      color
+      color,
     );
   }
 
@@ -209,7 +209,7 @@ class CanvasManager {
         h / 2 + (3 * h) / 10,
         "Level: " + level,
         BG,
-        this.width / 24
+        this.width / 24,
       );
       Draw.text(
         ctx,
@@ -217,7 +217,7 @@ class CanvasManager {
         h / 2 + (4 * h) / 10,
         "" + number_string(cash) + "$",
         BG,
-        this.width / 24
+        this.width / 24,
       );
       return;
     }
@@ -231,7 +231,7 @@ class CanvasManager {
       this.grid_start,
       this.grid_width,
       this.grid_height,
-      FG
+      FG,
     );
     Draw.grid(
       ctx,
@@ -239,7 +239,7 @@ class CanvasManager {
       0,
       this.grid_start,
       this.width,
-      this.grid_height
+      this.grid_height,
     );
     // Game elements:
     this.draw_tiles(ctx);
@@ -274,7 +274,7 @@ class CanvasManager {
     this.game.grid_click(
       this.canvas_to_grid_int(x),
       this.canvas_to_grid_int(y, this.grid_start),
-      card
+      card,
     );
   }
 
@@ -368,7 +368,7 @@ class CanvasManager {
   setup_events(
     canvas: HTMLCanvasElement,
     on_start_click: Callback,
-    on_victory: Callback
+    on_victory: Callback,
   ) {
     this.ui.start_button.on_click = on_start_click;
     this.game.on_victory = on_victory;
@@ -402,7 +402,7 @@ class CanvasManager {
         }
         this.key_down(event.key);
       },
-      false
+      false,
     );
 
     document.addEventListener(
@@ -410,7 +410,7 @@ class CanvasManager {
       (event) => {
         this.key_up(event.key);
       },
-      false
+      false,
     );
   }
 

@@ -1,5 +1,5 @@
 FROM node:20 AS build
-WORKDIR /towers
+WORKDIR /trpg
 COPY package-lock.json package.json ./
 RUN npm install --only=prod
 COPY .git .git
@@ -14,15 +14,15 @@ RUN npm run build
 RUN bash add_version.sh
 
 FROM node:20 AS test
-WORKDIR /towers
-COPY --from=build /towers /towers
+WORKDIR /trpg
+COPY --from=build /trpg /trpg
 COPY test test
 RUN npm install
 RUN npm run test
 
 FROM denoland/deno:1.34.3 AS run
-WORKDIR /towers
-COPY --from=build /towers/dist/ dist/
+WORKDIR /trpg
+COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
-COPY --from=test /towers/package.json /towers/package.json
+COPY --from=test /trpg/package.json /trpg/package.json
 CMD [ "deno" , "run", "--allow-net", "--allow-read", "--allow-env", "src/backend/backend.ts"]

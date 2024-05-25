@@ -1,6 +1,6 @@
 import { xy } from "@olehermanse/utils/funcs.js";
 import { ClickCallback, XY } from "@olehermanse/utils";
-import { Draw } from  "@olehermanse/utils/draw.js";
+import { Draw } from "@olehermanse/utils/draw.js";
 import { Card } from "../libtowers/libtowers";
 
 class UIRect {
@@ -25,7 +25,7 @@ class UIRect {
     stroke = null,
     padding = 0,
     margin = 0,
-    line_width = null
+    line_width = null,
   ) {
     this.x = x + margin;
     this.y = y + margin;
@@ -51,7 +51,7 @@ class UIRect {
       this.fill,
       this.stroke,
       0,
-      0
+      0,
     );
   }
 
@@ -70,7 +70,7 @@ class UIRect {
       this.h,
       this.fill,
       this.stroke,
-      this.line_width
+      this.line_width,
     );
     this.draw_children(ctx);
   }
@@ -134,7 +134,7 @@ class UIText {
     color: string,
     font: number,
     text: string = "",
-    n: number = 5
+    n: number = 5,
   ) {
     this.x = x;
     this.y = y;
@@ -159,7 +159,7 @@ class UIText {
       this.c,
       this.font,
       this.textAlign,
-      this.textBaseline
+      this.textBaseline,
     );
   }
 }
@@ -182,7 +182,7 @@ class UIButton extends UIRect {
     fill = null,
     stroke = null,
     label = null,
-    line_width = null
+    line_width = null,
   ) {
     super(x, y, w, h, fill, stroke);
     this.line_width = line_width;
@@ -352,4 +352,4 @@ class UITooltip {
   }
 }
 
-export { UIRect, UIText, UIButton, UITooltip };
+export { UIButton, UIRect, UIText, UITooltip };
