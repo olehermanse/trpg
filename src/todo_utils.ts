@@ -55,7 +55,7 @@ export class OXY {
   }
 
   to_xy(target: WH): XY {
-    return offset_to_canvas(this, target);
+    return offset_to_xy(this, target);
   }
 }
 
@@ -63,17 +63,23 @@ export function oxy(ox: number, oy: number, source: HTMLCanvasElement): OXY {
   return new OXY(ox, oy, source);
 }
 
-export function offset_to_canvas(p: OXY, target: WH): XY {
-  const source = p.source;
-  const x = (p.ox / source.getBoundingClientRect().width) * target.width;
-  const y = (p.oy / source.getBoundingClientRect().height) * target.height;
+export function offset_to_xy(offset: OXY, target: WH): XY {
+  const source = offset.source;
+  const x = target.width * offset.ox / source.getBoundingClientRect().width;
+  const y = target.height * offset.oy / source.getBoundingClientRect().height;
   return xy(x, y);
 }
 
-export function canvas_to_grid(p: XY, grid: Grid): CR {
-  const cell_w = grid.width / grid.columns;
-  const cell_h = grid.height / grid.rows;
-  const col = Math.floor(cell_w * p.x / grid.width);
-  const row = Math.floor(cell_h * p.y / grid.height);
+export function xy_to_cr(p: XY, grid: Grid): CR {
+  const col = Math.floor(grid.columns * p.x / grid.width);
+  const row = Math.floor(grid.rows * p.y / grid.height);
   return cr(col, row);
+}
+
+export function cr_to_xy(p: CR, grid: Grid): XY {
+  return xy(p.c * grid.cell_width, p.r * grid.cell_height);
+}
+
+export function distance_xy(a: XY, b: XY) {
+  return Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
 }
