@@ -83,3 +83,55 @@ export function cr_to_xy(p: CR, grid: Grid): XY {
 export function distance_xy(a: XY, b: XY) {
   return Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
 }
+
+export async function http_get(url: string): Promise<object> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+}
+
+export async function get_png(url: string): Promise<Blob> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "image/png",
+    },
+  });
+  return response.blob();
+}
+
+export async function http_delete(url: string): Promise<object> {
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  return response.json();
+}
+
+export async function http_put(url: string, data: object): Promise<object> {
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
+
+export async function http_post(url: string, data: object): Promise<object> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  return response.json();
+}
