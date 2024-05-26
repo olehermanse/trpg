@@ -23,14 +23,13 @@ class Application {
   constructor(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
-    columns: number = 20,
-    rows: number = 13,
-    width: number = 1600,
-    height: number = 1200,
+    columns: number,
+    rows: number,
+    width: number,
+    height: number,
     scale: number = 1.0,
   ) {
     this.canvas = canvas;
-    this.painter = new Painter(this, ctx);
     this.columns = columns;
     this.rows = rows;
     this.scale = scale;
@@ -46,6 +45,7 @@ class Application {
 
     const grid = new Grid(this.width, this.height, this.columns, this.rows);
     this.game = new Game(grid);
+    this.painter = new Painter(this, ctx);
     this.mouse = null;
 
     canvas.addEventListener("mousedown", (event: any) => {

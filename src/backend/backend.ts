@@ -33,6 +33,9 @@ function getContentType(path: string): string {
   if (path.endsWith(".css")) {
     return "text/css";
   }
+  if (path.endsWith(".png")) {
+    return "image/png";
+  }
   return "";
 }
 
