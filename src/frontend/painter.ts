@@ -17,7 +17,7 @@ export class Painter {
     const size = this.application.game.grid.cell_width;
     this.player_image.onload = () => {
       Promise.all([
-        createImageBitmap(this.player_image, 0, 0, 32, 32, {
+        createImageBitmap(this.player_image, 0, 0, 16, 16, {
           resizeWidth: size,
           resizeHeight: size,
           resizeQuality: "pixelated",
@@ -26,7 +26,7 @@ export class Painter {
         this.player_sprite = sprites[0];
       });
     };
-    this.player_image.src = "/player.png";
+    this.player_image.src = "/sprites.png";
   }
 
   draw_player() {
