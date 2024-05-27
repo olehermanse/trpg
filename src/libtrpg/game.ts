@@ -2,16 +2,27 @@ import { XY } from "@olehermanse/utils";
 import { cr_to_xy, distance_xy, Grid, WH, wh, xy_to_cr } from "../todo_utils";
 import { xy } from "@olehermanse/utils/funcs.js";
 
+const BASE_SPEED = 150.0;
+
 export class Player {
   xy: XY;
   wh: WH;
-  speed = 800.0;
+  speed = BASE_SPEED;
+  reversed = false;
+  walk_counter = 0;
+  destination: XY | null = null;
 
-  destination: XY | null;
   constructor(x: number, y: number, w: number, h: number) {
     this.xy = xy(x, y);
     this.wh = wh(w, h);
-    this.destination = null;
+  }
+
+  _animate(ms: number) {
+    const factor = this.speed / BASE_SPEED;
+    this.walk_counter += 4 * (ms * factor) / 1000;
+    if (this.walk_counter >= 2) {
+      this.walk_counter = 0;
+    }
   }
 
   tick(ms: number) {
@@ -23,10 +34,17 @@ export class Player {
     if (isNaN(dist) || dist <= step) {
       this.xy = this.destination;
       this.destination = null;
+      this.walk_counter = 0;
       return;
     }
+    this._animate(ms);
     const length = step / dist;
     const dx = (this.destination.x - this.xy.x) * length;
+    if (dx > 0) { // Moving right
+      this.reversed = false;
+    } else if (dx < 0) { // Moving left
+      this.reversed = true;
+    }
     const dy = (this.destination.y - this.xy.y) * length;
     this.xy.x += dx;
     this.xy.y += dy;
