@@ -1,6 +1,6 @@
 import { Draw } from "@olehermanse/utils/draw.js";
 import { Application } from "./application.ts"; // For access to width, height, game object
-import { Player } from "../libtrpg/game.ts";
+import { Entity, Player } from "../libtrpg/game.ts";
 
 const SPRITESHEET = {
   "player": {
@@ -99,8 +99,33 @@ export class Painter {
     this.spritesheet.src = "/sprites.png";
   }
 
-  draw_background() {
-    const player: Player = this.application.game.player;
+  draw_entity(entity: Entity) {
+    const sprite = this.sprites[entity.name][entity.variant];
+    if (sprite === undefined) {
+      return;
+    }
+    this.ctx.drawImage(
+      sprite,
+      entity.xy.x - entity.wh.width / 2,
+      entity.xy.y - entity.wh.height / 2,
+    );
+  }
+
+  draw_zone() {
+    let drew_player = false;
+    const player = this.application.game.player;
+    for (let entity of this.application.game.current_zone.get_all()) {
+      if (!drew_player && entity.xy.y > player.xy.y) {
+        this.draw_player();
+        drew_player = true;
+      }
+      this.draw_entity(entity);
+    }
+    if (!drew_player) {
+      this.draw_player();
+      drew_player = true;
+    }
+    return;
     const width = player.wh.width;
     const height = player.wh.height;
     let x = 0;
@@ -201,7 +226,6 @@ export class Painter {
     const width = this.application.width;
     const height = this.application.height;
     Draw.rectangle(this.ctx, 0, 0, width, height, "black", "black");
-    this.draw_background();
-    this.draw_player();
+    this.draw_zone();
   }
 }

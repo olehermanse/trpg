@@ -45,6 +45,7 @@ class Application {
 
     const grid = new Grid(this.width, this.height, this.columns, this.rows);
     this.game = new Game(grid);
+    this.game.current_zone.generate();
     this.painter = new Painter(this, ctx);
     this.mouse = null;
 
