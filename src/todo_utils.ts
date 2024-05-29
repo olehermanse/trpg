@@ -42,6 +42,19 @@ export class Grid {
   }
 }
 
+export function deep_copy<T>(obj: T): T {
+  return structuredClone(obj);
+}
+
+export function array_remove<T>(arr: T[], obj: T) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === obj) {
+      arr.splice(i, 1);
+      i--;
+    }
+  }
+}
+
 export class OXY {
   // An x, y screen space pixel offset,
   // which forces you to convert it to canvas coordinates
@@ -77,7 +90,10 @@ export function xy_to_cr(p: XY, grid: Grid): CR {
 }
 
 export function cr_to_xy(p: CR, grid: Grid): XY {
-  return xy(p.c * grid.cell_width, p.r * grid.cell_height);
+  return xy(
+    Math.round((0.5 + p.c) * grid.cell_width),
+    Math.round((0.5 + p.r) * grid.cell_height),
+  );
 }
 
 export function distance_xy(a: XY, b: XY) {
