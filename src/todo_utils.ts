@@ -100,6 +100,10 @@ export function distance_xy(a: XY, b: XY) {
   return Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
 }
 
+export function distance_cr(a: CR, b: CR) {
+  return Math.sqrt((b.c - a.c) ** 2 + (b.r - a.r) ** 2);
+}
+
 export async function http_get(url: string): Promise<object> {
   const response = await fetch(url, {
     method: "GET",
