@@ -119,6 +119,11 @@ export class Painter {
         this.draw_player();
         drew_player = true;
       }
+      const c = entity.cr.c;
+      const r = entity.cr.r;
+      if (this.application.game.current_zone.fog[c][r] === true) {
+        continue;
+      }
       this.draw_entity(entity);
     }
     if (!drew_player) {

@@ -3,6 +3,7 @@ import {
   array_remove,
   cr,
   cr_to_xy,
+  distance_cr,
   distance_xy,
   Grid,
   WH,
@@ -13,17 +14,63 @@ import { randint, xy } from "@olehermanse/utils/funcs.js";
 
 const BASE_SPEED = 150.0;
 
-export class Player {
+
+export class Entity {
+  name: string;
+  zone: Zone;
   xy: XY;
+  cr: CR;
   wh: WH;
+  variant: number;
+
+  constructor(name: string, pos: CR, zone: Zone, variant?: number) {
+    this.name = name;
+    this.zone = zone;
+    this.cr = cr(pos.c, pos.r);
+    this.wh = wh(zone.cell_width, zone.cell_height);
+    this.xy = cr_to_xy(this.cr, zone);
+    this.variant = variant ?? 0;
+  }
+}
+
+function get_neighbors(entity: Entity, zone: Zone): CR[] {
+  const radius = 2.1;
+  const bound = Math.floor(radius) + 1;
+  const results: CR[] = [];
+  const center = entity.cr;
+
+  for (let c = center.c - bound; c <= center.c + bound; c++) {
+    for (let r = center.r - bound; r <= center.r + bound; r++) {
+      const pos = cr(c,r);
+      if (!zone.inside(pos)){
+        continue;
+      }
+      const distance = distance_cr(pos, center);
+      if (distance > radius) {
+        continue;
+      }
+      results.push(pos);
+    }
+  }
+  return results;
+}
+
+export class Player extends Entity {
   speed = BASE_SPEED;
   reversed = false;
   walk_counter = 0;
   destination: XY | null = null;
 
-  constructor(x: number, y: number, w: number, h: number) {
-    this.xy = xy(x, y);
-    this.wh = wh(w, h);
+  constructor(pos: CR, zone: Zone) {
+    super("player", pos, zone);
+    this.defog();
+  }
+
+  defog() {
+    const tiles = get_neighbors(this, this.zone);
+    for (let tile of tiles) {
+      this.zone.fog[tile.c][tile.r] = false;
+    }
   }
 
   _animate(ms: number) {
@@ -57,24 +104,14 @@ export class Player {
     const dy = (this.destination.y - this.xy.y) * length;
     this.xy.x += dx;
     this.xy.y += dy;
-  }
-}
 
-export class Entity {
-  name: string;
-  zone: Zone;
-  xy: XY;
-  cr: CR;
-  wh: WH;
-  variant: number;
-
-  constructor(name: string, pos: CR, zone: Zone, variant?: number) {
-    this.name = name;
-    this.zone = zone;
-    this.cr = cr(pos.c, pos.r);
-    this.wh = wh(zone.cell_width, zone.cell_height);
-    this.xy = cr_to_xy(this.cr, zone);
-    this.variant = variant ?? 0;
+    const new_pos = xy_to_cr(this.xy, this.zone);
+    if (new_pos.c === this.cr.c && new_pos.r === this.cr.r){
+      return;
+    }
+    this.cr.c = new_pos.c;
+    this.cr.r = new_pos.r;
+    this.defog();
   }
 }
 
@@ -82,14 +119,19 @@ export type Tile = Entity | null;
 
 export class Zone extends Grid {
   entities: Entity[][][];
+  fog: boolean[][];
   constructor(grid: Grid) {
     super(grid.width, grid.height, grid.columns, grid.rows);
     this.entities = [];
+    this.fog = [];
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
+      const fog_column = [];
       for (let r = 0; r < grid.rows; r++) {
         column.push([]);
+        fog_column.push(true);
       }
+      this.fog.push(fog_column);
       this.entities.push(column);
     }
   }
@@ -183,13 +225,10 @@ export class Game {
   current_zone: Zone;
   constructor(grid: Grid) {
     this.grid = grid;
-    this.player = new Player(
-      grid.width / 2,
-      grid.height / 2,
-      grid.cell_width,
-      grid.cell_height,
-    );
     this.current_zone = new Zone(grid);
+    this.player = new Player(
+      cr(1,1), this.current_zone
+    );
   }
 
   click(position: XY) {
