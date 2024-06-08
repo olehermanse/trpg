@@ -131,42 +131,34 @@ export class Painter {
       drew_player = true;
     }
     return;
+  }
+
+  draw_selector() {
+    if (this.sprites["selector"].length < 2) {
+      return;
+    }
+    if (this.application.game.player.destination === null) {
+      return;
+    }
+    const player: Player = this.application.game.player;
+    const destination: XY = player.destination;
+    const x = destination.x;
+    const y = destination.y;
     const width = player.wh.width;
     const height = player.wh.height;
-    let x = 0;
-    let y = 0;
-    const rock = this.sprites["rock"][0];
-    if (rock != undefined) {
-      this.ctx.drawImage(rock, 0, 0);
-    }
-    const crystal = this.sprites["crystal"][0];
-    if (crystal != undefined) {
-      this.ctx.drawImage(crystal, 8 * width, 7 * height);
-    }
-    const chest = this.sprites["chest"][0];
-    if (chest != undefined) {
-      this.ctx.drawImage(chest, 0 * width, 6 * height);
-    }
-    const skeleton = this.sprites["skeleton"][3];
-    if (skeleton != undefined) {
-      this.ctx.drawImage(skeleton, width * 3, height * 5);
-      this.ctx.drawImage(skeleton, width * 4, height * 4);
-      this.ctx.drawImage(skeleton, width * 3, height * 3);
-    }
-    return;
-    for (const [_name, frames] of Object.entries(this.sprites)) {
-      for (const image of frames) {
-        this.ctx.drawImage(image, x, y);
-        x += width;
-        if (x > width * 4) {
-          x = 0;
-          y += height;
-        }
-      }
-    }
+    this.ctx.save();
+    this.ctx.translate(
+      this.application.scale * (x - width / 2),
+      this.application.scale * (y - height / 2),
+    );
+    const selector = this.sprites["selector"];
+    const frame = Math.round(0.6 * player.walk_counter) % 2;
+    this.ctx.drawImage(selector[frame], 0, 0);
+    this.ctx.restore();
   }
 
   draw_player() {
+    this.draw_selector();
     const player: Player = this.application.game.player;
     const x = player.xy.x;
     const y = player.xy.y;

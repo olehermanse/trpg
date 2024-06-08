@@ -10,10 +10,9 @@ import {
   wh,
   xy_to_cr,
 } from "../todo_utils";
-import { randint, xy } from "@olehermanse/utils/funcs.js";
+import { randint } from "@olehermanse/utils/funcs.js";
 
 const BASE_SPEED = 150.0;
-
 
 export class Entity {
   name: string;
@@ -41,8 +40,8 @@ function get_neighbors(entity: Entity, zone: Zone): CR[] {
 
   for (let c = center.c - bound; c <= center.c + bound; c++) {
     for (let r = center.r - bound; r <= center.r + bound; r++) {
-      const pos = cr(c,r);
-      if (!zone.inside(pos)){
+      const pos = cr(c, r);
+      if (!zone.inside(pos)) {
         continue;
       }
       const distance = distance_cr(pos, center);
@@ -75,7 +74,7 @@ export class Player extends Entity {
 
   _animate(ms: number) {
     const factor = this.speed / BASE_SPEED;
-    this.walk_counter += 4 * (ms * factor) / 1000;
+    this.walk_counter += (4 * (ms * factor)) / 1000;
     if (this.walk_counter >= 2) {
       this.walk_counter = 0;
     }
@@ -96,9 +95,11 @@ export class Player extends Entity {
     this._animate(ms);
     const length = step / dist;
     const dx = (this.destination.x - this.xy.x) * length;
-    if (dx > 0) { // Moving right
+    if (dx > 0) {
+      // Moving right
       this.reversed = false;
-    } else if (dx < 0) { // Moving left
+    } else if (dx < 0) {
+      // Moving left
       this.reversed = true;
     }
     const dy = (this.destination.y - this.xy.y) * length;
@@ -106,7 +107,7 @@ export class Player extends Entity {
     this.xy.y += dy;
 
     const new_pos = xy_to_cr(this.xy, this.zone);
-    if (new_pos.c === this.cr.c && new_pos.r === this.cr.r){
+    if (new_pos.c === this.cr.c && new_pos.r === this.cr.r) {
       return;
     }
     this.cr.c = new_pos.c;
@@ -143,7 +144,7 @@ export class Zone extends Grid {
         new Entity("rock", cr(this.columns - 1, r), this, randint(0, 2)),
       );
     }
-    for (let c = 0; c < this.columns; c++) {
+    for (let c = 1; c < this.columns - 1; c++) {
       this.append(new Entity("rock", cr(c, 0), this, randint(0, 2)));
       this.append(
         new Entity("rock", cr(c, this.rows - 1), this, randint(0, 2)),
@@ -176,8 +177,9 @@ export class Zone extends Grid {
   }
 
   inside(pos: CR): boolean {
-    return (pos.c >= 0 && pos.r >= 0 && pos.r < this.rows &&
-      pos.c < this.columns);
+    return (
+      pos.c >= 0 && pos.r >= 0 && pos.r < this.rows && pos.c < this.columns
+    );
   }
 
   get(pos: CR): Entity[] {
@@ -226,9 +228,7 @@ export class Game {
   constructor(grid: Grid) {
     this.grid = grid;
     this.current_zone = new Zone(grid);
-    this.player = new Player(
-      cr(1,1), this.current_zone
-    );
+    this.player = new Player(cr(1, 1), this.current_zone);
   }
 
   click(position: XY) {
