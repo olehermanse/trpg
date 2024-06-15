@@ -78,18 +78,25 @@ export function oxy(ox: number, oy: number, source: HTMLCanvasElement): OXY {
 
 export function offset_to_xy(offset: OXY, target: WH): XY {
   const source = offset.source;
-  const x = target.width * offset.ox / source.getBoundingClientRect().width;
-  const y = target.height * offset.oy / source.getBoundingClientRect().height;
+  const x = (target.width * offset.ox) / source.getBoundingClientRect().width;
+  const y = (target.height * offset.oy) / source.getBoundingClientRect().height;
   return xy(x, y);
 }
 
 export function xy_to_cr(p: XY, grid: Grid): CR {
-  const col = Math.floor(grid.columns * p.x / grid.width);
-  const row = Math.floor(grid.rows * p.y / grid.height);
+  const col = Math.floor((grid.columns * p.x) / grid.width);
+  const row = Math.floor((grid.rows * p.y) / grid.height);
   return cr(col, row);
 }
 
 export function cr_to_xy(p: CR, grid: Grid): XY {
+  return xy(
+    Math.floor(p.c * grid.cell_width),
+    Math.floor(p.r * grid.cell_height),
+  );
+}
+
+export function cr_to_xy_centered(p: CR, grid: Grid): XY {
   return xy(
     Math.round((0.5 + p.c) * grid.cell_width),
     Math.round((0.5 + p.r) * grid.cell_height),

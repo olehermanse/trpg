@@ -3,6 +3,7 @@ import {
   array_remove,
   cr,
   cr_to_xy,
+  cr_to_xy_centered,
   distance_cr,
   distance_xy,
   Grid,
@@ -10,7 +11,7 @@ import {
   wh,
   xy_to_cr,
 } from "../todo_utils";
-import { randint } from "@olehermanse/utils/funcs.js";
+import { randint, xy } from "@olehermanse/utils/funcs.js";
 
 const BASE_SPEED = 150.0;
 
@@ -29,6 +30,13 @@ export class Entity {
     this.wh = wh(zone.cell_width, zone.cell_height);
     this.xy = cr_to_xy(this.cr, zone);
     this.variant = variant ?? 0;
+  }
+
+  get center(): XY {
+    const r = xy(this.xy.x, this.xy.y);
+    r.x += this.wh.width / 2;
+    r.y += this.wh.height / 2;
+    return r;
   }
 }
 
@@ -68,7 +76,7 @@ export class Player extends Entity {
   defog() {
     const tiles = get_neighbors(this, this.zone);
     for (let tile of tiles) {
-      this.zone.fog[tile.c][tile.r] = false;
+      this.zone.tiles[tile.c][tile.r].fog = false;
     }
   }
 
@@ -116,24 +124,26 @@ export class Player extends Entity {
   }
 }
 
-export type Tile = Entity | null;
+export class Tile {
+  fog: boolean;
+  entities: Entity[];
+  constructor() {
+    this.fog = true;
+    this.entities = [];
+  }
+}
 
 export class Zone extends Grid {
-  entities: Entity[][][];
-  fog: boolean[][];
+  tiles: Tile[][];
   constructor(grid: Grid) {
     super(grid.width, grid.height, grid.columns, grid.rows);
-    this.entities = [];
-    this.fog = [];
+    this.tiles = [];
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
-      const fog_column = [];
       for (let r = 0; r < grid.rows; r++) {
-        column.push([]);
-        fog_column.push(true);
+        column.push(new Tile());
       }
-      this.fog.push(fog_column);
-      this.entities.push(column);
+      this.tiles.push(column);
     }
   }
 
@@ -182,18 +192,14 @@ export class Zone extends Grid {
     );
   }
 
-  get(pos: CR): Entity[] {
-    if (!this.inside(pos)) {
-      return [];
+  get_entities(pos?: CR): Entity[] {
+    if (pos !== undefined) {
+      return this.tiles[pos.c][pos.r].entities;
     }
-    return this.entities[pos.c][pos.r];
-  }
-
-  get_all(): Entity[] {
     const result = [];
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.columns; c++) {
-        for (let entity of this.get(cr(c, r))) {
+        for (let entity of this.get_entities(cr(c, r))) {
           result.push(entity);
         }
       }
@@ -202,7 +208,7 @@ export class Zone extends Grid {
   }
 
   empty(pos: CR): boolean {
-    return this.get(pos).length === 0;
+    return this.get_entities(pos).length === 0;
   }
 
   append(entity: Entity) {
@@ -210,11 +216,11 @@ export class Zone extends Grid {
     if (!this.inside(pos)) {
       return;
     }
-    this.entities[pos.c][pos.r].push(entity);
+    this.tiles[pos.c][pos.r].entities.push(entity);
   }
 
   remove(pos: CR, entity: Entity) {
-    let entities = this.get(pos);
+    let entities = this.tiles[pos.c][pos.r].entities;
     array_remove(entities, entity);
   }
 }
@@ -232,7 +238,7 @@ export class Game {
   }
 
   click(position: XY) {
-    const target = cr_to_xy(xy_to_cr(position, this.grid), this.grid);
+    const target = cr_to_xy_centered(xy_to_cr(position, this.grid), this.grid);
     this.player.destination = target;
   }
 
