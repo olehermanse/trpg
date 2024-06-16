@@ -295,7 +295,12 @@ export class Game {
   }
 
   click(position: XY) {
-    const target = cr_to_xy(xy_to_cr(position, this.grid), this.grid);
+    const pos = xy_to_cr(position, this.grid);
+    const tile = this.current_zone.tiles[pos.c][pos.r];
+    if (tile.light !== 5 || !tile.is_empty()) {
+      return;
+    }
+    const target = cr_to_xy(pos, this.grid);
     this.player.destination = target;
   }
 
