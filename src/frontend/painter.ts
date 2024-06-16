@@ -157,12 +157,9 @@ export class Painter {
     if (this.application.game.player.destination === null) {
       return;
     }
-    const half = this.application.game.current_zone.cell_width / 2;
     const player: Player = this.application.game.player;
-    const x = player.destination.x - half;
-    const y = player.destination.y - half;
     const frame = Math.round(0.6 * player.walk_counter) % 2;
-    this.draw_sprite(this.sprites["selector"][frame], xy(x, y), true);
+    this.draw_sprite(this.sprites["selector"][frame], player.destination, true);
   }
 
   draw_player() {
@@ -171,15 +168,11 @@ export class Painter {
       return;
     }
     const player: Player = this.application.game.player;
-    const half = this.application.game.current_zone.cell_width / 2;
-    const x = Math.floor(player.xy.x - half);
-    const y = Math.floor(player.xy.y - half);
-
     const standing = this.sprites["player"][0];
     const walking = this.sprites["player"][1];
     this.draw_sprite(
       player.walk_counter < 1 ? standing : walking,
-      xy(x, y),
+      player.xy,
       player.reversed,
     );
   }

@@ -19,6 +19,7 @@ export class Entity {
   name: string;
   zone: Zone;
   xy: XY;
+  fxy: XY | null;
   cr: CR;
   wh: WH;
   variant: number;
@@ -30,6 +31,7 @@ export class Entity {
     this.wh = wh(zone.cell_width, zone.cell_height);
     this.xy = cr_to_xy(this.cr, zone);
     this.variant = variant ?? 0;
+    this.fxy = null;
   }
 
   get center(): XY {
@@ -92,17 +94,23 @@ export class Player extends Entity {
     if (this.destination === null) {
       return;
     }
+    if (this.fxy === null) {
+      this.fxy = xy(this.xy.x, this.xy.y);
+    }
     const step = (this.speed * ms) / 1000.0;
-    const dist = distance_xy(this.xy, this.destination);
+    const dist = distance_xy(this.fxy, this.destination);
     if (isNaN(dist) || dist <= step) {
-      this.xy = this.destination;
+      this.xy.x = this.destination.x;
+      this.xy.y = this.destination.y;
+      this.fxy.x = this.xy.x;
+      this.fxy.y = this.xy.y;
       this.destination = null;
       this.walk_counter = 0;
       return;
     }
     this._animate(ms);
     const length = step / dist;
-    const dx = (this.destination.x - this.xy.x) * length;
+    const dx = (this.destination.x - this.fxy.x) * length;
     if (dx > 0) {
       // Moving right
       this.reversed = false;
@@ -110,9 +118,11 @@ export class Player extends Entity {
       // Moving left
       this.reversed = true;
     }
-    const dy = (this.destination.y - this.xy.y) * length;
-    this.xy.x += dx;
-    this.xy.y += dy;
+    const dy = (this.destination.y - this.fxy.y) * length;
+    this.fxy.x += dx;
+    this.fxy.y += dy;
+    this.xy.x = Math.floor(this.fxy.x);
+    this.xy.y = Math.floor(this.fxy.y);
 
     const new_pos = xy_to_cr(this.xy, this.zone);
     if (new_pos.c === this.cr.c && new_pos.r === this.cr.r) {
@@ -238,7 +248,7 @@ export class Game {
   }
 
   click(position: XY) {
-    const target = cr_to_xy_centered(xy_to_cr(position, this.grid), this.grid);
+    const target = cr_to_xy(xy_to_cr(position, this.grid), this.grid);
     this.player.destination = target;
   }
 
