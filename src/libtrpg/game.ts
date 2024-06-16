@@ -3,15 +3,15 @@ import {
   array_remove,
   cr,
   cr_to_xy,
-  cr_to_xy_centered,
   distance_cr,
   distance_xy,
   Grid,
   WH,
   wh,
   xy_to_cr,
-} from "../todo_utils";
-import { randint, xy } from "@olehermanse/utils/funcs.js";
+  randint,
+  xy,
+} from "@olehermanse/utils/funcs.js";
 
 const DIAG = 1.414;
 const BASE_SPEED = 16.0;

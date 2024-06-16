@@ -2,7 +2,7 @@ import { Game } from "../src/libtrpg/game.ts";
 
 // example.test.js
 import { describe, expect, test } from "vitest";
-import { Grid } from "../src/todo_utils.ts";
+import { Grid } from "@olehermanse/utils/funcs.js";
 
 describe("Game", () => {
   test("can be created", () => {
