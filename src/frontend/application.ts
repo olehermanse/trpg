@@ -46,7 +46,7 @@ class Application {
     const grid = new Grid(this.width, this.height, this.columns, this.rows);
     this.game = new Game(grid);
     this.game.current_zone.generate();
-    this.painter = new Painter(this, ctx);
+    this.painter = new Painter(this, ctx, columns, rows, 16);
     this.mouse = null;
 
     canvas.addEventListener("mousedown", (event: any) => {
@@ -98,17 +98,13 @@ class Application {
     this.game.click(pos);
   }
 
-  mouse_release(_pos: XY) {
-  }
+  mouse_release(_pos: XY) {}
 
-  mouse_move(_pos: XY) {
-  }
+  mouse_move(_pos: XY) {}
 
-  key_down(_key: string) {
-  }
+  key_down(_key: string) {}
 
-  key_up(_key: string) {
-  }
+  key_up(_key: string) {}
 
   tick(ms: number) {
     this.game.tick(ms);
