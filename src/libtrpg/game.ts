@@ -6,11 +6,11 @@ import {
   distance_cr,
   distance_xy,
   Grid,
+  randint,
   WH,
   wh,
-  xy_to_cr,
-  randint,
   xy,
+  xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
 
 const DIAG = 1.414;

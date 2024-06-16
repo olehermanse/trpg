@@ -14,8 +14,8 @@ function start(canvas: HTMLCanvasElement) {
     rows * 16,
     scale,
   );
-  // canvas.style.width = `${application.width * 4}px`;
-  canvas.style.height = `${application.height * 4}px`;
+  canvas.style.width = `${application.width * 4}px`;
+  // canvas.style.height = `${application.height * 4}px`;
   canvas.width = columns * 16;
   canvas.height = rows * 16;
   // application.setup_events(canvas, on_start_click, on_victory);
