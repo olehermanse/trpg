@@ -88,6 +88,11 @@ export class Player extends Entity {
         }
 
         const distance = distance_xy(tile.xy, this.xy) / 16;
+
+        if (tile.is_empty() && distance <= 5.0) {
+          tile.light = 5;
+          continue;
+        }
         if (distance <= 2.0) {
           tile.light = 5;
           continue;
@@ -104,7 +109,7 @@ export class Player extends Entity {
           tile.light = 2;
           continue;
         }
-        if (distance <= 4.0) {
+        if (distance <= 5.0) {
           tile.light = 1;
           continue;
         }
@@ -178,6 +183,10 @@ export class Tile {
     this.entities = [];
     this.cr = cr;
     this.xy = xy(cr.c * 16, cr.r * 16);
+  }
+
+  is_empty() {
+    return (this.entities.length === 0);
   }
 }
 
