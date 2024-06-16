@@ -1,6 +1,6 @@
 import { Draw } from "@olehermanse/utils/draw.js";
 import { Application } from "./application.ts"; // For access to width, height, game object
-import { Entity, Player } from "../libtrpg/game.ts";
+import { Entity, Player, Tile } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
 import { cr } from "../todo_utils.ts";
 import { xy } from "@olehermanse/utils/funcs.js";
@@ -114,18 +114,11 @@ export class Painter {
     this.draw_sprite(sprite, xy(x, y));
   }
 
-  draw_fog(pos: CR) {
+  draw_fog(tile: Tile) {
     if (this.sprites["fog"].length < 5) {
       return;
     }
-    const player: Player = this.application.game.player;
-    const width = player.wh.width;
-    const height = player.wh.height;
-    const x = Math.floor(pos.c * width);
-    const y = Math.floor(pos.r * height);
-    const fog = this.sprites["fog"];
-
-    this.draw_sprite(fog[1], xy(x, y));
+    this.draw_sprite(this.sprites["fog"][tile.light], tile.xy);
   }
 
   draw_zone() {
@@ -139,14 +132,19 @@ export class Painter {
       const c = entity.cr.c;
       const r = entity.cr.r;
       this.draw_entity(entity);
-      if (this.application.game.current_zone.tiles[c][r].fog === true) {
-        this.draw_fog(cr(c, r));
-      }
     }
     if (!drew_player) {
       this.draw_player();
       drew_player = true;
     }
+    for (let tiles of this.application.game.current_zone.tiles) {
+      for (let tile of tiles) {
+        if (tile.light < 5) {
+          this.draw_fog(tile);
+        }
+      }
+    }
+    this.draw_selector();
     return;
   }
 
@@ -163,7 +161,6 @@ export class Painter {
   }
 
   draw_player() {
-    this.draw_selector();
     if (this.sprites["player"].length < 2) {
       return;
     }
