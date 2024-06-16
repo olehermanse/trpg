@@ -178,11 +178,18 @@ export class Painter {
   }
 
   draw() {
-    const width = this.application.width;
-    const height = this.application.height;
-    Draw.rectangle(this.ctx, 0, 0, width, height, "black", "black");
-    this.draw_offscreen_canvas();
-    const bmp = this.offscreen_canvas.transferToImageBitmap();
-    this.ctx.drawImage(bmp, 0, 0);
+    try {
+      const width = this.application.width;
+      const height = this.application.height;
+      Draw.rectangle(this.ctx, 0, 0, width, height, "black", "black");
+      this.draw_offscreen_canvas();
+      const bmp = this.offscreen_canvas.transferToImageBitmap();
+      this.ctx.drawImage(bmp, 0, 0);
+    } catch (error) {
+      if (error instanceof DOMException) {
+        return;
+      }
+      console.log(error);
+    }
   }
 }
