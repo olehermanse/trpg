@@ -1,7 +1,7 @@
 import { Game } from "../libtrpg/game.ts";
 import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import { Grid, OXY, oxy } from "../todo_utils.ts";
+import { Grid, OXY, oxy } from "@olehermanse/utils/funcs.js";
 
 class Application {
   canvas: HTMLCanvasElement;

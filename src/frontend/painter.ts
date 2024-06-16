@@ -2,8 +2,7 @@ import { Draw } from "@olehermanse/utils/draw.js";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import { Entity, Player, Tile } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
-import { cr } from "../todo_utils.ts";
-import { xy } from "@olehermanse/utils/funcs.js";
+import { cr, xy } from "@olehermanse/utils/funcs.js";
 
 class SpriteLocation {
   cr: CR;
