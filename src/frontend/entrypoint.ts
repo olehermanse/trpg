@@ -4,10 +4,8 @@ function start(canvas: HTMLCanvasElement) {
   let scale = window.devicePixelRatio;
   let columns = 16;
   let rows = 12;
-  const ctx = canvas.getContext("2d");
   const application: Application = new Application(
     canvas,
-    ctx,
     columns,
     rows,
     columns * 16,

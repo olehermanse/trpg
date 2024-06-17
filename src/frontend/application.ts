@@ -22,7 +22,6 @@ class Application {
 
   constructor(
     canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D,
     columns: number,
     rows: number,
     width: number,
@@ -47,7 +46,7 @@ class Application {
     const grid = new Grid(this.width, this.height, this.columns, this.rows);
     this.game = new Game(grid);
     this.game.current_zone.generate();
-    this.painter = new Painter(this, ctx, columns, rows, 16);
+    this.painter = new Painter(this, canvas, columns, rows, 16);
     this.mouse = null;
 
     canvas.addEventListener("mousedown", (event: any) => {
