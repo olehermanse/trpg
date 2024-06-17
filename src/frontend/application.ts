@@ -29,6 +29,7 @@ class Application {
     height: number,
     scale: number = 1.0,
   ) {
+    canvas.application = this;
     this.canvas = canvas;
     this.columns = columns;
     this.rows = rows;

@@ -1,4 +1,4 @@
-import { Draw } from "@olehermanse/utils/draw.js";
+import { Draw } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import { Entity, Player, Tile } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
@@ -28,7 +28,8 @@ const SPRITESHEET = {
 };
 
 export class Painter {
-  ctx: CanvasRenderingContext2D;
+  canvas_ctx: CanvasRenderingContext2D;
+  offscreen_ctx: OffscreenCanvasRenderingContext2D;
   application: Application;
   real_scale: number;
   columns: number;
@@ -40,6 +41,7 @@ export class Painter {
   sprites: Record<string, ImageBitmap[]>;
 
   draw_sprite(sprite, pos: XY, reversed?: boolean) {
+    Draw.set_custom_scale(1.0);
     const ctx = this.offscreen_canvas.getContext("2d");
     ctx.save();
     ctx.translate(pos.x, pos.y);
@@ -61,8 +63,9 @@ export class Painter {
     this.columns = columns;
     this.rows = rows;
     this.size = size;
-    this.ctx = ctx;
+    this.canvas_ctx = ctx;
     this.offscreen_canvas = new OffscreenCanvas(columns * size, rows * size);
+    this.offscreen_ctx = this.offscreen_canvas.getContext("2d");
     this.application = application;
     this.real_scale = this.application.scale *
       this.application.game.grid.cell_width;
@@ -173,18 +176,31 @@ export class Painter {
     );
   }
 
+  draw_levelup() {
+    // TODO: Finish this screen
+    const mid_x = Math.floor(this.application.width / 2);
+    const mid_y = Math.floor(this.application.height / 2);
+    Draw.line(this.offscreen_ctx, mid_x, 0, mid_x, this.application.height, "white", 1);
+    Draw.line(this.offscreen_ctx, 0, mid_y, this.application.width, mid_y, "white", 1);
+  }
+
   draw_offscreen_canvas() {
-    this.draw_zone();
+    if (this.application.game.state === "zone"){
+      return this.draw_zone();
+    }
+    return this.draw_levelup();
   }
 
   draw() {
     try {
       const width = this.application.width;
       const height = this.application.height;
-      Draw.rectangle(this.ctx, 0, 0, width, height, "black", "black");
+      Draw.set_custom_scale(1.0);
+      Draw.rectangle(this.canvas_ctx, 0, 0, width, height, "black", "black");
+      Draw.rectangle(this.offscreen_ctx, 0, 0, width, height, "black", "black");
       this.draw_offscreen_canvas();
       const bmp = this.offscreen_canvas.transferToImageBitmap();
-      this.ctx.drawImage(bmp, 0, 0);
+      this.canvas_ctx.drawImage(bmp, 0, 0, width, height);
     } catch (error) {
       if (error instanceof DOMException) {
         return;

@@ -282,16 +282,28 @@ export class Zone extends Grid {
   }
 }
 
+export type GameState = "zone" | "levelup";
+
+export class Choice {
+  constructor(public text: string) {
+
+  }
+}
+
 export class Game {
   grid: Grid;
   rows: number;
   columns: number;
   player: Player;
   current_zone: Zone;
+  state: GameState;
+  choices: Choice[];
   constructor(grid: Grid) {
     this.grid = grid;
     this.current_zone = new Zone(grid);
     this.player = new Player(cr(1, 1), this.current_zone);
+    this.choices = [];
+    this.state = "zone";
   }
 
   click(position: XY) {
