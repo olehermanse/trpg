@@ -1,8 +1,8 @@
-import { Draw } from "../todo_utils.ts";
+import { Draw, Drawer } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import { Entity, Player, Tile } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
-import { cr, xy } from "@olehermanse/utils/funcs.js";
+import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
 class SpriteLocation {
   cr: CR;
@@ -28,8 +28,8 @@ const SPRITESHEET = {
 };
 
 export class Painter {
-  canvas_ctx: CanvasRenderingContext2D;
-  offscreen_ctx: OffscreenCanvasRenderingContext2D;
+  canvas_drawer: Drawer;
+  offscreen_drawer: Drawer;
   application: Application;
   real_scale: number;
   columns: number;
@@ -40,22 +40,9 @@ export class Painter {
   spritesheet: Image;
   sprites: Record<string, ImageBitmap[]>;
 
-  draw_sprite(sprite, pos: XY, reversed?: boolean) {
-    Draw.set_custom_scale(1.0);
-    const ctx = this.offscreen_canvas.getContext("2d");
-    ctx.save();
-    ctx.translate(pos.x, pos.y);
-    if (reversed) {
-      ctx.scale(-1, 1);
-      ctx.translate(-16, 0);
-    }
-    ctx.drawImage(sprite, 0, 0);
-    ctx.restore();
-  }
-
   constructor(
     application: Application,
-    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
     columns: number,
     rows: number,
     size: number,
@@ -63,9 +50,11 @@ export class Painter {
     this.columns = columns;
     this.rows = rows;
     this.size = size;
-    this.canvas_ctx = ctx;
-    this.offscreen_canvas = new OffscreenCanvas(columns * size, rows * size);
-    this.offscreen_ctx = this.offscreen_canvas.getContext("2d");
+    this.canvas_drawer = new Drawer(canvas, false);
+    this.offscreen_drawer = new Drawer(
+      new OffscreenCanvas(columns * size, rows * size),
+      false,
+    );
     this.application = application;
     this.real_scale = this.application.scale *
       this.application.game.grid.cell_width;
@@ -84,6 +73,8 @@ export class Painter {
         frames.push(frame);
       }
     }
+    const saved_state = this.application.game.state;
+    this.application.game.state = "loading";
     this.spritesheet.onload = () => {
       Promise.all(
         frames.map((frame) =>
@@ -97,6 +88,7 @@ export class Painter {
           const name = frames[i].name;
           this.sprites[name].push(sprite);
         }
+        this.application.game.state = saved_state;
       });
     };
     this.spritesheet.src = "/sprites.png";
@@ -113,14 +105,14 @@ export class Painter {
     const pos = entity.cr;
     const x = Math.floor(pos.c * width);
     const y = Math.floor(pos.r * height);
-    this.draw_sprite(sprite, xy(x, y));
+    this.offscreen_drawer.sprite(sprite, xy(x, y));
   }
 
   draw_fog(tile: Tile) {
     if (this.sprites["fog"].length < 5) {
       return;
     }
-    this.draw_sprite(this.sprites["fog"][tile.light], tile.xy);
+    this.offscreen_drawer.sprite(this.sprites["fog"][tile.light], tile.xy);
   }
 
   draw_zone() {
@@ -151,25 +143,24 @@ export class Painter {
   }
 
   draw_selector() {
-    if (this.sprites["selector"].length < 2) {
-      return;
-    }
     if (this.application.game.player.destination === null) {
       return;
     }
     const player: Player = this.application.game.player;
     const frame = Math.round(0.6 * player.walk_counter) % 2;
-    this.draw_sprite(this.sprites["selector"][frame], player.destination, true);
+    this.offscreen_drawer.sprite(
+      this.sprites["selector"][frame],
+      player.destination,
+      true,
+    );
   }
 
   draw_player() {
-    if (this.sprites["player"].length < 2) {
-      return;
-    }
+    // TODO: Move this to a more "proper" animation system
     const player: Player = this.application.game.player;
     const standing = this.sprites["player"][0];
     const walking = this.sprites["player"][1];
-    this.draw_sprite(
+    this.offscreen_drawer.sprite(
       player.walk_counter < 1 ? standing : walking,
       player.xy,
       player.reversed,
@@ -178,14 +169,15 @@ export class Painter {
 
   draw_levelup() {
     // TODO: Finish this screen
-    const mid_x = Math.floor(this.application.width / 2);
-    const mid_y = Math.floor(this.application.height / 2);
-    Draw.line(this.offscreen_ctx, mid_x, 0, mid_x, this.application.height, "white", 1);
-    Draw.line(this.offscreen_ctx, 0, mid_y, this.application.width, mid_y, "white", 1);
+    // const mid_x = Math.floor(this.application.width / 2);
+    // const mid_y = Math.floor(this.application.height / 2);
+    // Draw.line(this.offscreen_ctx, mid_x, 0, mid_x, this.application.height, "white", 1);
+    // Draw.line(this.offscreen_ctx, 0, mid_y, this.application.width, mid_y, "white", 1);
   }
 
-  draw_offscreen_canvas() {
-    if (this.application.game.state === "zone"){
+  draw_game() {
+    // Check the current state and choose what "screen" to draw:
+    if (this.application.game.state === "zone") {
       return this.draw_zone();
     }
     return this.draw_levelup();
@@ -193,18 +185,21 @@ export class Painter {
 
   draw() {
     try {
-      const width = this.application.width;
-      const height = this.application.height;
-      Draw.set_custom_scale(1.0);
-      Draw.rectangle(this.canvas_ctx, 0, 0, width, height, "black", "black");
-      Draw.rectangle(this.offscreen_ctx, 0, 0, width, height, "black", "black");
-      this.draw_offscreen_canvas();
-      const bmp = this.offscreen_canvas.transferToImageBitmap();
-      this.canvas_ctx.drawImage(bmp, 0, 0, width, height);
+      // Sizes / coordinates:
+      const size = wh(this.application.width, this.application.height);
+      const zero = xy(0, 0);
+
+      // Draw backgrounds:
+      this.canvas_drawer.rectangle(zero, size, "black", "black");
+      this.offscreen_drawer.rectangle(zero, size, "black", "black");
+
+      // Draw the game itself onto the offscreen canvas:
+      this.draw_game();
+
+      // "Flip" the offscreen canvas, transferring it to the DOM canvas:
+      const bmp = this.offscreen_drawer.canvas.transferToImageBitmap();
+      this.canvas_drawer.sprite(bmp, zero);
     } catch (error) {
-      if (error instanceof DOMException) {
-        return;
-      }
       console.log(error);
     }
   }

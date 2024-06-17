@@ -282,11 +282,10 @@ export class Zone extends Grid {
   }
 }
 
-export type GameState = "zone" | "levelup";
+export type GameState = "zone" | "levelup" | "loading";
 
 export class Choice {
   constructor(public text: string) {
-
   }
 }
 
