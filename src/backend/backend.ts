@@ -93,3 +93,5 @@ async function handleHttp(conn: Deno.Conn) {
     await handleFile(requestEvent, filepath);
   }
 }
+
+export {};

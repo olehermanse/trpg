@@ -6,7 +6,7 @@
     "lib": ["ESNext", "dom"],
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "strict": false, // TODO: Make this true & fix errors
+    "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -17,5 +17,6 @@
     "skipLibCheck": true,
     "outDir": "dist/frontend"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/backend"]
 }

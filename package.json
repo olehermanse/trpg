@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run build:vite",
     "build:vite": "vite build",
+    "tsc": "tsc --noEmit",
     "test": "vitest",
     "preview": "vite preview"
   },
