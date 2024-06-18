@@ -3,7 +3,6 @@ import {
   array_remove,
   cr,
   cr_to_xy,
-  distance_cr,
   distance_xy,
   Grid,
   randint,
@@ -41,28 +40,6 @@ export class Entity {
     r.y += this.wh.height / 2;
     return r;
   }
-}
-
-function get_neighbors(entity: Entity, zone: Zone): CR[] {
-  const radius = 2.1;
-  const bound = Math.floor(radius) + 1;
-  const results: CR[] = [];
-  const center = entity.cr;
-
-  for (let c = center.c - bound; c <= center.c + bound; c++) {
-    for (let r = center.r - bound; r <= center.r + bound; r++) {
-      const pos = cr(c, r);
-      if (!zone.inside(pos)) {
-        continue;
-      }
-      const distance = distance_cr(pos, center);
-      if (distance > radius) {
-        continue;
-      }
-      results.push(pos);
-    }
-  }
-  return results;
 }
 
 export class Player extends Entity {
@@ -291,8 +268,6 @@ export class Choice {
 
 export class Game {
   grid: Grid;
-  rows: number;
-  columns: number;
   player: Player;
   current_zone: Zone;
   state: GameState;

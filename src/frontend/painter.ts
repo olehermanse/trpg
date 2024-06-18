@@ -1,13 +1,13 @@
-import { Draw, Drawer } from "../todo_utils.ts";
+import { Drawer } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import { Entity, Player, Tile } from "../libtrpg/game.ts";
-import { CR, XY } from "@olehermanse/utils";
+import { CR } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
 class SpriteLocation {
   cr: CR;
   frames: number;
-  constructor(r, c, frames?: number) {
+  constructor(r: number, c:number, frames?: number) {
     this.cr = cr(c, r);
     this.frames = frames ?? 1;
   }
@@ -28,16 +28,15 @@ const SPRITESHEET = {
 };
 
 export class Painter {
-  canvas_drawer: Drawer;
-  offscreen_drawer: Drawer;
+  canvas_drawer: Drawer<HTMLCanvasElement>;
+  offscreen_drawer: Drawer<OffscreenCanvas>;
   application: Application;
   real_scale: number;
   columns: number;
   rows: number;
   size: number;
-  offscreen_canvas: OffscreenCanvas;
 
-  spritesheet: Image;
+  spritesheet: HTMLImageElement;
   sprites: Record<string, ImageBitmap[]>;
 
   constructor(
@@ -123,8 +122,6 @@ export class Painter {
         this.draw_player();
         drew_player = true;
       }
-      const c = entity.cr.c;
-      const r = entity.cr.r;
       this.draw_entity(entity);
     }
     if (!drew_player) {
@@ -143,10 +140,10 @@ export class Painter {
   }
 
   draw_selector() {
-    if (this.application.game.player.destination === null) {
+    const player: Player = this.application.game.player;
+    if (player.destination === null) {
       return;
     }
-    const player: Player = this.application.game.player;
     const frame = Math.round(0.6 * player.walk_counter) % 2;
     this.offscreen_drawer.sprite(
       this.sprites["selector"][frame],
