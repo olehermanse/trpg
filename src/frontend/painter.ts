@@ -27,6 +27,69 @@ const SPRITESHEET = {
   fog: new SpriteLocation(5, 0, 5),
 };
 
+type SpriteCallback = {
+  (spritesheet: ImageBitmap[][]): void;
+};
+
+function load_sprites(
+    url: string,
+    columns: number,
+    rows: number,
+    cell_width: number,
+    cell_height: number,
+    callback: SpriteCallback,
+  ) {
+    const image = new Image();
+    const sprites: ImageBitmap[] = [];
+    let frames = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < columns; c++) {
+        frames.push(new SpriteLocation(r, c));
+      }
+    }
+    image.onload = () => {
+      Promise.all(
+        frames.map((loc) =>
+          createImageBitmap(image, loc.cr.c * cell_width, loc.cr.r * cell_height, cell_width, cell_height, {
+            resizeQuality: "pixelated",
+          })
+        )
+      ).then((bitmaps: ImageBitmap[]) => {
+        for (let i = 0; i < bitmaps.length; i++) {
+          const sprite = bitmaps[i];
+          sprites.push(sprite);
+        }
+        const spritesheet: ImageBitmap[][] = [];
+        for (let r = 0; r < rows; r++) {
+          const row = [];
+          for (let c = 0; c < columns; c++) {
+            row.push(sprites[r * columns + c]);
+          }
+          spritesheet.push(row);
+        }
+        callback(spritesheet);
+      });
+    };
+    image.src = url;
+  }
+
+function get_font_data(font: ImageBitmap[][]){
+  const FONT_MAP = [
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "abcdefghijklmnopqrstuvwxyz",
+    "1234567890",
+    "!+-*/\"'_., ^"
+  ];
+  const map: Record<string, ImageBitmap> = {};
+  for (let r = 0; r < FONT_MAP.length; r++){
+    const row = FONT_MAP[r];
+    for (let c = 0; c < row.length; ++c){
+      map[row[c]] = font[r][c];
+    }
+  }
+  return map;
+}
+
 export class Painter {
   canvas_drawer: Drawer<HTMLCanvasElement>;
   offscreen_drawer: Drawer<OffscreenCanvas>;
@@ -38,6 +101,7 @@ export class Painter {
 
   spritesheet: HTMLImageElement;
   sprites: Record<string, ImageBitmap[]>;
+  font: Record<string, ImageBitmap>;
 
   constructor(
     application: Application,
@@ -49,6 +113,7 @@ export class Painter {
     this.columns = columns;
     this.rows = rows;
     this.size = size;
+    this.font = {};
     this.canvas_drawer = new Drawer(canvas, false);
     this.offscreen_drawer = new Drawer(
       new OffscreenCanvas(columns * size, rows * size),
@@ -87,7 +152,10 @@ export class Painter {
           const name = frames[i].name;
           this.sprites[name].push(sprite);
         }
-        this.application.game.state = saved_state;
+        load_sprites("/font.png", 26, 4, 5, 8, (font) => {
+          this.font = get_font_data(font);
+          this.application.game.state = saved_state;
+        });
       });
     };
     this.spritesheet.src = "/sprites.png";
@@ -170,10 +238,26 @@ export class Painter {
     // const mid_y = Math.floor(this.application.height / 2);
     // Draw.line(this.offscreen_ctx, mid_x, 0, mid_x, this.application.height, "white", 1);
     // Draw.line(this.offscreen_ctx, 0, mid_y, this.application.width, mid_y, "white", 1);
+    this.offscreen_drawer.sprite(this.font["A"], xy(0,0));
+
+    const message = "Hello, world!?";
+    for (let i = 0; i < message.length; ++i){
+      let letter = message[i];
+      if (letter === " ") {
+        continue;
+      }
+      if (this.font[letter] === undefined) {
+        letter = "."
+      }
+      this.offscreen_drawer.sprite(this.font[letter], xy(5 + i * 6, 50));
+    }
   }
 
   draw_game() {
     // Check the current state and choose what "screen" to draw:
+    if (this.application.game.state === "loading") {
+      return;
+    }
     if (this.application.game.state === "zone") {
       return this.draw_zone();
     }

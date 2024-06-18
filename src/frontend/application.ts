@@ -101,7 +101,20 @@ class Application {
 
   mouse_move(_pos: XY) {}
 
-  key_down(_key: string) {}
+  key_down(key: string) {
+    if (key === "1") {
+      this.game.state = "zone";
+      return;
+    }
+    if (key === "2") {
+      this.game.state = "levelup";
+      return;
+    }
+    if (key === "3") {
+      this.game.state = "loading";
+      return;
+    }
+  }
 
   key_up(_key: string) {}
 
