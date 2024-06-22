@@ -1,4 +1,4 @@
-import { WH } from "@olehermanse/utils/funcs.js";
+import { WH, xy } from "@olehermanse/utils/funcs.js";
 import { XY } from "@olehermanse/utils";
 
 function SCALE() {
@@ -54,6 +54,27 @@ export class Drawer<T extends Canvas> {
       // Leave other pixels alone, they are black.
     }
     this.ctx.putImageData(rect, 0, 0);
+  }
+  text(message: string, font: Record<string, ImageBitmap>, pos: XY) {
+    let x = pos.x;
+    let y = pos.y;
+    for (let i = 0; i < message.length; ++i) {
+      let letter = message[i];
+      if (letter === " ") {
+        x += 6;
+        continue;
+      }
+      if (letter === "\n") {
+        x = 5;
+        y += 16;
+        continue;
+      }
+      if (font[letter] === undefined) {
+        letter = ".";
+      }
+      this.sprite(font[letter], xy(x, y));
+      x += 6;
+    }
   }
   rectangle(
     pos: XY,

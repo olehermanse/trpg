@@ -242,33 +242,29 @@ export class Painter {
   draw_levelup() {
     const width = this.offscreen_drawer.canvas.width;
     const height = this.offscreen_drawer.canvas.height;
-    this.offscreen_drawer.rectangle(xy(10, 10), wh(1, 1));
-    this.offscreen_drawer.rectangle(xy(20, 10), wh(2, 2));
-    this.offscreen_drawer.rectangle(xy(30, 10), wh(3, 3));
-    this.offscreen_drawer.rectangle(xy(40, 10), wh(3, 6));
     this.offscreen_drawer.rectangle(xy(0, 0), wh(width, height));
 
-    const message =
-      "Hello, world?\nThe quick brown fox jumped over\nthe lazy dog.\nTHE QUICK BROWN FOX JUMPED OVER THE\nLAZY DOG!";
-    let y = 50;
-    let x = 5;
-    for (let i = 0; i < message.length; ++i) {
-      let letter = message[i];
-      if (letter === " ") {
-        x += 6;
-        continue;
-      }
-      if (letter === "\n") {
-        x = 5;
-        y += 16;
-        continue;
-      }
-      if (this.font[letter] === undefined) {
-        letter = ".";
-      }
-      this.offscreen_drawer.sprite(this.font[letter], xy(x, y));
-      x += 6;
-    }
+    const card_width = Math.floor(width / 3) - 10;
+    const card_height = Math.floor(height / 2);
+    let y = height / 2 - card_height / 2;
+    const pos = xy(5, y);
+    const size = wh(card_width, card_height);
+    this.offscreen_drawer.rectangle(pos, size);
+    pos.x += card_width + 10;
+    this.offscreen_drawer.rectangle(pos, size);
+    pos.x += card_width + 10;
+    this.offscreen_drawer.rectangle(pos, size);
+
+    y = Math.floor(y / 2 - 4);
+    const text_width = 6 * "Level up!".length;
+    let x = Math.floor(width / 2 - text_width / 2);
+
+    this.offscreen_drawer.text("Level up!", this.font, xy(x, y));
+
+    this.offscreen_drawer.sprite(
+      this.sprites["player"][0],
+      xy(Math.floor(width / 2 - 8), height - 2 * 16),
+    );
   }
 
   draw_game() {
