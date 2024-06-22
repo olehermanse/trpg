@@ -7,7 +7,7 @@ import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 class SpriteLocation {
   cr: CR;
   frames: number;
-  constructor(r: number, c:number, frames?: number) {
+  constructor(r: number, c: number, frames?: number) {
     this.cr = cr(c, r);
     this.frames = frames ?? 1;
   }
@@ -32,58 +32,65 @@ type SpriteCallback = {
 };
 
 function load_sprites(
-    url: string,
-    columns: number,
-    rows: number,
-    cell_width: number,
-    cell_height: number,
-    callback: SpriteCallback,
-  ) {
-    const image = new Image();
-    const sprites: ImageBitmap[] = [];
-    let frames = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < columns; c++) {
-        frames.push(new SpriteLocation(r, c));
-      }
+  url: string,
+  columns: number,
+  rows: number,
+  cell_width: number,
+  cell_height: number,
+  callback: SpriteCallback,
+) {
+  const image = new Image();
+  const sprites: ImageBitmap[] = [];
+  let frames = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < columns; c++) {
+      frames.push(new SpriteLocation(r, c));
     }
-    image.onload = () => {
-      Promise.all(
-        frames.map((loc) =>
-          createImageBitmap(image, loc.cr.c * cell_width, loc.cr.r * cell_height, cell_width, cell_height, {
-            resizeQuality: "pixelated",
-          })
-        )
-      ).then((bitmaps: ImageBitmap[]) => {
-        for (let i = 0; i < bitmaps.length; i++) {
-          const sprite = bitmaps[i];
-          sprites.push(sprite);
-        }
-        const spritesheet: ImageBitmap[][] = [];
-        for (let r = 0; r < rows; r++) {
-          const row = [];
-          for (let c = 0; c < columns; c++) {
-            row.push(sprites[r * columns + c]);
-          }
-          spritesheet.push(row);
-        }
-        callback(spritesheet);
-      });
-    };
-    image.src = url;
   }
+  image.onload = () => {
+    Promise.all(
+      frames.map((loc) =>
+        createImageBitmap(
+          image,
+          loc.cr.c * cell_width,
+          loc.cr.r * cell_height,
+          cell_width,
+          cell_height,
+          {
+            resizeQuality: "pixelated",
+          },
+        )
+      ),
+    ).then((bitmaps: ImageBitmap[]) => {
+      for (let i = 0; i < bitmaps.length; i++) {
+        const sprite = bitmaps[i];
+        sprites.push(sprite);
+      }
+      const spritesheet: ImageBitmap[][] = [];
+      for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < columns; c++) {
+          row.push(sprites[r * columns + c]);
+        }
+        spritesheet.push(row);
+      }
+      callback(spritesheet);
+    });
+  };
+  image.src = url;
+}
 
-function get_font_data(font: ImageBitmap[][]){
+function get_font_data(font: ImageBitmap[][]) {
   const FONT_MAP = [
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "abcdefghijklmnopqrstuvwxyz",
     "1234567890",
-    "!+-*/\"'_., ^"
+    "!+-*/\"'_., ^?",
   ];
   const map: Record<string, ImageBitmap> = {};
-  for (let r = 0; r < FONT_MAP.length; r++){
+  for (let r = 0; r < FONT_MAP.length; r++) {
     const row = FONT_MAP[r];
-    for (let c = 0; c < row.length; ++c){
+    for (let c = 0; c < row.length; ++c) {
       map[row[c]] = font[r][c];
     }
   }
@@ -233,23 +240,34 @@ export class Painter {
   }
 
   draw_levelup() {
-    // TODO: Finish this screen
-    // const mid_x = Math.floor(this.application.width / 2);
-    // const mid_y = Math.floor(this.application.height / 2);
-    // Draw.line(this.offscreen_ctx, mid_x, 0, mid_x, this.application.height, "white", 1);
-    // Draw.line(this.offscreen_ctx, 0, mid_y, this.application.width, mid_y, "white", 1);
-    this.offscreen_drawer.sprite(this.font["A"], xy(0,0));
+    const width = this.offscreen_drawer.canvas.width;
+    const height = this.offscreen_drawer.canvas.height;
+    this.offscreen_drawer.rectangle(xy(10, 10), wh(1, 1));
+    this.offscreen_drawer.rectangle(xy(20, 10), wh(2, 2));
+    this.offscreen_drawer.rectangle(xy(30, 10), wh(3, 3));
+    this.offscreen_drawer.rectangle(xy(40, 10), wh(3, 6));
+    this.offscreen_drawer.rectangle(xy(0, 0), wh(width, height));
 
-    const message = "Hello, world!?";
-    for (let i = 0; i < message.length; ++i){
+    const message =
+      "Hello, world?\nThe quick brown fox jumped over\nthe lazy dog.\nTHE QUICK BROWN FOX JUMPED OVER THE\nLAZY DOG!";
+    let y = 50;
+    let x = 5;
+    for (let i = 0; i < message.length; ++i) {
       let letter = message[i];
       if (letter === " ") {
+        x += 6;
+        continue;
+      }
+      if (letter === "\n") {
+        x = 5;
+        y += 16;
         continue;
       }
       if (this.font[letter] === undefined) {
-        letter = "."
+        letter = ".";
       }
-      this.offscreen_drawer.sprite(this.font[letter], xy(5 + i * 6, 50));
+      this.offscreen_drawer.sprite(this.font[letter], xy(x, y));
+      x += 6;
     }
   }
 
@@ -266,20 +284,16 @@ export class Painter {
 
   draw() {
     try {
-      // Sizes / coordinates:
-      const size = wh(this.application.width, this.application.height);
-      const zero = xy(0, 0);
-
       // Draw backgrounds:
-      this.canvas_drawer.rectangle(zero, size, "black", "black");
-      this.offscreen_drawer.rectangle(zero, size, "black", "black");
+      this.canvas_drawer.clear();
+      this.offscreen_drawer.clear();
 
       // Draw the game itself onto the offscreen canvas:
       this.draw_game();
 
       // "Flip" the offscreen canvas, transferring it to the DOM canvas:
       const bmp = this.offscreen_drawer.canvas.transferToImageBitmap();
-      this.canvas_drawer.sprite(bmp, zero);
+      this.canvas_drawer.sprite(bmp, xy(0, 0));
     } catch (error) {
       console.log(error);
     }
