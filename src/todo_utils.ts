@@ -65,7 +65,7 @@ export class Drawer<T extends Canvas> {
         continue;
       }
       if (letter === "\n") {
-        x = 5;
+        x = pos.x;
         y += 16;
         continue;
       }
