@@ -1,5 +1,5 @@
 * {
-  font-family: sans-serif;
+  font-family: 'Courier New', Courier, monospace;
   padding: 0;
   margin: 0;
 }
@@ -75,8 +75,6 @@ a {
   grid-row: 3 / span 1;
   text-align: center;
   margin: auto;
+  color: rgb(255,255,255);
   font-weight: bold;
-  font-style: italic;
-  color: grey;
-  font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
 }
