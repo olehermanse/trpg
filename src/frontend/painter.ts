@@ -1,8 +1,8 @@
 import { Drawer } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import { Choice, Entity, Player, Tile } from "../libtrpg/game.ts";
-import { CR, XY } from "@olehermanse/utils";
-import { cr, WH, wh, xy } from "@olehermanse/utils/funcs.js";
+import { CR } from "@olehermanse/utils";
+import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
 class SpriteLocation {
   cr: CR;
@@ -239,9 +239,9 @@ export class Painter {
     );
   }
 
-  draw_card(pos: XY, size: WH, choice: Choice) {
-    this.offscreen_drawer.rectangle(pos, size);
-    const text_position = xy(pos.x + 5, pos.y + 6);
+  draw_card(choice: Choice) {
+    this.offscreen_drawer.rectangle(choice.pos, choice.size);
+    const text_position = xy(choice.pos.x + 5, choice.pos.y + 6);
     const text = choice.title + "\n" + choice.description;
     this.offscreen_drawer.text(text, this.font, text_position);
   }
@@ -251,21 +251,14 @@ export class Painter {
     const height = this.offscreen_drawer.canvas.height;
     this.offscreen_drawer.rectangle(xy(0, 0), wh(width, height));
 
-    const card_width = Math.floor(width / 3) - 10;
-    const card_height = Math.floor(height / 2);
-    let y = height / 2 - card_height / 2;
-    const pos = xy(5, y);
-    const size = wh(card_width, card_height);
     const choices = this.application.game.choices;
-    this.draw_card(pos, size, choices[0]);
-    pos.x += card_width + 10;
-    this.draw_card(pos, size, choices[1]);
-    pos.x += card_width + 10;
-    this.draw_card(pos, size, choices[2]);
+    this.draw_card(choices[0]);
+    this.draw_card(choices[1]);
+    this.draw_card(choices[2]);
 
-    y = Math.floor(y / 2 - 4);
+    const y = Math.floor(choices[0].pos.y / 2 - 4);
     const text_width = 6 * "Level up!".length;
-    let x = Math.floor(width / 2 - text_width / 2);
+    const x = Math.floor(width / 2 - text_width / 2);
 
     this.offscreen_drawer.text("Level up!", this.font, xy(x, y));
 
