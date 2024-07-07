@@ -179,7 +179,7 @@ export class Painter {
     const pos = entity.cr;
     const x = Math.floor(pos.c * width);
     const y = Math.floor(pos.r * height);
-    this.offscreen_drawer.sprite(sprite, xy(x, y));
+    this.offscreen_drawer.sprite(sprite, xy(x, y), entity.reversed);
   }
 
   draw_fog(tile: Tile) {

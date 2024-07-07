@@ -11,7 +11,12 @@ import {
   xy,
   xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
-import { get_ugrade, get_upgrade_choices, NamedUpgrade, UpgradeName } from "./upgrades";
+import {
+  get_ugrade,
+  get_upgrade_choices,
+  NamedUpgrade,
+  UpgradeName,
+} from "./upgrades";
 
 const DIAG = 1.414;
 const BASE_SPEED = 16.0;
@@ -24,6 +29,7 @@ export class Entity {
   cr: CR;
   wh: WH;
   variant: number;
+  reversed = false;
 
   constructor(name: string, pos: CR, zone: Zone, variant?: number) {
     this.name = name;
@@ -55,7 +61,6 @@ export class Player extends Entity {
   stats: Stats;
   upgrades: NamedUpgrade[];
   speed = BASE_SPEED;
-  reversed = false;
   walk_counter = 0;
   destination: XY | null = null;
   game: Game;
@@ -93,7 +98,7 @@ export class Player extends Entity {
         if (tile.is_empty() && distance <= 5.0) {
           tile.light = 5;
           this.zone.fog -= 1;
-          if (this.zone.fog === 0) {
+          if (this.zone.fog % 100 === 0) {
             this.game.level_up();
           }
           continue;
@@ -101,7 +106,7 @@ export class Player extends Entity {
         if (distance <= 2.0) {
           tile.light = 5;
           this.zone.fog -= 1;
-          if (this.zone.fog === 0) {
+          if (this.zone.fog % 100 === 0) {
             this.game.level_up();
           }
           continue;
@@ -229,27 +234,33 @@ export class Zone extends Grid {
       );
     }
     for (let i = 0; i < 7; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       }
-      const entity = new Entity("rock", pos, this);
+      const entity = new Entity("crystal", pos, this);
       this.append(entity);
     }
     for (let i = 0; i < 2; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       }
       const entity = new Entity("skeleton", pos, this, 3);
+      if (entity.cr.c > this.columns / 2) {
+        entity.reversed = true;
+      }
       this.append(entity);
     }
     for (let i = 0; i < 1; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(1, this.rows - 2));
+        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
       }
       const entity = new Entity("chest", pos, this);
+      if (entity.cr.c > this.columns / 2) {
+        entity.reversed = true;
+      }
       this.append(entity);
     }
   }
