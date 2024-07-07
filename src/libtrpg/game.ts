@@ -264,6 +264,7 @@ export type GameState = "zone" | "levelup" | "loading";
 export class Choice {
   pos: XY;
   size: WH;
+  hovered: boolean;
 
   constructor(
     public title: string,
@@ -276,6 +277,31 @@ export class Choice {
     let y = window.height / 2 - card_height / 2;
     this.pos = xy(5 + index * (card_width + 10), y);
     this.size = wh(card_width, card_height);
+    this.hovered = false;
+  }
+
+  is_inside(position: XY) {
+    if (position.x < this.pos.x) {
+      return false;
+    }
+    if (position.y < this.pos.y) {
+      return false;
+    }
+    if (position.x > this.pos.x + this.size.width) {
+      return false;
+    }
+    if (position.y > this.pos.y + this.size.height) {
+      return false;
+    }
+    return true;
+  }
+
+  hover(position: XY) {
+    const inside = this.is_inside(position);
+    if (inside === this.hovered) {
+      return;
+    }
+    this.hovered = !this.hovered;
   }
 }
 
@@ -297,6 +323,9 @@ export class Game {
   }
 
   click(position: XY) {
+    if (this.state !== "zone") {
+      return;
+    }
     const pos = xy_to_cr(position, this.grid);
     const tile = this.current_zone.tiles[pos.c][pos.r];
     if (tile.light !== 5 || !tile.is_empty()) {
@@ -304,6 +333,12 @@ export class Game {
     }
     const target = cr_to_xy(pos, this.grid);
     this.player.destination = target;
+  }
+
+  hover(position: XY) {
+    for (let x of this.choices) {
+      x.hover(position);
+    }
   }
 
   tick(ms: number) {
