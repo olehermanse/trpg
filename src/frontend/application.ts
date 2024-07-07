@@ -99,7 +99,9 @@ class Application {
 
   mouse_release(_pos: XY) {}
 
-  mouse_move(_pos: XY) {}
+  mouse_move(pos: XY) {
+    this.game.hover(pos);
+  }
 
   key_down(key: string) {
     if (key === "1") {

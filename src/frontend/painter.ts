@@ -240,8 +240,13 @@ export class Painter {
   }
 
   draw_card(choice: Choice) {
-    this.offscreen_drawer.rectangle(choice.pos, choice.size);
-    const text_position = xy(choice.pos.x + 5, choice.pos.y + 6);
+    let pos = choice.pos;
+    if (choice.hovered) {
+      pos = xy(pos.x, pos.y - 2);
+    }
+
+    this.offscreen_drawer.rectangle(pos, choice.size);
+    const text_position = xy(pos.x + 5, pos.y + 6);
     const text = choice.title + "\n" + choice.description;
     this.offscreen_drawer.text(text, this.font, text_position);
   }
