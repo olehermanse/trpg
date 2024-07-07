@@ -21,7 +21,7 @@ RUN npm install
 RUN npm run tsc
 RUN npm run test
 
-FROM denoland/deno:1.34.3 AS run
+FROM denoland/deno:1.44.4 AS run
 WORKDIR /trpg
 COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
