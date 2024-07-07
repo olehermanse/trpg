@@ -109,7 +109,7 @@ class Application {
       return;
     }
     if (key === "2") {
-      this.game.state = "levelup";
+      this.game.level_up();
       return;
     }
     if (key === "3") {

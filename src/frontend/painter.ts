@@ -247,7 +247,7 @@ export class Painter {
 
     this.offscreen_drawer.rectangle(pos, choice.size);
     const text_position = xy(pos.x + 5, pos.y + 6);
-    const text = choice.title + "\n" + choice.description;
+    const text = choice.name + "\n" + choice.description;
     this.offscreen_drawer.text(text, this.font, text_position);
   }
 

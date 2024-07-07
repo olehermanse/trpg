@@ -11,6 +11,7 @@ import {
   xy,
   xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
+import { get_ugrade, get_upgrade_choices, NamedUpgrade, UpgradeName } from "./upgrades";
 
 const DIAG = 1.414;
 const BASE_SPEED = 16.0;
@@ -42,14 +43,28 @@ export class Entity {
   }
 }
 
+export class Stats {
+  speed = 1;
+  strength = 1;
+  luck = 1;
+  light = 1;
+}
+
 export class Player extends Entity {
+  level = 1;
+  stats: Stats;
+  upgrades: NamedUpgrade[];
   speed = BASE_SPEED;
   reversed = false;
   walk_counter = 0;
   destination: XY | null = null;
+  game: Game;
 
-  constructor(pos: CR, zone: Zone) {
+  constructor(pos: CR, zone: Zone, game: Game) {
     super("player", pos, zone);
+    this.game = game;
+    this.upgrades = [];
+    this.stats = new Stats();
     this.defog();
   }
 
@@ -57,7 +72,16 @@ export class Player extends Entity {
     return xy(this.xy.x + this.wh.width / 2, this.xy.y + this.wh.height / 2);
   }
 
+  add_upgrade(upgrade: NamedUpgrade) {
+    this.upgrades.push(upgrade);
+    upgrade.apply(this);
+    this.speed = BASE_SPEED * this.stats.speed;
+  }
+
   defog() {
+    if (this.zone.fog === 0) {
+      return;
+    }
     for (let tiles of this.zone.tiles) {
       for (let tile of tiles) {
         if (tile.light === 5) {
@@ -68,10 +92,18 @@ export class Player extends Entity {
 
         if (tile.is_empty() && distance <= 5.0) {
           tile.light = 5;
+          this.zone.fog -= 1;
+          if (this.zone.fog === 0) {
+            this.game.level_up();
+          }
           continue;
         }
         if (distance <= 2.0) {
           tile.light = 5;
+          this.zone.fog -= 1;
+          if (this.zone.fog === 0) {
+            this.game.level_up();
+          }
           continue;
         }
         if (distance <= 2.0 * DIAG) {
@@ -169,8 +201,10 @@ export class Tile {
 
 export class Zone extends Grid {
   tiles: Tile[][];
+  fog: number;
   constructor(grid: Grid) {
     super(grid.width, grid.height, grid.columns, grid.rows);
+    this.fog = grid.columns * grid.rows;
     this.tiles = [];
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
@@ -267,7 +301,7 @@ export class Choice {
   hovered: boolean;
 
   constructor(
-    public title: string,
+    public name: UpgradeName,
     public description: string,
     index: number,
     window: WH,
@@ -278,6 +312,11 @@ export class Choice {
     this.pos = xy(5 + index * (card_width + 10), y);
     this.size = wh(card_width, card_height);
     this.hovered = false;
+  }
+
+  set(upgrade: NamedUpgrade) {
+    this.name = upgrade.name;
+    this.description = upgrade.description;
   }
 
   is_inside(position: XY) {
@@ -314,18 +353,25 @@ export class Game {
   constructor(grid: Grid) {
     this.grid = grid;
     this.current_zone = new Zone(grid);
-    this.player = new Player(cr(1, 1), this.current_zone);
+    this.player = new Player(cr(1, 1), this.current_zone, this);
     this.choices = [];
-    this.choices.push(new Choice("Attack", "Damage +100", 0, grid));
+    this.choices.push(new Choice("Physique", "Damage +100", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
     this.state = "zone";
   }
 
-  click(position: XY) {
-    if (this.state !== "zone") {
-      return;
-    }
+  level_up() {
+    this.player.level += 1;
+    this.state = "levelup";
+    const upgrades = get_upgrade_choices(this.player);
+    console.log(upgrades);
+    this.choices[0].set(upgrades[0]);
+    this.choices[1].set(upgrades[1]);
+    this.choices[2].set(upgrades[2]);
+  }
+
+  zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
     const tile = this.current_zone.tiles[pos.c][pos.r];
     if (tile.light !== 5 || !tile.is_empty()) {
@@ -335,6 +381,26 @@ export class Game {
     this.player.destination = target;
   }
 
+  level_up_click(position: XY) {
+    for (let x of this.choices) {
+      if (x.is_inside(position)) {
+        console.log("Upgrade chosen: " + x.name);
+        this.player.add_upgrade(get_ugrade(x.name));
+        this.state = "zone";
+        return;
+      }
+    }
+  }
+
+  click(position: XY) {
+    if (this.state === "zone") {
+      return this.zone_click(position);
+    }
+    if (this.state === "levelup") {
+      return this.level_up_click(position);
+    }
+  }
+
   hover(position: XY) {
     for (let x of this.choices) {
       x.hover(position);
@@ -342,6 +408,9 @@ export class Game {
   }
 
   tick(ms: number) {
+    if (this.state !== "zone") {
+      return;
+    }
     this.player.tick(ms);
   }
 }
