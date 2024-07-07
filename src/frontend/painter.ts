@@ -241,8 +241,9 @@ export class Painter {
 
   draw_card(pos: XY, size: WH, choice: Choice) {
     this.offscreen_drawer.rectangle(pos, size);
-    let text_position = xy(pos.x + 5, pos.y + 6);
-    this.offscreen_drawer.text(choice.text, this.font, text_position);
+    const text_position = xy(pos.x + 5, pos.y + 6);
+    const text = choice.title + "\n" + choice.description;
+    this.offscreen_drawer.text(text, this.font, text_position);
   }
 
   draw_levelup() {

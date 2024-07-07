@@ -262,7 +262,7 @@ export class Zone extends Grid {
 export type GameState = "zone" | "levelup" | "loading";
 
 export class Choice {
-  constructor(public text: string) {
+  constructor(public title: string, public description: string) {
   }
 }
 
@@ -277,9 +277,9 @@ export class Game {
     this.current_zone = new Zone(grid);
     this.player = new Player(cr(1, 1), this.current_zone);
     this.choices = [];
-    this.choices.push(new Choice("Attack\nDamage +100"));
-    this.choices.push(new Choice("Haste\nSpeed x2"));
-    this.choices.push(new Choice("Luck\nGold +1"));
+    this.choices.push(new Choice("Attack", "Damage +100"));
+    this.choices.push(new Choice("Haste", "Speed x2"));
+    this.choices.push(new Choice("Luck", "Gold +1"));
     this.state = "zone";
   }
 
