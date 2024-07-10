@@ -25,7 +25,7 @@ export class Entity {
   name: string;
   zone: Zone;
   xy: XY;
-  fxy: XY | null;
+  fxy: XY | null; // can hold floating point xy values, so players can move half pixels.
   cr: CR;
   wh: WH;
   variant: number;
@@ -143,6 +143,25 @@ export class Player extends Entity {
     }
   }
 
+  check_for_exit() {
+    if (
+      this.cr.c === 0 ||
+      this.cr.r === 0 ||
+      this.cr.c === this.game.current_zone.columns - 1 ||
+      this.cr.r === this.game.current_zone.rows - 1
+    ) {
+      return this.game.new_zone();
+    }
+  }
+
+  teleport(target: CR) {
+    this.cr.c = target.c;
+    this.cr.r = target.r;
+    this.xy.x = this.cr.c * this.wh.width;
+    this.xy.y = this.cr.r * this.wh.height;
+    this.fxy = null;
+  }
+
   tick(ms: number) {
     if (this.destination === null) {
       return;
@@ -159,6 +178,7 @@ export class Player extends Entity {
       this.fxy.y = this.xy.y;
       this.destination = null;
       this.walk_counter = 0;
+      this.check_for_exit();
       return;
     }
     this._animate(ms);
@@ -200,14 +220,20 @@ export class Tile {
   }
 
   is_empty() {
-    return (this.entities.length === 0);
+    return this.entities.length === 0;
   }
 }
 
 export class Zone extends Grid {
   tiles: Tile[][];
   fog: number;
-  constructor(grid: Grid) {
+  constructor(
+    grid: Grid,
+    public left_entry?: number,
+    public right_entry?: number,
+    public top_entry?: number,
+    public bottom_entry?: number,
+  ) {
     super(grid.width, grid.height, grid.columns, grid.rows);
     this.fog = grid.columns * grid.rows;
     this.tiles = [];
@@ -221,17 +247,29 @@ export class Zone extends Grid {
   }
 
   generate() {
+    this.left_entry ??= randint(1, this.rows - 2);
+    this.right_entry ??= randint(1, this.rows - 2);
     for (let r = 0; r < this.rows; r++) {
-      this.append(new Entity("rock", cr(0, r), this, randint(0, 2)));
-      this.append(
-        new Entity("rock", cr(this.columns - 1, r), this, randint(0, 2)),
-      );
+      if (r !== this.left_entry) {
+        this.append(new Entity("rock", cr(0, r), this, randint(0, 2)));
+      }
+      if (r !== this.right_entry) {
+        this.append(
+          new Entity("rock", cr(this.columns - 1, r), this, randint(0, 2)),
+        );
+      }
     }
+    this.top_entry ??= randint(1, this.columns - 2);
+    this.bottom_entry ??= randint(1, this.columns - 2);
     for (let c = 1; c < this.columns - 1; c++) {
-      this.append(new Entity("rock", cr(c, 0), this, randint(0, 2)));
-      this.append(
-        new Entity("rock", cr(c, this.rows - 1), this, randint(0, 2)),
-      );
+      if (c !== this.top_entry) {
+        this.append(new Entity("rock", cr(c, 0), this, randint(0, 2)));
+      }
+      if (c !== this.bottom_entry) {
+        this.append(
+          new Entity("rock", cr(c, this.rows - 1), this, randint(0, 2)),
+        );
+      }
     }
     for (let i = 0; i < 7; i++) {
       let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
@@ -370,6 +408,45 @@ export class Game {
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
     this.state = "zone";
+  }
+
+  new_zone() {
+    const right = this.current_zone.columns - 1;
+    const bottom = this.current_zone.rows - 1;
+    let left_entry = undefined;
+    let right_entry = undefined;
+    let top_entry = undefined;
+    let bottom_entry = undefined;
+    if (this.player.cr.c === 0) {
+      // player exited left
+      right_entry = this.player.cr.r;
+      this.player.teleport(cr(right, this.player.cr.r));
+    } else if (this.player.cr.r === 0) {
+      // player exited top
+      bottom_entry = this.player.cr.c;
+      this.player.teleport(cr(this.player.cr.c, bottom));
+    } else if (this.player.cr.c === this.current_zone.columns - 1) {
+      // player exited right
+      left_entry = this.player.cr.r;
+      this.player.teleport(cr(0, this.player.cr.r));
+    } else if (this.player.cr.r === this.current_zone.rows - 1) {
+      // player exited bottom
+      top_entry = this.player.cr.c;
+      this.player.teleport(cr(this.player.cr.c, 0));
+    } else {
+      console.log("Error: new_zone called without player exiting!");
+      return;
+    }
+    this.current_zone = new Zone(
+      this.grid,
+      left_entry,
+      right_entry,
+      top_entry,
+      bottom_entry,
+    );
+    this.current_zone.generate();
+    this.player.zone = this.current_zone;
+    this.player.defog();
   }
 
   level_up() {
