@@ -1,5 +1,5 @@
 import { randint } from "@olehermanse/utils/funcs.js";
-import { Player } from "./game";
+import { Player } from "./game.ts";
 
 interface EligibleFunction {
   (player: Player): boolean;
