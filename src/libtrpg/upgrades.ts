@@ -25,16 +25,25 @@ const _all_upgrades = {
       return player.stats.speed <= 10;
     },
   },
-  "Physique": {
-    "description": "Strength +1",
+  "Vision": {
+    "description": "Light +1",
     "apply": (player: Player) => {
-      player.stats.strength += 1;
+      player.stats.light += 1;
+    },
+    "eligible": (player: Player) => {
+      return player.stats.light <= 10;
     },
   },
   "Luck": {
     "description": "Luck +1",
     "apply": (player: Player) => {
       player.stats.luck += 1;
+    },
+  },
+  "Physique": {
+    "description": "Strength +1",
+    "apply": (player: Player) => {
+      player.stats.strength += 1;
     },
   },
 } as const;

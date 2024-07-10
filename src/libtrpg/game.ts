@@ -3,6 +3,7 @@ import {
   array_remove,
   cr,
   cr_to_xy,
+  distance_cr,
   distance_xy,
   Grid,
   randint,
@@ -18,7 +19,7 @@ import {
   UpgradeName,
 } from "./upgrades.ts";
 
-const DIAG = 1.414;
+const DIAG = 1.42;
 const BASE_SPEED = 16.0;
 
 export class Entity {
@@ -51,9 +52,9 @@ export class Entity {
 
 export class Stats {
   speed = 1;
-  strength = 1;
-  luck = 1;
   light = 1;
+  luck = 1;
+  strength = 1;
 }
 
 export class Player extends Entity {
@@ -83,6 +84,25 @@ export class Player extends Entity {
     this.speed = BASE_SPEED * this.stats.speed;
   }
 
+  apply_light(tile: Tile, intensity: number){
+    if (tile.light === 5) {
+      return;
+    }
+    if (intensity === 0) {
+      tile.light = 0;
+      return
+    }
+    if (tile.is_empty() || intensity === 5) {
+      tile.light = 5;
+      this.zone.fog -= 1;
+      if (this.zone.fog % 100 === 0) {
+        this.game.level_up();
+      }
+      return;
+    }
+    tile.light = intensity;
+  }
+
   defog() {
     if (this.zone.fog === 0) {
       return;
@@ -93,44 +113,57 @@ export class Player extends Entity {
           continue;
         }
 
-        const distance = distance_xy(tile.xy, this.xy) / 16;
+        const distance = distance_cr(tile.cr, this.cr);
+        const light_stat = this.stats.light;
+        let light_base = 1;
+        let light_extra = 0;
+        if (light_stat === 1) {
+          // no-op
+        } else if (light_stat <= 5) {
+          light_base = light_stat;
+        } else {
+          light_base = 5;
+          light_extra = light_stat - 5;
+        }
 
-        if (tile.is_empty() && distance <= 5.0) {
-          tile.light = 5;
-          this.zone.fog -= 1;
-          if (this.zone.fog % 100 === 0) {
-            this.game.level_up();
-          }
+        // Adjacent tiles:
+        if (distance <= 1.0 * DIAG + light_extra) {
+          this.apply_light(tile, 5);
           continue;
         }
-        if (distance <= 2.0) {
-          tile.light = 5;
-          this.zone.fog -= 1;
-          if (this.zone.fog % 100 === 0) {
-            this.game.level_up();
-          }
+        if (light_base === 1) {
+          this.apply_light(tile, 0);
           continue;
         }
-        if (distance <= 2.0 * DIAG) {
-          tile.light = 4;
+        if (distance <= 2.0 * DIAG + light_extra) {
+          this.apply_light(tile, 4);
           continue;
         }
-        if (distance <= 3.0) {
-          tile.light = 3;
+        if (light_base === 2) {
+          this.apply_light(tile, 0);
           continue;
         }
-        if (distance <= 3.0 * DIAG) {
-          tile.light = 2;
+        if (distance <= 3.0 + light_extra) {
+          this.apply_light(tile, 3);
           continue;
         }
-        if (distance <= 5.0) {
-          tile.light = 1;
+        if (light_base === 3) {
+          this.apply_light(tile, 0);
           continue;
         }
-        if (tile.light === 1) {
+        if (distance <= 3.0 * DIAG + light_extra) {
+          this.apply_light(tile, 2);
           continue;
         }
-        tile.light = 0;
+        if (light_base === 4) {
+          this.apply_light(tile, 0);
+          continue;
+        }
+        if (distance <= 5.0 + light_extra) {
+          this.apply_light(tile, 1);
+          continue;
+        }
+        this.apply_light(tile, 0);
       }
     }
   }
@@ -404,7 +437,7 @@ export class Game {
     this.current_zone = new Zone(grid);
     this.player = new Player(cr(1, 1), this.current_zone, this);
     this.choices = [];
-    this.choices.push(new Choice("Physique", "Damage +100", 0, grid));
+    this.choices.push(new Choice("Vision", "light +1", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
     this.state = "zone";
@@ -475,6 +508,7 @@ export class Game {
         console.log("Upgrade chosen: " + x.name);
         this.player.add_upgrade(get_ugrade(x.name));
         this.state = "zone";
+        this.player.defog();
         return;
       }
     }
