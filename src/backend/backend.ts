@@ -79,7 +79,7 @@ async function handleHttp(conn: Deno.Conn) {
   const httpConn = Deno.serveHttp(conn);
   for await (const requestEvent of httpConn) {
     const url = new URL(requestEvent.request.url);
-    let filepath = decodeURIComponent(url.pathname);
+    const filepath = decodeURIComponent(url.pathname);
 
     if (illegalURL(filepath)) {
       await notFound(requestEvent);
