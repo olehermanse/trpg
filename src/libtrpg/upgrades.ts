@@ -66,7 +66,7 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
     return upgrade.eligible(player);
   });
   const choices: NamedUpgrade[] = [];
-  for (let _ of [1, 2, 3]) {
+  for (const _ of [1, 2, 3]) {
     const i: number = randint(0, unlocked.length - 1);
     const name: UpgradeName = unlocked[i];
     const upgrade = all_upgrades[name];

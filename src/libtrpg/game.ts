@@ -87,8 +87,8 @@ export class Player extends Entity {
     if (this.zone.fog === 0) {
       return;
     }
-    for (let tiles of this.zone.tiles) {
-      for (let tile of tiles) {
+    for (const tiles of this.zone.tiles) {
+      for (const tile of tiles) {
         if (tile.light === 5) {
           continue;
         }
@@ -278,7 +278,7 @@ export class Zone extends Grid {
     const result = [];
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.columns; c++) {
-        for (let entity of this.get_entities(cr(c, r))) {
+        for (const entity of this.get_entities(cr(c, r))) {
           result.push(entity);
         }
       }
@@ -299,7 +299,7 @@ export class Zone extends Grid {
   }
 
   remove(pos: CR, entity: Entity) {
-    let entities = this.tiles[pos.c][pos.r].entities;
+    const entities = this.tiles[pos.c][pos.r].entities;
     array_remove(entities, entity);
   }
 }
@@ -319,7 +319,7 @@ export class Choice {
   ) {
     const card_width = Math.floor(window.width / 3) - 10;
     const card_height = Math.floor(window.height / 2);
-    let y = window.height / 2 - card_height / 2;
+    const y = window.height / 2 - card_height / 2;
     this.pos = xy(5 + index * (card_width + 10), y);
     this.size = wh(card_width, card_height);
     this.hovered = false;
@@ -393,7 +393,7 @@ export class Game {
   }
 
   level_up_click(position: XY) {
-    for (let x of this.choices) {
+    for (const x of this.choices) {
       if (x.is_inside(position)) {
         console.log("Upgrade chosen: " + x.name);
         this.player.add_upgrade(get_ugrade(x.name));
@@ -413,7 +413,7 @@ export class Game {
   }
 
   hover(position: XY) {
-    for (let x of this.choices) {
+    for (const x of this.choices) {
       x.hover(position);
     }
   }
