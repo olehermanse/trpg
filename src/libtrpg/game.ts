@@ -495,6 +495,9 @@ export class Game {
 
   zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
+    if (this.player.destination === null && pos.c === this.player.cr.c && pos.r === this.player.cr.r){
+      return;
+    }
     const tile = this.current_zone.tiles[pos.c][pos.r];
     if (tile.light !== 5 || !tile.is_empty()) {
       return;
