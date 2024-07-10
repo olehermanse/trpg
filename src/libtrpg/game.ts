@@ -60,6 +60,7 @@ export class Stats {
 
 export class Player extends Entity {
   level = 1;
+  xp = 0;
   stats: Stats;
   upgrades: NamedUpgrade[];
   speed = BASE_SPEED;
@@ -79,26 +80,40 @@ export class Player extends Entity {
     return xy(this.xy.x + this.wh.width / 2, this.xy.y + this.wh.height / 2);
   }
 
+  xp_threshold() {
+    return 10 * this.level;
+  }
+
+  add_xp(xp: number) {
+    this.xp += xp;
+    if (this.xp >= this.xp_threshold()) {
+      this.xp = 0;
+      this.game.level_up();
+    }
+  }
+
   add_upgrade(upgrade: NamedUpgrade) {
     this.upgrades.push(upgrade);
     upgrade.apply(this);
     this.speed = BASE_SPEED * this.stats.speed;
   }
 
-  apply_light(tile: Tile, intensity: number) {
-    if (tile.light === 5) {
-      return;
-    }
+  apply_light(tile: Tile, intensity: LightLevel) {
     if (intensity === 0) {
       tile.light = 0;
       return;
     }
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;
-      this.zone.fog -= 1;
-      if (this.zone.fog % 100 === 0) {
-        this.game.level_up();
+      let xp_reward = 0;
+      if (!tile.is_empty()) {
+        xp_reward += 1;
       }
+      this.zone.fog -= 1;
+      if (this.zone.fog === 0) {
+        xp_reward += 15;
+      }
+      this.add_xp(xp_reward);
       return;
     }
     tile.light = intensity;
@@ -241,8 +256,10 @@ export class Player extends Entity {
   }
 }
 
+export type LightLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
 export class Tile {
-  light: number;
+  light: LightLevel;
   entities: Entity[];
   cr: CR;
   xy: XY;
@@ -495,7 +512,10 @@ export class Game {
 
   zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
-    if (this.player.destination === null && pos.c === this.player.cr.c && pos.r === this.player.cr.r){
+    if (
+      this.player.destination === null && pos.c === this.player.cr.c &&
+      pos.r === this.player.cr.r
+    ) {
       return;
     }
     const tile = this.current_zone.tiles[pos.c][pos.r];
