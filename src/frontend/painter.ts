@@ -98,9 +98,9 @@ function get_font_data(font: ImageBitmap[][]) {
 }
 
 interface Frame {
-  x: number,
-  y: number,
-  name: string,
+  x: number;
+  y: number;
+  name: string;
 }
 
 export class Painter {
