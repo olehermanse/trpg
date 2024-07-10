@@ -116,6 +116,10 @@ class Application {
       this.game.state = "loading";
       return;
     }
+    if (key === "4") {
+      console.log(this);
+      return;
+    }
   }
 
   key_up(_key: string) {}
