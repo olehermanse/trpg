@@ -55,6 +55,7 @@ export class Stats {
   light = 1;
   luck = 1;
   strength = 1;
+  magic = 1;
 }
 
 export class Player extends Entity {
@@ -84,13 +85,13 @@ export class Player extends Entity {
     this.speed = BASE_SPEED * this.stats.speed;
   }
 
-  apply_light(tile: Tile, intensity: number){
+  apply_light(tile: Tile, intensity: number) {
     if (tile.light === 5) {
       return;
     }
     if (intensity === 0) {
       tile.light = 0;
-      return
+      return;
     }
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;

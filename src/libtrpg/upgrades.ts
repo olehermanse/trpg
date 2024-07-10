@@ -25,15 +25,6 @@ const _all_upgrades = {
       return player.stats.speed <= 10;
     },
   },
-  "Vision": {
-    "description": "Light +1",
-    "apply": (player: Player) => {
-      player.stats.light += 1;
-    },
-    "eligible": (player: Player) => {
-      return player.stats.light <= 10;
-    },
-  },
   "Luck": {
     "description": "Luck +1",
     "apply": (player: Player) => {
@@ -44,6 +35,27 @@ const _all_upgrades = {
     "description": "Strength +1",
     "apply": (player: Player) => {
       player.stats.strength += 1;
+    },
+    "eligible": (player: Player) => {
+      return player.level >= 3;
+    },
+  },
+  "Intellect": {
+    "description": "Magic +1",
+    "apply": (player: Player) => {
+      player.stats.magic += 1;
+    },
+    "eligible": (player: Player) => {
+      return player.level >= 3;
+    },
+  },
+  "Vision": {
+    "description": "Light +1",
+    "apply": (player: Player) => {
+      player.stats.light += 1;
+    },
+    "eligible": (player: Player) => {
+      return player.stats.light <= 10;
     },
   },
 } as const;
@@ -61,9 +73,12 @@ export type UpgradeAtlas = {
 };
 
 export function get_upgrade_choices(player: Player): NamedUpgrade[] {
+  // 1. Get the names of all the upgrades:
   const upgrade_names: UpgradeName[] = <UpgradeName[]> Object.keys(
     all_upgrades,
   );
+
+  // 2. Filter out the names of upgrades which are not available:
   const unlocked: UpgradeName[] = upgrade_names.filter((k: UpgradeName) => {
     const upgrade: Upgrade = all_upgrades[k];
     if (upgrade === undefined) {
@@ -74,16 +89,31 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
     }
     return upgrade.eligible(player);
   });
-  const choices: NamedUpgrade[] = [];
+  console.log(unlocked);
+
+  // 3. Construct the 3 choices by picking randomly from the available ones:
+  const choices: UpgradeName[] = [];
   for (const _ of [1, 2, 3]) {
     const i: number = randint(0, unlocked.length - 1);
     const name: UpgradeName = unlocked[i];
-    const upgrade = all_upgrades[name];
-    const choice = { "name": name, ...upgrade };
     unlocked.splice(i, 1);
-    choices.push(choice);
+    choices.push(name);
   }
-  return choices;
+  console.log(choices);
+
+  // 4. Sort:
+  const sorted: NamedUpgrade[] = [];
+  for (const name in all_upgrades) {
+    if (choices.includes(<UpgradeName> name)) {
+      sorted.push({
+        "name": <UpgradeName> name,
+        ...all_upgrades[<UpgradeName> name],
+      });
+    }
+  }
+  console.log(sorted);
+
+  return sorted;
 }
 
 export function get_ugrade(name: UpgradeName): NamedUpgrade {
