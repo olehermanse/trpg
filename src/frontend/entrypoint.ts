@@ -1,9 +1,9 @@
 import { Application } from "./application.ts";
 
 function start(canvas: HTMLCanvasElement) {
-  let scale = window.devicePixelRatio;
-  let columns = 16;
-  let rows = 12;
+  const scale = window.devicePixelRatio;
+  const columns = 16;
+  const rows = 12;
   const application: Application = new Application(
     canvas,
     columns,

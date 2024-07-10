@@ -6,12 +6,12 @@ import { Grid } from "@olehermanse/utils/funcs.js";
 
 describe("Game", () => {
   test("can be created", () => {
-    let game = new Game(new Grid(400, 300, 4, 3));
+    const game = new Game(new Grid(400, 300, 4, 3));
     expect(game).not.toBe(null);
     expect(game).toBeInstanceOf(Game);
   });
   test("to have correct dimensions", () => {
-    let game = new Game(new Grid(400, 300, 4, 3));
+    const game = new Game(new Grid(400, 300, 4, 3));
     expect(game.grid.columns).toBe(4);
     expect(game.grid.rows).toBe(3);
     expect(game.grid.cell_width).toBe(100);

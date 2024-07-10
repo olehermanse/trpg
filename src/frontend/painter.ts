@@ -41,7 +41,7 @@ function load_sprites(
 ) {
   const image = new Image();
   const sprites: ImageBitmap[] = [];
-  let frames = [];
+  const frames: SpriteLocation[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
       frames.push(new SpriteLocation(r, c));
@@ -131,7 +131,7 @@ export class Painter {
       this.application.game.grid.cell_width;
     this.spritesheet = new Image();
     this.sprites = {};
-    let frames = [];
+    const frames = [];
     for (const [key, value] of Object.entries(SPRITESHEET)) {
       this.sprites[key] = [];
       const n = value.frames ?? 1;
@@ -192,7 +192,7 @@ export class Painter {
   draw_zone() {
     let drew_player = false;
     const player = this.application.game.player;
-    for (let entity of this.application.game.current_zone.get_entities()) {
+    for (const entity of this.application.game.current_zone.get_entities()) {
       if (!drew_player && entity.xy.y > player.xy.y) {
         this.draw_player();
         drew_player = true;
@@ -203,8 +203,8 @@ export class Painter {
       this.draw_player();
       drew_player = true;
     }
-    for (let tiles of this.application.game.current_zone.tiles) {
-      for (let tile of tiles) {
+    for (const tiles of this.application.game.current_zone.tiles) {
+      for (const tile of tiles) {
         if (tile.light < 5) {
           this.draw_fog(tile);
         }
