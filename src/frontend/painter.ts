@@ -97,6 +97,12 @@ function get_font_data(font: ImageBitmap[][]) {
   return map;
 }
 
+interface Frame {
+  x: number,
+  y: number,
+  name: string,
+}
+
 export class Painter {
   canvas_drawer: Drawer<HTMLCanvasElement>;
   offscreen_drawer: Drawer<OffscreenCanvas>;
@@ -131,7 +137,7 @@ export class Painter {
       this.application.game.grid.cell_width;
     this.spritesheet = new Image();
     this.sprites = {};
-    const frames = [];
+    const frames: Frame[] = [];
     for (const [key, value] of Object.entries(SPRITESHEET)) {
       this.sprites[key] = [];
       const n = value.frames ?? 1;
@@ -148,7 +154,7 @@ export class Painter {
     this.application.game.state = "loading";
     this.spritesheet.onload = () => {
       Promise.all(
-        frames.map((frame) =>
+        frames.map((frame: Frame) =>
           createImageBitmap(this.spritesheet, frame.x, frame.y, 16, 16, {
             resizeQuality: "pixelated",
           })
