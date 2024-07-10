@@ -445,20 +445,18 @@ export class Choice {
 }
 
 export class Game {
-  grid: Grid;
+  disabled_clicks_ms: number = 0;
+  state: GameState = "zone";
   player: Player;
   current_zone: Zone;
-  state: GameState;
   choices: Choice[];
-  constructor(grid: Grid) {
-    this.grid = grid;
+  constructor(public grid: Grid) {
     this.current_zone = new Zone(grid);
     this.player = new Player(cr(1, 1), this.current_zone, this);
     this.choices = [];
     this.choices.push(new Choice("Vision", "light +1", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
-    this.state = "zone";
   }
 
   new_zone() {
@@ -500,9 +498,21 @@ export class Game {
     this.player.defog();
   }
 
+  disable_clicks(ms: number) {
+    if (ms < this.disabled_clicks_ms) {
+      return;
+    }
+    this.disabled_clicks_ms = ms;
+  }
+
+  goto_state(state: GameState) {
+    this.state = state;
+    this.disable_clicks(500);
+  }
+
   level_up() {
     this.player.level += 1;
-    this.state = "levelup";
+    this.goto_state("levelup");
     const upgrades = get_upgrade_choices(this.player);
     console.log(upgrades);
     this.choices[0].set(upgrades[0]);
@@ -539,6 +549,9 @@ export class Game {
   }
 
   click(position: XY) {
+    if (this.disabled_clicks_ms > 0) {
+      return;
+    }
     if (this.state === "zone") {
       return this.zone_click(position);
     }
@@ -554,6 +567,12 @@ export class Game {
   }
 
   tick(ms: number) {
+    if (this.disabled_clicks_ms > 0) {
+      this.disabled_clicks_ms -= ms;
+      if (this.disabled_clicks_ms <= 0) {
+        this.disabled_clicks_ms = 0;
+      }
+    }
     if (this.state !== "zone") {
       return;
     }
