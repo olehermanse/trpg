@@ -222,13 +222,13 @@ export class Painter {
 
   draw_selector() {
     const player: Player = this.application.game.player;
-    if (player.destination === null) {
+    if (player.target === null) {
       return;
     }
-    const frame = Math.round(0.6 * player.walk_counter) % 2;
+    const frame = player.target.frame;
     this.offscreen_drawer.sprite(
       this.sprites["selector"][frame],
-      player.destination,
+      player.target.xy,
       true,
     );
   }
