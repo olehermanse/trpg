@@ -58,6 +58,19 @@ export class Stats {
   magic = 1;
 }
 
+export class Target {
+  xy: XY;
+  ms: number = 0;
+  frame: number = 0;
+  constructor(public cr: CR, grid: Grid) {
+    this.xy = cr_to_xy(cr, grid);
+  }
+  tick(ms: number) {
+    this.ms = (this.ms + ms) % 500;
+    this.frame = Math.floor(this.ms / 250);
+  }
+}
+
 export class Player extends Entity {
   level = 1;
   xp = 0;
@@ -65,7 +78,7 @@ export class Player extends Entity {
   upgrades: NamedUpgrade[];
   speed = BASE_SPEED;
   walk_counter = 0;
-  destination: XY | null = null;
+  target: Target | null = null;
   game: Game;
 
   constructor(pos: CR, zone: Zone, game: Game) {
@@ -212,27 +225,28 @@ export class Player extends Entity {
   }
 
   tick(ms: number) {
-    if (this.destination === null) {
+    if (this.target === null) {
       return;
     }
+    this.target.tick(ms);
     if (this.fxy === null) {
       this.fxy = xy(this.xy.x, this.xy.y);
     }
     const step = (this.speed * ms) / 1000.0;
-    const dist = distance_xy(this.fxy, this.destination);
+    const dist = distance_xy(this.fxy, this.target.xy);
     if (isNaN(dist) || dist <= step) {
-      this.xy.x = this.destination.x;
-      this.xy.y = this.destination.y;
+      this.xy.x = this.target.xy.x;
+      this.xy.y = this.target.xy.y;
       this.fxy.x = this.xy.x;
       this.fxy.y = this.xy.y;
-      this.destination = null;
+      this.target = null;
       this.walk_counter = 0;
       this.check_for_exit();
       return;
     }
     this._animate(ms);
     const length = step / dist;
-    const dx = (this.destination.x - this.fxy.x) * length;
+    const dx = (this.target.xy.x - this.fxy.x) * length;
     if (dx > 0) {
       // Moving right
       this.reversed = false;
@@ -240,7 +254,7 @@ export class Player extends Entity {
       // Moving left
       this.reversed = true;
     }
-    const dy = (this.destination.y - this.fxy.y) * length;
+    const dy = (this.target.xy.y - this.fxy.y) * length;
     this.fxy.x += dx;
     this.fxy.y += dy;
     this.xy.x = Math.floor(this.fxy.x);
@@ -523,7 +537,7 @@ export class Game {
   zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
     if (
-      this.player.destination === null && pos.c === this.player.cr.c &&
+      this.player.target === null && pos.c === this.player.cr.c &&
       pos.r === this.player.cr.r
     ) {
       return;
@@ -532,8 +546,7 @@ export class Game {
     if (tile.light !== 5 || !tile.is_empty()) {
       return;
     }
-    const target = cr_to_xy(pos, this.grid);
-    this.player.destination = target;
+    this.player.target = new Target(pos, this.grid);
   }
 
   level_up_click(position: XY) {
