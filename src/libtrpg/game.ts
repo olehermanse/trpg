@@ -16,7 +16,7 @@ import {
   get_upgrade_choices,
   NamedUpgrade,
   UpgradeName,
-} from "./upgrades";
+} from "./upgrades.ts";
 
 const DIAG = 1.414;
 const BASE_SPEED = 16.0;
