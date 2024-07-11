@@ -309,15 +309,15 @@ export class Painter {
       Math.floor(center.y - map_height / 2),
     );
     const top_left = xy(
-      world_map_origin.x - map_width,
-      world_map_origin.y - map_height,
+      world_map_origin.x - 2 * map_width,
+      world_map_origin.y - 2 * map_height,
     );
     const top_left_cr = cr(
-      this.application.game.current_zone.pos.c - 1,
-      this.application.game.current_zone.pos.r - 1,
+      this.application.game.current_zone.pos.c - 2,
+      this.application.game.current_zone.pos.r - 2,
     );
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
         const zone_pos = xy(
           top_left.x + map_width * i,
           top_left.y + map_height * j,
