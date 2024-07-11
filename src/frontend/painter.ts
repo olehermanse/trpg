@@ -1,7 +1,7 @@
 import { Drawer } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
-import { Choice, Entity, Player, Tile } from "../libtrpg/game.ts";
-import { CR } from "@olehermanse/utils";
+import { Choice, Entity, Player, Tile, Zone } from "../libtrpg/game.ts";
+import { CR, XY } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
 class SpriteLocation {
@@ -106,26 +106,19 @@ interface Frame {
 export class Painter {
   canvas_drawer: Drawer<HTMLCanvasElement>;
   offscreen_drawer: Drawer<OffscreenCanvas>;
-  application: Application;
   real_scale: number;
-  columns: number;
-  rows: number;
-  size: number;
 
   spritesheet: HTMLImageElement;
   sprites: Record<string, ImageBitmap[]>;
   font: Record<string, ImageBitmap>;
 
   constructor(
-    application: Application,
+    public application: Application,
     canvas: HTMLCanvasElement,
-    columns: number,
-    rows: number,
-    size: number,
+    public columns: number,
+    public rows: number,
+    public size: number,
   ) {
-    this.columns = columns;
-    this.rows = rows;
-    this.size = size;
     this.font = {};
     this.canvas_drawer = new Drawer(canvas, false);
     this.offscreen_drawer = new Drawer(
@@ -257,7 +250,7 @@ export class Painter {
     this.offscreen_drawer.text(text, this.font, text_position);
   }
 
-  draw_levelup() {
+  draw_level_up() {
     const width = this.offscreen_drawer.canvas.width;
     const height = this.offscreen_drawer.canvas.height;
     this.offscreen_drawer.rectangle(xy(0, 0), wh(width, height));
@@ -279,6 +272,61 @@ export class Painter {
     );
   }
 
+  draw_one_map(pos: XY, zone: Zone, scaling: number) {
+    for (const tile of zone.all_tiles) {
+      if (tile.is_empty()) {
+        continue;
+      }
+      if (tile.light !== 5) {
+        continue;
+      }
+      this.offscreen_drawer.white_square(
+        xy(pos.x + scaling * tile.cr.c, pos.y + scaling * tile.cr.r),
+        scaling,
+      );
+    }
+  }
+
+  draw_world_map() {
+    const width = this.offscreen_drawer.canvas.width;
+    const height = this.offscreen_drawer.canvas.height;
+    this.offscreen_drawer.rectangle(xy(0, 0), wh(width, height));
+
+    const center = xy(
+      Math.floor(this.offscreen_drawer.canvas.width / 2),
+      Math.floor(this.offscreen_drawer.canvas.height / 2),
+    );
+    const scaling = 2.0;
+    const map_width = scaling * (this.columns - 1);
+    const map_height = scaling * (this.rows - 1);
+    const world_map_origin = xy(
+      Math.floor(center.x - map_width / 2),
+      Math.floor(center.y - map_height / 2),
+    );
+    const top_left = xy(
+      world_map_origin.x - map_width,
+      world_map_origin.y - map_height,
+    );
+    const top_left_cr = cr(
+      this.application.game.current_zone.pos.c - 1,
+      this.application.game.current_zone.pos.r - 1,
+    );
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        const zone_pos = xy(
+          top_left.x + map_width * i,
+          top_left.y + map_height * j,
+        );
+        const zone_pos_cr = cr(top_left_cr.c + i, top_left_cr.r + j);
+        const zone = this.application.game.get_zone(zone_pos_cr);
+        if (zone === null) {
+          continue;
+        }
+        this.draw_one_map(zone_pos, zone, scaling);
+      }
+    }
+  }
+
   draw_game() {
     // Check the current state and choose what "screen" to draw:
     if (this.application.game.state === "loading") {
@@ -287,7 +335,12 @@ export class Painter {
     if (this.application.game.state === "zone") {
       return this.draw_zone();
     }
-    return this.draw_levelup();
+    if (this.application.game.state === "level_up") {
+      return this.draw_level_up();
+    }
+    if (this.application.game.state === "world_map") {
+      return this.draw_world_map();
+    }
   }
 
   draw() {

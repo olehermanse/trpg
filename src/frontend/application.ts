@@ -105,7 +105,7 @@ class Application {
 
   key_down(key: string) {
     if (key === "1") {
-      this.game.state = "zone";
+      this.game.goto_state("zone");
       return;
     }
     if (key === "2") {
@@ -113,10 +113,14 @@ class Application {
       return;
     }
     if (key === "3") {
-      this.game.state = "loading";
+      this.game.goto_state("world_map");
       return;
     }
     if (key === "4") {
+      this.game.goto_state("loading");
+      return;
+    }
+    if (key === "d") {
       console.log(this);
       return;
     }

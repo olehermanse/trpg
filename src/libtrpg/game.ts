@@ -291,9 +291,12 @@ export class Tile {
 
 export class Zone extends Grid {
   tiles: Tile[][];
+  all_tiles: Tile[];
   fog: number;
   constructor(
     grid: Grid,
+    public game: Game,
+    public pos: CR,
     public left_entry?: number,
     public right_entry?: number,
     public top_entry?: number,
@@ -302,16 +305,39 @@ export class Zone extends Grid {
     super(grid.width, grid.height, grid.columns, grid.rows);
     this.fog = grid.columns * grid.rows;
     this.tiles = [];
+    this.all_tiles = [];
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
       for (let r = 0; r < grid.rows; r++) {
-        column.push(new Tile(cr(c, r)));
+        const tile: Tile = new Tile(cr(c, r));
+        column.push(tile);
+        this.all_tiles.push(tile);
       }
       this.tiles.push(column);
     }
   }
 
+  discover_neighbors() {
+    const left = this.game.get_zone(cr(this.pos.c - 1, this.pos.r));
+    const right = this.game.get_zone(cr(this.pos.c + 1, this.pos.r));
+    const top = this.game.get_zone(cr(this.pos.c, this.pos.r - 1));
+    const bottom = this.game.get_zone(cr(this.pos.c, this.pos.r + 1));
+    if (left !== null) {
+      this.left_entry = left.right_entry;
+    }
+    if (right !== null) {
+      this.right_entry = right.left_entry;
+    }
+    if (top !== null) {
+      this.top_entry = top.bottom_entry;
+    }
+    if (bottom !== null) {
+      this.bottom_entry = bottom.top_entry;
+    }
+  }
+
   generate() {
+    this.discover_neighbors();
     this.left_entry ??= randint(1, this.rows - 2);
     this.right_entry ??= randint(1, this.rows - 2);
     for (let r = 0; r < this.rows; r++) {
@@ -407,7 +433,7 @@ export class Zone extends Grid {
   }
 }
 
-export type GameState = "zone" | "levelup" | "loading";
+export type GameState = "zone" | "level_up" | "loading" | "world_map";
 
 export class Choice {
   pos: XY;
@@ -463,14 +489,29 @@ export class Game {
   state: GameState = "zone";
   player: Player;
   current_zone: Zone;
+  zones: Record<string, Zone> = {};
   choices: Choice[];
   constructor(public grid: Grid) {
-    this.current_zone = new Zone(grid);
+    this.current_zone = new Zone(grid, this, cr(0, 0));
+    this.put_zone(this.current_zone);
     this.player = new Player(cr(1, 1), this.current_zone, this);
     this.choices = [];
     this.choices.push(new Choice("Vision", "light +1", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
+  }
+
+  put_zone(zone: Zone) {
+    const key = "" + zone.pos.c + "," + zone.pos.r;
+    this.zones[key] = zone;
+  }
+
+  get_zone(pos: CR): Zone | null {
+    const key = "" + pos.c + "," + pos.r;
+    if (key in this.zones) {
+      return this.zones[key];
+    }
+    return null;
   }
 
   new_zone() {
@@ -480,34 +521,48 @@ export class Game {
     let right_entry = undefined;
     let top_entry = undefined;
     let bottom_entry = undefined;
+    const zone_pos = cr(this.current_zone.pos.c, this.current_zone.pos.r);
     if (this.player.cr.c === 0) {
       // player exited left
+      zone_pos.c -= 1;
       right_entry = this.player.cr.r;
       this.player.teleport(cr(right, this.player.cr.r));
     } else if (this.player.cr.r === 0) {
       // player exited top
+      zone_pos.r -= 1;
       bottom_entry = this.player.cr.c;
       this.player.teleport(cr(this.player.cr.c, bottom));
     } else if (this.player.cr.c === this.current_zone.columns - 1) {
       // player exited right
+      zone_pos.c += 1;
       left_entry = this.player.cr.r;
       this.player.teleport(cr(0, this.player.cr.r));
     } else if (this.player.cr.r === this.current_zone.rows - 1) {
       // player exited bottom
+      zone_pos.r += 1;
       top_entry = this.player.cr.c;
       this.player.teleport(cr(this.player.cr.c, 0));
     } else {
       console.log("Error: new_zone called without player exiting!");
       return;
     }
-    this.current_zone = new Zone(
-      this.grid,
-      left_entry,
-      right_entry,
-      top_entry,
-      bottom_entry,
-    );
-    this.current_zone.generate();
+
+    const zone = this.get_zone(zone_pos);
+    if (zone === null) {
+      this.current_zone = new Zone(
+        this.grid,
+        this,
+        zone_pos,
+        left_entry,
+        right_entry,
+        top_entry,
+        bottom_entry,
+      );
+      this.put_zone(this.current_zone);
+      this.current_zone.generate();
+    } else {
+      this.current_zone = zone;
+    }
     this.player.zone = this.current_zone;
     this.player.defog();
   }
@@ -526,7 +581,7 @@ export class Game {
 
   level_up() {
     this.player.level += 1;
-    this.goto_state("levelup");
+    this.goto_state("level_up");
     const upgrades = get_upgrade_choices(this.player);
     console.log(upgrades);
     this.choices[0].set(upgrades[0]);
@@ -568,7 +623,7 @@ export class Game {
     if (this.state === "zone") {
       return this.zone_click(position);
     }
-    if (this.state === "levelup") {
+    if (this.state === "level_up") {
       return this.level_up_click(position);
     }
   }
