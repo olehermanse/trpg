@@ -130,6 +130,7 @@ class Application {
 
   tick(ms: number) {
     this.game.tick(ms);
+    this.painter.tick(ms);
   }
 }
 

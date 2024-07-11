@@ -111,6 +111,7 @@ export class Painter {
   spritesheet: HTMLImageElement;
   sprites: Record<string, ImageBitmap[]>;
   font: Record<string, ImageBitmap>;
+  clock: number = 0;
 
   constructor(
     public application: Application,
@@ -165,6 +166,10 @@ export class Painter {
       });
     };
     this.spritesheet.src = "/sprites.png";
+  }
+
+  tick(ms: number) {
+    this.clock += ms;
   }
 
   draw_entity(entity: Entity) {
@@ -324,6 +329,48 @@ export class Painter {
         }
         this.draw_one_map(zone_pos, zone, scaling);
       }
+    }
+    this.offscreen_drawer.white_square(
+      xy(
+        world_map_origin.x + scaling * this.application.game.player.cr.c,
+        world_map_origin.y + scaling * this.application.game.player.cr.r,
+      ),
+      scaling,
+    );
+    if (this.clock % 1500 < 750) {
+      this.offscreen_drawer.white_square(
+        xy(world_map_origin.x, world_map_origin.y),
+        2,
+      );
+      this.offscreen_drawer.white_square(
+        xy(world_map_origin.x + map_width, world_map_origin.y),
+        2,
+      );
+      this.offscreen_drawer.white_square(
+        xy(world_map_origin.x, world_map_origin.y + map_height),
+        2,
+      );
+      this.offscreen_drawer.white_square(
+        xy(world_map_origin.x + map_width, world_map_origin.y + map_height),
+        2,
+      );
+    } else {
+      this.offscreen_drawer.black_square(
+        xy(world_map_origin.x, world_map_origin.y),
+        2,
+      );
+      this.offscreen_drawer.black_square(
+        xy(world_map_origin.x + map_width, world_map_origin.y),
+        2,
+      );
+      this.offscreen_drawer.black_square(
+        xy(world_map_origin.x, world_map_origin.y + map_height),
+        2,
+      );
+      this.offscreen_drawer.black_square(
+        xy(world_map_origin.x + map_width, world_map_origin.y + map_height),
+        2,
+      );
     }
   }
 

@@ -641,9 +641,8 @@ export class Game {
         this.disabled_clicks_ms = 0;
       }
     }
-    if (this.state !== "zone") {
-      return;
+    if (this.state === "zone" || this.state === "world_map") {
+      this.player.tick(ms);
     }
-    this.player.tick(ms);
   }
 }
