@@ -112,8 +112,13 @@ export class Player extends Entity {
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
+    if (tile.light === 5) {
+      return;
+    }
     if (intensity === 0) {
-      tile.light = 0;
+      if (tile.light > 1) {
+        tile.light = 1;
+      }
       return;
     }
     if (tile.is_empty() || intensity === 5) {
