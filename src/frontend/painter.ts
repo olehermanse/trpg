@@ -337,7 +337,7 @@ export class Painter {
       ),
       scaling,
     );
-    if (this.clock % 1500 < 750) {
+    if (this.clock % 1000 < 333) {
       this.offscreen_drawer.white_square(
         xy(world_map_origin.x, world_map_origin.y),
         2,
@@ -354,7 +354,7 @@ export class Painter {
         xy(world_map_origin.x + map_width, world_map_origin.y + map_height),
         2,
       );
-    } else {
+    } else if (this.clock % 1000 < 666) {
       this.offscreen_drawer.black_square(
         xy(world_map_origin.x, world_map_origin.y),
         2,
