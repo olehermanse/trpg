@@ -91,9 +91,26 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   });
   console.log(unlocked);
 
-  // 3. Construct the 3 choices by picking randomly from the available ones:
+  // 3. Add guaranteed options:
   const choices: UpgradeName[] = [];
-  for (const _ of [1, 2, 3]) {
+
+  if (player.stats.light < 5 || player.stats.speed < 5) {
+    if (player.stats.light < player.stats.speed) {
+      unlocked.splice(unlocked.indexOf("Vision"), 1);
+      choices.push("Vision");
+    } else if (player.stats.light > player.stats.speed) {
+      unlocked.splice(unlocked.indexOf("Haste"), 1);
+      choices.push("Haste");
+    } else {
+      unlocked.splice(unlocked.indexOf("Vision"), 1);
+      choices.push("Vision");
+      unlocked.splice(unlocked.indexOf("Haste"), 1);
+      choices.push("Haste");
+    }
+  }
+
+  // 4. Pick the rest randomly
+  while (choices.length < 3) {
     const i: number = randint(0, unlocked.length - 1);
     const name: UpgradeName = unlocked[i];
     unlocked.splice(i, 1);
@@ -101,14 +118,11 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   }
   console.log(choices);
 
-  // 4. Sort:
+  // 5. Sort:
   const sorted: NamedUpgrade[] = [];
   for (const name in all_upgrades) {
     if (choices.includes(<UpgradeName> name)) {
-      sorted.push({
-        "name": <UpgradeName> name,
-        ...all_upgrades[<UpgradeName> name],
-      });
+      sorted.push(get_ugrade(<UpgradeName> name));
     }
   }
   console.log(sorted);
