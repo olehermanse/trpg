@@ -489,7 +489,84 @@ export class Choice {
   }
 }
 
+export class ZoneTransition {
+  offset: number = 0;
+  end: number;
+  clock: number = 0;
+  direction: "left" | "right" | "up" | "down";
+
+  constructor(public from: Zone, public to: Zone) {
+    console.assert(
+      (from.pos.c === to.pos.c) || (from.pos.c === to.pos.c - 1) ||
+        (from.pos.c === to.pos.c + 1),
+    );
+    console.assert(
+      (from.pos.r === to.pos.r) || (from.pos.r === to.pos.r - 1) ||
+        (from.pos.r === to.pos.r + 1),
+    );
+    console.assert((from.pos.c === to.pos.c) || (from.pos.r === to.pos.r));
+    console.assert((from.pos.c !== to.pos.c) || (from.pos.r !== to.pos.r));
+
+    if (from.pos.c < to.pos.c) {
+      this.direction = "right";
+      this.end = from.width;
+    } else if (from.pos.c > to.pos.c) {
+      this.direction = "left";
+      this.end = from.width;
+    } else if (from.pos.r > to.pos.r) {
+      this.direction = "down";
+      this.end = from.height;
+    } else {
+      console.assert(from.pos.r < to.pos.r);
+      this.direction = "up";
+      this.end = from.height;
+    }
+  }
+
+  get xy_from(): XY {
+    switch (this.direction) {
+      case "left":
+        return xy(this.offset, 0);
+      case "right":
+        return xy(this.offset * -1, 0);
+      case "up":
+        return xy(0, this.offset * -1);
+      case "down":
+        return xy(0, this.offset);
+    }
+    return xy(0, 0);
+  }
+
+  get xy_to(): XY {
+    switch (this.direction) {
+      case "left":
+        return xy(16 - 1 * (this.end - this.offset), 0);
+      case "right":
+        return xy(-16 + this.end - this.offset, 0);
+      case "up":
+        return xy(0, -16 + this.end - this.offset);
+      case "down":
+        return xy(0, 16 - 1 * (this.end - this.offset));
+    }
+    return xy(0, 0);
+  }
+
+  tick(ms: number) {
+    this.clock += ms;
+    this.offset += 2;
+  }
+
+  get done(): boolean {
+    if (this.offset < this.end - 16) {
+      return false;
+    }
+    return true;
+  }
+}
+
 export class Game {
+  transition: ZoneTransition | null = null;
+  previous_zone: Zone | null = null;
   disabled_clicks_ms: number = 0;
   state: GameState = "zone";
   player: Player;
@@ -552,9 +629,9 @@ export class Game {
       return;
     }
 
-    const zone = this.get_zone(zone_pos);
+    let zone = this.get_zone(zone_pos);
     if (zone === null) {
-      this.current_zone = new Zone(
+      zone = new Zone(
         this.grid,
         this,
         zone_pos,
@@ -563,12 +640,16 @@ export class Game {
         top_entry,
         bottom_entry,
       );
-      this.put_zone(this.current_zone);
-      this.current_zone.generate();
-    } else {
-      this.current_zone = zone;
+      this.put_zone(zone);
+      zone.generate();
     }
-    this.player.zone = this.current_zone;
+    this.start_transition(zone);
+  }
+
+  start_transition(zone: Zone) {
+    this.transition = new ZoneTransition(this.current_zone, zone);
+    this.current_zone = zone;
+    this.player.zone = zone;
     this.player.defog();
   }
 
@@ -622,6 +703,9 @@ export class Game {
   }
 
   click(position: XY) {
+    if (this.transition !== null) {
+      return;
+    }
     if (this.disabled_clicks_ms > 0) {
       return;
     }
@@ -645,6 +729,13 @@ export class Game {
       if (this.disabled_clicks_ms <= 0) {
         this.disabled_clicks_ms = 0;
       }
+    }
+    if (this.transition !== null) {
+      this.transition.tick(ms);
+      if (this.transition.done) {
+        this.transition = null;
+      }
+      return;
     }
     if (this.state === "zone" || this.state === "world_map") {
       this.player.tick(ms);
