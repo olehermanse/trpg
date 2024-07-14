@@ -1,6 +1,13 @@
 import { Drawer } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
-import { Choice, Entity, Player, Tile, Zone } from "../libtrpg/game.ts";
+import {
+  Choice,
+  Entity,
+  Player,
+  Tile,
+  Zone,
+  ZoneTransition,
+} from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
@@ -193,10 +200,10 @@ export class Painter {
     this.offscreen_drawer.sprite(this.sprites["fog"][tile.light], tile.xy);
   }
 
-  draw_zone() {
+  draw_one_zone(zone: Zone) {
     let drew_player = false;
     const player = this.application.game.player;
-    for (const entity of this.application.game.current_zone.get_entities()) {
+    for (const entity of zone.get_entities()) {
       if (!drew_player && entity.xy.y > player.xy.y) {
         this.draw_player();
         drew_player = true;
@@ -207,7 +214,7 @@ export class Painter {
       this.draw_player();
       drew_player = true;
     }
-    for (const tiles of this.application.game.current_zone.tiles) {
+    for (const tiles of zone.tiles) {
       for (const tile of tiles) {
         if (tile.light < 5) {
           this.draw_fog(tile);
@@ -215,7 +222,28 @@ export class Painter {
       }
     }
     this.draw_selector();
-    return;
+  }
+
+  draw_transition(transition: ZoneTransition) {
+    const offset = transition.xy_from;
+    this.offscreen_drawer.ctx.save();
+    this.offscreen_drawer.ctx.translate(offset.x, offset.y);
+    this.draw_one_zone(transition.from);
+    this.offscreen_drawer.ctx.restore();
+
+    const inv = transition.xy_to;
+    this.offscreen_drawer.ctx.save();
+    this.offscreen_drawer.ctx.translate(inv.x, inv.y);
+    this.draw_one_zone(transition.to);
+    this.offscreen_drawer.ctx.restore();
+  }
+
+  draw_zone() {
+    if (this.application.game.transition !== null) {
+      this.draw_transition(this.application.game.transition);
+      return;
+    }
+    this.draw_one_zone(this.application.game.current_zone);
   }
 
   draw_selector() {
