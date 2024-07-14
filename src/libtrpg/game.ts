@@ -123,22 +123,16 @@ export class Player extends Entity {
     }
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;
-      let xp_reward = 0;
       if (!tile.is_empty()) {
-        xp_reward += 1;
+        this.add_xp(1);
       }
-      this.zone.fog -= 1;
-      if (this.zone.fog === 0) {
-        xp_reward += 15;
-      }
-      this.add_xp(xp_reward);
       return;
     }
     tile.light = intensity;
   }
 
   defog() {
-    if (this.zone.fog === 0) {
+    if (this.zone.fully_lit === true) {
       return;
     }
     for (const tiles of this.zone.tiles) {
@@ -200,6 +194,7 @@ export class Player extends Entity {
         this.apply_light(tile, 0);
       }
     }
+    this.zone.check_fog();
   }
 
   _animate(ms: number) {
@@ -325,7 +320,7 @@ export class Tile {
 export class Zone extends Grid {
   tiles: Tile[][];
   all_tiles: Tile[];
-  fog: number;
+  fully_lit: boolean;
   constructor(
     grid: Grid,
     public game: Game,
@@ -336,7 +331,7 @@ export class Zone extends Grid {
     public bottom_entry?: number,
   ) {
     super(grid.width, grid.height, grid.columns, grid.rows);
-    this.fog = grid.columns * grid.rows;
+    this.fully_lit = false;
     this.tiles = [];
     this.all_tiles = [];
     for (let c = 0; c < grid.columns; c++) {
@@ -348,6 +343,19 @@ export class Zone extends Grid {
       }
       this.tiles.push(column);
     }
+  }
+
+  check_fog() {
+    if (this.fully_lit === true) {
+      return;
+    }
+    for (const tile of this.all_tiles) {
+      if (tile.light !== 5) {
+        return;
+      }
+    }
+    this.fully_lit = true;
+    this.game.player.add_xp(15);
   }
 
   discover_neighbors() {
@@ -517,13 +525,44 @@ export class Choice {
   }
 }
 
+function map_range(
+  x: number,
+  from_low: number,
+  from_high: number,
+  to_low: number,
+  to_high: number,
+) {
+  const from_diff = from_high - from_low;
+  const to_diff = to_high - to_low;
+  const fraction = (x - from_low) / from_diff;
+  return to_low + fraction * to_diff;
+}
+
+function map_range_clamped(
+  x: number,
+  from_low: number,
+  from_high: number,
+  to_low: number,
+  to_high: number,
+) {
+  const result = map_range(x, from_low, from_high, to_low, to_high);
+  if (result < to_low) {
+    return to_low;
+  }
+  if (result > to_high) {
+    return to_high;
+  }
+  return result;
+}
+
 export class ZoneTransition {
   offset: number = 0;
   end: number;
   clock: number = 0;
+  speed: number;
   direction: "left" | "right" | "up" | "down";
 
-  constructor(public from: Zone, public to: Zone) {
+  constructor(public from: Zone, public to: Zone, speed: number) {
     console.assert(
       (from.pos.c === to.pos.c) || (from.pos.c === to.pos.c - 1) ||
         (from.pos.c === to.pos.c + 1),
@@ -534,6 +573,8 @@ export class ZoneTransition {
     );
     console.assert((from.pos.c === to.pos.c) || (from.pos.r === to.pos.r));
     console.assert((from.pos.c !== to.pos.c) || (from.pos.r !== to.pos.r));
+
+    this.speed = map_range_clamped(speed, 1, 5, 200, 500);
 
     if (from.pos.c < to.pos.c) {
       this.direction = "right";
@@ -581,7 +622,7 @@ export class ZoneTransition {
 
   tick(ms: number) {
     this.clock += ms;
-    this.offset += 2;
+    this.offset = Math.round(this.speed * (this.clock / 1000));
   }
 
   get done(): boolean {
@@ -717,7 +758,11 @@ export class Game {
   }
 
   start_transition(zone: Zone) {
-    this.transition = new ZoneTransition(this.current_zone, zone);
+    this.transition = new ZoneTransition(
+      this.current_zone,
+      zone,
+      this.player.stats.speed,
+    );
     this.update_neighbors();
     this.current_zone = zone;
     this.player.zone = zone;
