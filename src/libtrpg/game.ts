@@ -778,7 +778,7 @@ export class Game {
 
   goto_state(state: GameState) {
     this.state = state;
-    this.disable_clicks(500);
+    this.disable_clicks(200);
   }
 
   level_up() {
