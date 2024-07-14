@@ -289,6 +289,34 @@ export class Tile {
     this.xy = xy(cr.c * 16, cr.r * 16);
   }
 
+  _find_rock(): Entity | null {
+    for (const x of this.entities) {
+      if (x.name === "rock") {
+        return x;
+      }
+    }
+    return null;
+  }
+
+  get_rock_variant(): number | null {
+    const rock = this._find_rock();
+    if (rock === null) {
+      return null;
+    }
+    return rock.variant;
+  }
+
+  set_rock_variant(variant: number | null) {
+    if (variant === null) {
+      return;
+    }
+    const rock = this._find_rock();
+    if (rock === null) {
+      return;
+    }
+    rock.variant = variant;
+  }
+
   is_empty() {
     return this.entities.length === 0;
   }
@@ -646,8 +674,51 @@ export class Game {
     this.start_transition(zone);
   }
 
+  tile_update(from: Tile, to: Tile) {
+    to.light = from.light;
+    to.set_rock_variant(from.get_rock_variant());
+  }
+
+  update_neighbors() {
+    const zone = this.current_zone;
+    const left = this.get_zone(cr(zone.pos.c - 1, zone.pos.r));
+    const right = this.get_zone(cr(zone.pos.c + 1, zone.pos.r));
+    const top = this.get_zone(cr(zone.pos.c, zone.pos.r - 1));
+    const bottom = this.get_zone(cr(zone.pos.c, zone.pos.r + 1));
+
+    for (let r = 0; r < zone.rows; r++) {
+      if (left !== null) {
+        this.tile_update(
+          zone.tiles[0][r],
+          left.tiles[left.columns - 1][r],
+        );
+      }
+      if (right !== null) {
+        this.tile_update(
+          zone.tiles[zone.columns - 1][r],
+          right.tiles[0][r],
+        );
+      }
+    }
+    for (let c = 0; c < zone.columns; c++) {
+      if (top !== null) {
+        this.tile_update(
+          zone.tiles[c][0],
+          top.tiles[c][top.rows - 1],
+        );
+      }
+      if (bottom !== null) {
+        this.tile_update(
+          zone.tiles[c][zone.rows - 1],
+          bottom.tiles[c][0],
+        );
+      }
+    }
+  }
+
   start_transition(zone: Zone) {
     this.transition = new ZoneTransition(this.current_zone, zone);
+    this.update_neighbors();
     this.current_zone = zone;
     this.player.zone = zone;
     this.player.defog();
