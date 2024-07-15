@@ -720,7 +720,7 @@ export class Game {
     to.set_rock_variant(from.get_rock_variant());
   }
 
-  update_neighbors() {
+  update_to_neighbors() {
     const zone = this.current_zone;
     const left = this.get_zone(cr(zone.pos.c - 1, zone.pos.r));
     const right = this.get_zone(cr(zone.pos.c + 1, zone.pos.r));
@@ -757,15 +757,53 @@ export class Game {
     }
   }
 
+  update_from_neighbors() {
+    const zone = this.current_zone;
+    const left = this.get_zone(cr(zone.pos.c - 1, zone.pos.r));
+    const right = this.get_zone(cr(zone.pos.c + 1, zone.pos.r));
+    const top = this.get_zone(cr(zone.pos.c, zone.pos.r - 1));
+    const bottom = this.get_zone(cr(zone.pos.c, zone.pos.r + 1));
+
+    for (let r = 0; r < zone.rows; r++) {
+      if (left !== null) {
+        this.tile_update(
+          left.tiles[left.columns - 1][r],
+          zone.tiles[0][r],
+        );
+      }
+      if (right !== null) {
+        this.tile_update(
+          right.tiles[0][r],
+          zone.tiles[zone.columns - 1][r],
+        );
+      }
+    }
+    for (let c = 0; c < zone.columns; c++) {
+      if (top !== null) {
+        this.tile_update(
+          top.tiles[c][top.rows - 1],
+          zone.tiles[c][0],
+        );
+      }
+      if (bottom !== null) {
+        this.tile_update(
+          bottom.tiles[c][0],
+          zone.tiles[c][zone.rows - 1],
+        );
+      }
+    }
+  }
+
   start_transition(zone: Zone) {
     this.transition = new ZoneTransition(
       this.current_zone,
       zone,
       this.player.stats.speed,
     );
-    this.update_neighbors();
+    this.update_to_neighbors();
     this.current_zone = zone;
     this.player.zone = zone;
+    this.update_from_neighbors();
     this.player.defog();
   }
 
