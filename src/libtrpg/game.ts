@@ -30,9 +30,16 @@ export class Entity {
   cr: CR;
   wh: WH;
   variant: number;
-  reversed = false;
+  reversed: boolean;
 
-  constructor(name: string, pos: CR, zone: Zone, variant?: number) {
+  constructor(
+    name: string,
+    pos: CR,
+    zone: Zone,
+    variant?: number,
+    reversed?: boolean,
+  ) {
+    this.reversed = reversed === true;
     this.name = name;
     this.zone = zone;
     this.cr = cr(pos.c, pos.r);
@@ -383,11 +390,25 @@ export class Zone extends Grid {
     this.right_entry ??= randint(1, this.rows - 2);
     for (let r = 0; r < this.rows; r++) {
       if (r !== this.left_entry) {
-        this.append(new Entity("rock", cr(0, r), this, randint(0, 2)));
+        this.append(
+          new Entity(
+            "rock",
+            cr(0, r),
+            this,
+            randint(0, 2),
+            randint(0, 1) === 0,
+          ),
+        );
       }
       if (r !== this.right_entry) {
         this.append(
-          new Entity("rock", cr(this.columns - 1, r), this, randint(0, 2)),
+          new Entity(
+            "rock",
+            cr(this.columns - 1, r),
+            this,
+            randint(0, 2),
+            randint(0, 1) === 0,
+          ),
         );
       }
     }
@@ -395,11 +416,25 @@ export class Zone extends Grid {
     this.bottom_entry ??= randint(1, this.columns - 2);
     for (let c = 1; c < this.columns - 1; c++) {
       if (c !== this.top_entry) {
-        this.append(new Entity("rock", cr(c, 0), this, randint(0, 2)));
+        this.append(
+          new Entity(
+            "rock",
+            cr(c, 0),
+            this,
+            randint(0, 2),
+            randint(0, 1) === 0,
+          ),
+        );
       }
       if (c !== this.bottom_entry) {
         this.append(
-          new Entity("rock", cr(c, this.rows - 1), this, randint(0, 2)),
+          new Entity(
+            "rock",
+            cr(c, this.rows - 1),
+            this,
+            randint(0, 2),
+            randint(0, 1) === 0,
+          ),
         );
       }
     }
@@ -718,6 +753,12 @@ export class Game {
   tile_update(from: Tile, to: Tile) {
     to.light = from.light;
     to.set_rock_variant(from.get_rock_variant());
+    const from_rock = from._find_rock();
+    const to_rock = to._find_rock();
+    if (to_rock === null || from_rock === null) {
+      return;
+    }
+    to_rock.reversed = from_rock.reversed;
   }
 
   update_to_neighbors() {
