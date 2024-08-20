@@ -88,8 +88,31 @@ function _discover_neighbors(zone: Zone) {
 }
 
 function _generate_walls(zone: Zone) {
-  zone.left_entry ??= randint(1, zone.rows - 2);
-  zone.right_entry ??= randint(1, zone.rows - 2);
+  if (zone.starting_zone()) {
+    zone.left_entry = -1;
+    zone.right_entry = -1;
+    zone.top_entry = -1;
+    zone.bottom_entry = -1;
+    switch (randint(1, 4)) {
+      case 1:
+        zone.left_entry = randint(1, zone.rows - 2);
+        break;
+      case 2:
+        zone.right_entry = randint(1, zone.rows - 2);
+        break;
+      case 3:
+        zone.top_entry = randint(1, zone.columns - 2);
+        break;
+      case 4:
+        zone.bottom_entry = randint(1, zone.columns - 2);
+        break;
+    }
+  } else {
+    zone.left_entry ??= randint(1, zone.rows - 2);
+    zone.right_entry ??= randint(1, zone.rows - 2);
+    zone.top_entry ??= randint(1, zone.columns - 2);
+    zone.bottom_entry ??= randint(1, zone.columns - 2);
+  }
   for (let r = 0; r < zone.rows; r++) {
     if (r !== zone.left_entry) {
       zone.append(
@@ -108,8 +131,6 @@ function _generate_walls(zone: Zone) {
       );
     }
   }
-  zone.top_entry ??= randint(1, zone.columns - 2);
-  zone.bottom_entry ??= randint(1, zone.columns - 2);
   for (let c = 1; c < zone.columns - 1; c++) {
     if (c !== zone.top_entry) {
       zone.append(
