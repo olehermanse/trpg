@@ -15,6 +15,7 @@
         "include": [],
         "exclude": [
           "no-explicit-any",
+          "no-inferrable-types",
           "no-window",
           "no-window-prefix",
           "no-deprecated-deno-api"
