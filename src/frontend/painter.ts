@@ -221,7 +221,7 @@ export class Painter {
         }
       }
     }
-    this.draw_selector();
+    this.draw_target();
   }
 
   draw_transition(transition: ZoneTransition) {
@@ -246,9 +246,9 @@ export class Painter {
     this.draw_one_zone(this.application.game.current_zone);
   }
 
-  draw_selector() {
+  draw_target() {
     const player: Player = this.application.game.player;
-    if (player.target === null) {
+    if (player.target === null || player.target.draw === false) {
       return;
     }
     const frame = player.target.frame;
