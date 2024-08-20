@@ -103,6 +103,7 @@ class Application {
   }
 
   key_down(key: string) {
+    this.game.keyboard.press(key);
     if (key === "1") {
       this.game.goto_state("zone");
       return;
@@ -119,13 +120,16 @@ class Application {
       this.game.goto_state("loading");
       return;
     }
-    if (key === "d") {
+    if (key === "p") {
       console.log(this);
       return;
     }
+    this.game.keyboard_update();
   }
 
-  key_up(_key: string) {}
+  key_up(key: string) {
+    this.game.keyboard.release(key);
+  }
 
   tick(ms: number) {
     this.game.tick(ms);
