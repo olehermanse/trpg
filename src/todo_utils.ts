@@ -1,5 +1,5 @@
-import { randint, WH, xy } from "@olehermanse/utils/funcs.js";
-import { XY } from "@olehermanse/utils";
+import { cr, randint, WH, xy } from "@olehermanse/utils/funcs.js";
+import { CR, XY } from "@olehermanse/utils";
 
 function SCALE() {
   // This should be a constant, but I want this file to be importable by deno,
@@ -179,4 +179,23 @@ export function randpercent(threshold: number): boolean {
     return true;
   }
   return false;
+}
+
+export function cr_4_neighbors(pos: CR, up?: boolean, down?: boolean, left?:boolean, right?:boolean): CR[] {
+  const c = pos.c;
+  const r = pos.r;
+  const results = [];
+  if (up === undefined || up === true) {
+    results.push(cr(c, r - 1));
+  }
+  if (down === undefined || down === true) {
+    results.push(cr(c, r + 1));
+  }
+  if (left === undefined || left === true) {
+    results.push(cr(c - 1, r));
+  }
+  if (right === undefined || right === true) {
+    results.push(cr(c + 1, r));
+  }
+  return results;
 }
