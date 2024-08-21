@@ -1,4 +1,4 @@
-import { Drawer } from "../todo_utils.ts";
+import { Drawer, xy_copy } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import {
   Choice,
@@ -11,28 +11,120 @@ import {
 import { CR, XY } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
 
-class SpriteLocation {
+export class SpriteMetadata {
   cr: CR;
   frames: number;
-  constructor(r: number, c: number, frames?: number) {
+  constructor(
+    r: number,
+    c: number,
+    frames?: number,
+    public animation_data?: AnimationData,
+  ) {
     this.cr = cr(c, r);
     this.frames = frames ?? 1;
   }
 }
 
+export interface AnimationFrame {
+  index: number;
+  time: number;
+}
+
+export function frame(index: number, time: number): AnimationFrame {
+  return { index: index, time: time };
+}
+
+export class AnimationData {
+  constructor(
+    public frames: AnimationFrame[],
+    public loop?: boolean,
+  ) {
+  }
+
+  get_animator() {
+    return new Animation(this.frames, this.loop);
+  }
+}
+
+export class Animation {
+  current_ms: number = 0;
+  current_frame_index: number = 0;
+  max_time: number;
+  done: boolean = false;
+  constructor(
+    public frames: AnimationFrame[],
+    public loop?: boolean,
+  ) {
+    this.max_time = this.frames[this.frames.length - 1].time;
+  }
+
+  restart() {
+    this.current_frame_index = 0;
+    this.current_ms = 0;
+    this.done = false;
+  }
+
+  get_current_frame(): number {
+    return this.frames[this.current_frame_index].index;
+  }
+
+  get_next_time(): number {
+    return this.frames[this.current_frame_index].time;
+  }
+
+  tick(ms: number) {
+    if (this.done) {
+      return;
+    }
+    this.current_ms += ms;
+    const beyond_end = this.current_ms >= this.max_time;
+    if (beyond_end) {
+      if (!this.loop) {
+        this.done = true;
+        this.current_frame_index = this.frames.length - 1;
+        return;
+      }
+      // Go back to start if necessary
+      this.current_frame_index = 0;
+      this.current_ms -= this.max_time;
+      while (this.current_ms > this.max_time) {
+        this.current_ms -= this.max_time;
+      }
+    }
+    // Advance frame if necessary
+    while (
+      this.current_frame_index < this.frames.length - 1 &&
+      this.current_ms > this.get_next_time()
+    ) {
+      this.current_frame_index += 1;
+    }
+  }
+}
+
 const SPRITESHEET = {
-  player: new SpriteLocation(0, 0, 2),
-  sword: new SpriteLocation(1, 0, 2),
-  pickaxe: new SpriteLocation(1, 2, 2),
-  axe: new SpriteLocation(1, 4, 2),
-  staff: new SpriteLocation(1, 4, 2),
-  selector: new SpriteLocation(2, 0, 2),
-  chest: new SpriteLocation(3, 0),
-  rock: new SpriteLocation(3, 1, 3),
-  crystal: new SpriteLocation(3, 4),
-  skeleton: new SpriteLocation(4, 0, 4),
-  fog: new SpriteLocation(5, 0, 5),
+  player: new SpriteMetadata(0, 0, 2),
+  sword: new SpriteMetadata(1, 0, 2),
+  pickaxe: new SpriteMetadata(
+    1,
+    2,
+    2,
+    new AnimationData([frame(0, 250), frame(1, 500)], false),
+  ),
+  axe: new SpriteMetadata(1, 4, 2),
+  staff: new SpriteMetadata(1, 4, 2),
+  selector: new SpriteMetadata(2, 0, 2),
+  chest: new SpriteMetadata(3, 0),
+  rock: new SpriteMetadata(3, 1, 3),
+  crystal: new SpriteMetadata(3, 4),
+  skeleton: new SpriteMetadata(4, 0, 4),
+  fog: new SpriteMetadata(5, 0, 5),
 };
+
+export type SpriteName = keyof typeof SPRITESHEET;
+
+export function get_sprite_metadata(name: SpriteName) {
+  return SPRITESHEET[name];
+}
 
 type SpriteCallback = {
   (spritesheet: ImageBitmap[][]): void;
@@ -48,10 +140,10 @@ function load_sprites(
 ) {
   const image = new Image();
   const sprites: ImageBitmap[] = [];
-  const frames: SpriteLocation[] = [];
+  const frames: SpriteMetadata[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < columns; c++) {
-      frames.push(new SpriteLocation(r, c));
+      frames.push(new SpriteMetadata(r, c));
     }
   }
   image.onload = () => {
@@ -269,6 +361,20 @@ export class Painter {
       player.xy,
       player.reversed,
     );
+    for (const item of player.inventory) {
+      if (item.animation === undefined || item.animation.done) {
+        continue;
+      }
+      const sprite =
+        this.sprites[item.name][item.animation.get_current_frame()];
+      const pos = xy_copy(player.xy);
+      if (player.reversed) {
+        pos.x -= 4;
+      } else {
+        pos.x += 4;
+      }
+      this.offscreen_drawer.sprite(sprite, pos, player.reversed);
+    }
   }
 
   draw_card(choice: Choice) {

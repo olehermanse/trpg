@@ -20,35 +20,56 @@ import {
 import { generate_room, RoomType } from "./rooms.ts";
 import { Keyboard } from "./keyboard.ts";
 import { cr_4_neighbors } from "../todo_utils.ts";
+import {
+  Animation,
+  get_sprite_metadata,
+  SpriteMetadata,
+  SpriteName,
+} from "../frontend/painter.ts";
 
 const DIAG = 1.42;
 const BASE_SPEED = 16.0;
 
 export class Entity {
-  name: string;
-  zone: Zone;
   xy: XY;
   fxy: XY | null; // can hold floating point xy values, so players can move half pixels.
   cr: CR;
   wh: WH;
   variant: number;
-  reversed: boolean;
+  animation?: Animation;
 
   constructor(
-    name: string,
+    public name: SpriteName,
     pos: CR,
-    zone: Zone,
+    public zone: Zone,
     variant?: number,
-    reversed?: boolean,
+    public reversed?: boolean,
   ) {
-    this.reversed = reversed === true;
-    this.name = name;
-    this.zone = zone;
     this.cr = cr(pos.c, pos.r);
     this.wh = wh(zone.cell_width, zone.cell_height);
     this.xy = cr_to_xy(this.cr, zone);
     this.variant = variant ?? 0;
     this.fxy = null;
+  }
+
+  tick(ms: number) {
+    if (this.animation === undefined) {
+      return;
+    }
+    this.animation.tick(ms);
+  }
+
+  start_animation() {
+    if (this.animation !== undefined) {
+      this.animation.restart();
+      return;
+    }
+    const metadata: SpriteMetadata = get_sprite_metadata(this.name);
+    if (metadata.animation_data === undefined) {
+      console.log("No animation found for " + this.name);
+      return;
+    }
+    this.animation = metadata.animation_data.get_animator();
   }
 
   get center(): XY {
@@ -74,7 +95,7 @@ export class Target {
   constructor(
     public cr: CR,
     grid: Grid,
-    public draw: boolean
+    public draw: boolean,
   ) {
     this.xy = cr_to_xy(cr, grid);
   }
@@ -89,6 +110,7 @@ export class Player extends Entity {
   xp = 0;
   stats: Stats;
   upgrades: NamedUpgrade[];
+  inventory: Entity[] = [];
   speed = BASE_SPEED;
   walk_counter = 0;
   target: Target | null = null;
@@ -238,6 +260,9 @@ export class Player extends Entity {
   }
 
   tick(ms: number) {
+    for (const item of this.inventory) {
+      item.tick(ms);
+    }
     if (this.target === null) {
       return;
     }
@@ -280,6 +305,15 @@ export class Player extends Entity {
     this.cr.c = new_pos.c;
     this.cr.r = new_pos.r;
     this.defog();
+    const tile = this.game.current_zone.get_tile(this.cr);
+    if (tile.is_interactable()) {
+      this.interact(tile);
+    }
+  }
+  interact(tile: Tile) {
+    const item = tile.pickup();
+    item.start_animation();
+    this.inventory.push(item);
   }
 }
 
@@ -331,6 +365,24 @@ export class Tile {
 
   is_empty() {
     return this.entities.length === 0;
+  }
+
+  is_interactable() {
+    if (this.is_empty() || this.is_rock()) {
+      return false;
+    }
+    if (this.entities[0].name === "pickaxe") {
+      return true;
+    }
+    return false;
+  }
+
+  pickup() {
+    console.assert(this.entities.length > 0);
+    console.assert(this.entities[0].name === "pickaxe");
+    const item = this.entities[0];
+    array_remove(this.entities, item);
+    return item;
   }
 }
 
@@ -604,7 +656,7 @@ export class Game {
   constructor(public grid: Grid) {
     this.current_zone = new Zone(grid, this, cr(0, 0));
     this.put_zone(this.current_zone);
-    this.player = new Player(cr(1, 1), this.current_zone, this);
+    this.player = new Player(cr(7, 3), this.current_zone, this);
     this.choices = [];
     this.choices.push(new Choice("Vision", "light +1", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
@@ -768,6 +820,12 @@ export class Game {
     this.choices[2].set(upgrades[2]);
   }
 
+  attempt_move_or_interact(pos: CR, mouse: boolean) {
+    const tile = this.current_zone.get_tile(pos);
+    console.assert(tile.is_empty() || tile.is_interactable());
+    this.player.target = new Target(pos, this.grid, mouse);
+  }
+
   zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
     if (
@@ -777,11 +835,11 @@ export class Game {
     ) {
       return;
     }
-    const tile = this.current_zone.tiles[pos.c][pos.r];
+    const tile = this.current_zone.get_tile(pos);
     if (tile.light !== 5 || !tile.is_empty()) {
       return;
     }
-    this.player.target = new Target(pos, this.grid, true);
+    this.attempt_move_or_interact(pos, true);
   }
 
   level_up_click(position: XY) {
@@ -807,8 +865,8 @@ export class Game {
     let up = this.keyboard.pressed("w") || this.keyboard.pressed("ArrowUp");
     let down = this.keyboard.pressed("s") || this.keyboard.pressed("ArrowDown");
     let left = this.keyboard.pressed("a") || this.keyboard.pressed("ArrowLeft");
-    let right =
-      this.keyboard.pressed("d") || this.keyboard.pressed("ArrowRight");
+    let right = this.keyboard.pressed("d") ||
+      this.keyboard.pressed("ArrowRight");
 
     if (up === down && left === right) {
       return;
@@ -821,7 +879,7 @@ export class Game {
         (down && this.player.cr.r === this.current_zone.rows - 1) ||
         (right && this.player.cr.c === this.current_zone.columns - 1)
       ) {
-        this.player.target = new Target(this.player.cr, this.grid, false);
+        this.attempt_move_or_interact(this.player.cr, false);
         return;
       }
     }
@@ -854,8 +912,8 @@ export class Game {
     if (tile.light !== 5) {
       return;
     }
-    if (tile.is_empty()) {
-      this.player.target = new Target(pos, this.grid, false);
+    if (tile.is_empty() || tile.is_interactable()) {
+      this.attempt_move_or_interact(pos, false);
       return;
     }
     const alternatives: CR[] = cr_4_neighbors(
@@ -880,7 +938,7 @@ export class Game {
         neighbor.c === this.current_zone.columns - 1 ||
         neighbor.r === this.current_zone.rows - 1
       ) {
-        this.player.target = new Target(neighbor, this.grid, false);
+        this.attempt_move_or_interact(neighbor, false);
         return;
       }
       second_choice = neighbor;
@@ -888,7 +946,7 @@ export class Game {
     if (second_choice === null) {
       return;
     }
-    this.player.target = new Target(second_choice, this.grid, false);
+    this.attempt_move_or_interact(second_choice, false);
   }
 
   click(position: XY) {
