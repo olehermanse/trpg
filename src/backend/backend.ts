@@ -3,10 +3,10 @@ console.log("Backend running on http://localhost:3000/");
 
 Deno.serve(
   { port: 3000, hostname: "0.0.0.0" },
-  handleHttp,
+  handle_http,
 );
 
-function illegalURL(path: string) {
+function illegal_url(path: string) {
   return (
     !path.startsWith("/") ||
     path.includes("..") ||
@@ -20,7 +20,7 @@ function illegalURL(path: string) {
   );
 }
 
-function getContentType(path: string): string {
+function get_content_type(path: string): string {
   if (path === "/index.html") {
     return "text/html";
   }
@@ -39,15 +39,15 @@ function getContentType(path: string): string {
   return "";
 }
 
-function notFound(_request: Request): Response {
+function not_found(_request: Request): Response {
   return new Response("404 Not Found", { status: 404 });
 }
 
 function handleAPI(request: Request): Response {
-  return notFound(request);
+  return not_found(request);
 }
 
-async function handleFile(
+async function handle_file(
   request: Request,
   filepath: string,
 ): Promise<Response> {
@@ -55,36 +55,34 @@ async function handleFile(
     filepath = "/index.html";
   }
 
-  const contentType: string = getContentType(filepath);
+  const contentType: string = get_content_type(filepath);
   if (contentType === "") {
-    return notFound(request);
+    return not_found(request);
   }
 
-  // Try opening the file
-  let file;
   try {
-    file = await Deno.open(`./dist${filepath}`, { read: true });
+    const file = await Deno.open(`./dist${filepath}`, { read: true });
     const readableStream = file.readable;
     const headers: HeadersInit = { "content-type": contentType };
     const response = new Response(readableStream, { headers: headers });
     return response;
   } catch {
-    return notFound(request);
+    return not_found(request);
   }
 }
 
-function handleHttp(request: Request): Response | Promise<Response> {
+function handle_http(request: Request): Response | Promise<Response> {
   const url = new URL(request.url);
   const filepath = decodeURIComponent(url.pathname);
 
-  if (illegalURL(filepath)) {
-    return notFound(request);
+  if (illegal_url(filepath)) {
+    return not_found(request);
   }
   if (filepath.startsWith("/api/")) {
     return handleAPI(request);
   }
 
-  return handleFile(request, filepath);
+  return handle_file(request, filepath);
 }
 
 export {};
