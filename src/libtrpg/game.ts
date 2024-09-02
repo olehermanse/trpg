@@ -862,10 +862,12 @@ export class Game {
       return;
     }
     const pos = cr(0, 0);
-    let up = this.keyboard.pressed("w") || this.keyboard.pressed("ArrowUp");
-    let down = this.keyboard.pressed("s") || this.keyboard.pressed("ArrowDown");
-    let left = this.keyboard.pressed("a") || this.keyboard.pressed("ArrowLeft");
-    let right = this.keyboard.pressed("d") ||
+    const up = this.keyboard.pressed("w") || this.keyboard.pressed("ArrowUp");
+    const down = this.keyboard.pressed("s") ||
+      this.keyboard.pressed("ArrowDown");
+    const left = this.keyboard.pressed("a") ||
+      this.keyboard.pressed("ArrowLeft");
+    const right = this.keyboard.pressed("d") ||
       this.keyboard.pressed("ArrowRight");
 
     if (up === down && left === right) {
