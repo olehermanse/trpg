@@ -47,10 +47,10 @@ function handleAPI(request: Request): Response {
   return notFound(request);
 }
 
-function handleFile(
+async function handleFile(
   request: Request,
   filepath: string,
-): Response | Promise<Response> {
+): Promise<Response> {
   if (filepath === "/") {
     filepath = "/index.html";
   }
@@ -63,17 +63,14 @@ function handleFile(
   // Try opening the file
   let file;
   try {
-    file = Deno.open(`./dist${filepath}`, { read: true });
-  } catch {
-    return notFound(request);
-  }
-
-  return file.then((file) => {
+    file = await Deno.open(`./dist${filepath}`, { read: true });
     const readableStream = file.readable;
     const headers: HeadersInit = { "content-type": contentType };
     const response = new Response(readableStream, { headers: headers });
     return response;
-  });
+  } catch {
+    return notFound(request);
+  }
 }
 
 function handleHttp(request: Request): Response | Promise<Response> {
