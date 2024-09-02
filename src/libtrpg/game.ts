@@ -836,7 +836,10 @@ export class Game {
       return;
     }
     const tile = this.current_zone.get_tile(pos);
-    if (tile.light !== 5 || !tile.is_empty()) {
+    if (tile.light !== 5) {
+      return;
+    }
+    if (!tile.is_empty() && !tile.is_interactable()) {
       return;
     }
     this.attempt_move_or_interact(pos, true);

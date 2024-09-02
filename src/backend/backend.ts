@@ -1,6 +1,3 @@
-// Start listening on port 3000 of localhost.
-console.log("Backend running on http://localhost:3000/");
-
 Deno.serve(
   { port: 3000, hostname: "0.0.0.0" },
   handle_http,
