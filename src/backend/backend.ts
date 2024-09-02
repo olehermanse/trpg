@@ -1,10 +1,10 @@
 // Start listening on port 3000 of localhost.
-const server = Deno.listen({ port: 3000 });
 console.log("Backend running on http://localhost:3000/");
 
-for await (const conn of server) {
-  handleHttp(conn).catch(console.error);
-}
+Deno.serve(
+  { port: 3000, hostname: "0.0.0.0" },
+  handleHttp,
+);
 
 function illegalURL(path: string) {
   return (
@@ -39,59 +39,55 @@ function getContentType(path: string): string {
   return "";
 }
 
-async function notFound(requestEvent: any) {
-  const notFoundResponse = new Response("404 Not Found", { status: 404 });
-  await requestEvent.respondWith(notFoundResponse);
+function notFound(_request: Request): Response {
+  return new Response("404 Not Found", { status: 404 });
 }
 
-async function handleAPI(requestEvent: any) {
-  await notFound(requestEvent);
+function handleAPI(request: Request): Response {
+  return notFound(request);
 }
 
-async function handleFile(requestEvent: any, filepath: string) {
+function handleFile(
+  request: Request,
+  filepath: string,
+): Response | Promise<Response> {
   if (filepath === "/") {
     filepath = "/index.html";
   }
 
   const contentType: string = getContentType(filepath);
   if (contentType === "") {
-    await notFound(requestEvent);
-    return;
+    return notFound(request);
   }
 
   // Try opening the file
   let file;
   try {
-    file = await Deno.open(`./dist${filepath}`, { read: true });
+    file = Deno.open(`./dist${filepath}`, { read: true });
   } catch {
-    await notFound(requestEvent);
-    return;
+    return notFound(request);
   }
 
-  const readableStream = file.readable;
-  const headers: HeadersInit = { "content-type": contentType };
-  const response = new Response(readableStream, { headers: headers });
-  await requestEvent.respondWith(response);
-  return;
+  return file.then((file) => {
+    const readableStream = file.readable;
+    const headers: HeadersInit = { "content-type": contentType };
+    const response = new Response(readableStream, { headers: headers });
+    return response;
+  });
 }
 
-async function handleHttp(conn: Deno.Conn) {
-  const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
-    const url = new URL(requestEvent.request.url);
-    const filepath = decodeURIComponent(url.pathname);
+function handleHttp(request: Request): Response | Promise<Response> {
+  const url = new URL(request.url);
+  const filepath = decodeURIComponent(url.pathname);
 
-    if (illegalURL(filepath)) {
-      await notFound(requestEvent);
-      continue;
-    }
-    if (filepath.startsWith("/api/")) {
-      await handleAPI(requestEvent);
-      continue;
-    }
-
-    await handleFile(requestEvent, filepath);
+  if (illegalURL(filepath)) {
+    return notFound(request);
   }
+  if (filepath.startsWith("/api/")) {
+    return handleAPI(request);
+  }
+
+  return handleFile(request, filepath);
 }
 
 export {};
