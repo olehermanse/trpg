@@ -116,6 +116,7 @@ export class Drawer<T extends Canvas> {
     font: Record<string, ImageBitmap>,
     pos: XY,
     anchor: Anchor = "top_left",
+    line_height: number = 16,
   ) {
     let x = pos.x;
     let y = pos.y;
@@ -157,7 +158,7 @@ export class Drawer<T extends Canvas> {
       }
       if (letter === "\n") {
         x = pos.x;
-        y += 16;
+        y += line_height;
         continue;
       }
       if (font[letter] === undefined) {

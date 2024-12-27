@@ -478,7 +478,12 @@ export class Zone extends Grid {
   }
 }
 
-export type GameState = "zone" | "level_up" | "loading" | "world_map";
+export type GameState =
+  | "zone"
+  | "level_up"
+  | "loading"
+  | "world_map"
+  | "battle";
 
 export class Choice {
   pos: XY;
@@ -647,7 +652,7 @@ export class Game {
   transition: ZoneTransition | null = null;
   previous_zone: Zone | null = null;
   disabled_clicks_ms: number = 0;
-  state: GameState = "zone";
+  state: GameState = "battle";
   keyboard: Keyboard = new Keyboard();
   player: Player;
   current_zone: Zone;
