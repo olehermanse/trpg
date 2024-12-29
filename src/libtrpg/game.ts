@@ -105,7 +105,7 @@ export class Target {
   }
 }
 
-export class Player extends Entity {
+export class Creature extends Entity {
   level = 1;
   xp = 0;
   stats: Stats;
@@ -116,12 +116,11 @@ export class Player extends Entity {
   target: Target | null = null;
   game: Game;
 
-  constructor(pos: CR, zone: Zone, game: Game) {
-    super("player", pos, zone);
+  constructor(name: SpriteName, pos: CR, zone: Zone, game: Game) {
+    super(name, pos, zone);
     this.game = game;
     this.upgrades = [];
     this.stats = new Stats();
-    this.defog();
   }
 
   get center() {
@@ -144,6 +143,21 @@ export class Player extends Entity {
     this.upgrades.push(upgrade);
     upgrade.apply(this);
     this.speed = BASE_SPEED * this.stats.speed;
+  }
+
+  _animate(ms: number) {
+    const factor = this.speed / BASE_SPEED;
+    this.walk_counter += (3 * (ms * factor)) / 1000;
+    if (this.walk_counter >= 2) {
+      this.walk_counter = 0;
+    }
+  }
+}
+
+export class Player extends Creature {
+  constructor(pos: CR, zone: Zone, game: Game) {
+    super("player", pos, zone, game);
+    this.defog();
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -230,14 +244,6 @@ export class Player extends Entity {
       }
     }
     this.zone.check_fog();
-  }
-
-  _animate(ms: number) {
-    const factor = this.speed / BASE_SPEED;
-    this.walk_counter += (3 * (ms * factor)) / 1000;
-    if (this.walk_counter >= 2) {
-      this.walk_counter = 0;
-    }
   }
 
   check_for_exit() {
