@@ -340,6 +340,10 @@ export class Painter {
   }
 
   draw_battle() {
+    const battle = this.application.game.battle;
+    if (battle === null) {
+      return;
+    }
     // TODO: Sprite anchor
     this.offscreen_drawer.sprite(this.sprites["player"][0], xy(32, 64));
     this.offscreen_drawer.sprite(
