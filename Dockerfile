@@ -13,7 +13,7 @@ RUN rm -rf dist
 RUN npm run build
 RUN bash add_version.sh
 
-FROM node:20 AS test
+FROM node:20 AS npmtest
 WORKDIR /trpg
 COPY --from=build /trpg /trpg
 COPY test test
@@ -21,9 +21,19 @@ RUN npm install
 RUN npm run tsc
 RUN npm run test
 
-FROM denoland/deno:1.44.4 AS run
+FROM denoland/deno:2.1.4 AS denotest
+WORKDIR /trpg
+COPY --from=build /trpg /trpg
+COPY deno.json /trpg/deno.json
+COPY test test
+RUN deno install
+RUN deno check --frozen --all src/
+RUN deno task test
+
+FROM denoland/deno:2.1.4 AS run
 WORKDIR /trpg
 COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
-COPY --from=test /trpg/package.json /trpg/package.json
+COPY --from=npmtest /trpg/package.json /trpg/package.json
+COPY --from=denotest /trpg/package.json /trpg/package.json
 CMD [ "deno" , "run", "--allow-net", "--allow-read", "--allow-env", "src/backend/backend.ts"]

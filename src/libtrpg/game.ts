@@ -123,10 +123,6 @@ export class Creature extends Entity {
     this.stats = new Stats();
   }
 
-  get center() {
-    return xy(this.xy.x + this.wh.width / 2, this.xy.y + this.wh.height / 2);
-  }
-
   xp_threshold() {
     return 10 * this.level;
   }
@@ -265,7 +261,7 @@ export class Player extends Creature {
     this.fxy = null;
   }
 
-  tick(ms: number) {
+  override tick(ms: number) {
     for (const item of this.inventory) {
       item.tick(ms);
     }

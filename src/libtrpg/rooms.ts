@@ -1,6 +1,6 @@
 import { cr, randint } from "@olehermanse/utils/funcs.js";
-import { Entity, Zone } from "./game.ts";
-import { inside_rectangle } from "../todo_utils";
+import { Creature, Entity, Zone } from "./game.ts";
+import { inside_rectangle } from "../todo_utils.ts";
 
 export type RoomType = "generic" | "chest" | "empty" | "spawn";
 
@@ -31,7 +31,7 @@ function _generic_room(zone: Zone) {
     while (!zone.empty(pos)) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     }
-    const entity = new Entity("skeleton", pos, zone, 3);
+    const entity = new Creature("skeleton", pos, zone, zone.game);
     if (entity.cr.c > zone.columns / 2) {
       entity.reversed = true;
     }
