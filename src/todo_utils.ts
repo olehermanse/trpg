@@ -224,6 +224,34 @@ export function inside_rectangle(
   return false;
 }
 
+export interface Rectangle {
+  xy: XY;
+  wh: WH;
+}
+
+export function rectangle(xy: XY, wh: WH): Rectangle {
+  return {
+    xy: xy,
+    wh: wh,
+  };
+}
+
+export function inside(point: XY, rect: Rectangle): boolean {
+  if (point.x < rect.xy.x) {
+    return false;
+  }
+  if (point.y < rect.xy.y) {
+    return false;
+  }
+  if (point.x > rect.xy.x + rect.wh.width) {
+    return false;
+  }
+  if (point.y > rect.xy.y + rect.wh.height) {
+    return false;
+  }
+  return true;
+}
+
 export function randpercent(threshold: number): boolean {
   if (randint(1, 100) <= threshold) {
     return true;

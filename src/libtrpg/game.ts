@@ -19,7 +19,7 @@ import {
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
 import { Keyboard } from "./keyboard.ts";
-import { cr_4_neighbors } from "../todo_utils.ts";
+import { cr_4_neighbors, Rectangle, rectangle } from "../todo_utils.ts";
 import {
   Animation,
   get_sprite_metadata,
@@ -81,11 +81,53 @@ export class Entity {
 }
 
 export class Stats {
-  speed = 1;
-  light = 1;
-  luck = 1;
-  strength = 1;
-  magic = 1;
+  // Resources:
+  max_hp;
+  max_mp;
+  // Basic stats which increase each level:
+  strength;
+  magic;
+  // Special stats which have to be increased through choices:
+  speed;
+  light;
+  luck;
+
+  constructor(level?: number) {
+    if (level === undefined || level <= 0) {
+      this.max_hp = 0;
+      this.max_mp = 0;
+      this.strength = 0;
+      this.magic = 0;
+      this.speed = 0;
+      this.light = 0;
+      this.luck = 0;
+      return;
+    }
+    // Don't increase per level:
+    this.speed = 1;
+    this.light = 1;
+    this.luck = 0;
+    // Increase per level:
+    this.max_hp = 20 + 2 * (level - 1);
+    this.max_mp = 10 + 2 * (level - 1);
+    this.strength = level;
+    this.magic = level;
+  }
+  static assign(a: Stats, b: Stats) {
+    b.max_hp = a.max_hp;
+    b.max_mp = a.max_mp;
+    b.strength = a.strength;
+    b.magic = a.magic;
+    b.speed = a.speed;
+    b.light = a.light;
+    b.luck = a.luck;
+  }
+
+  copy() {
+    const r = new Stats();
+    Stats.assign(this, r);
+    return r;
+  }
 }
 
 export class Target {
@@ -109,6 +151,8 @@ export class Creature extends Entity {
   level = 1;
   xp = 0;
   stats: Stats;
+  hp: number;
+  mp: number;
   upgrades: NamedUpgrade[];
   inventory: Entity[] = [];
   speed = BASE_SPEED;
@@ -120,7 +164,9 @@ export class Creature extends Entity {
     super(name, pos, zone);
     this.game = game;
     this.upgrades = [];
-    this.stats = new Stats();
+    this.stats = new Stats(this.level);
+    this.hp = this.stats.max_hp;
+    this.mp = this.stats.max_mp;
   }
 
   xp_threshold() {
@@ -148,12 +194,20 @@ export class Creature extends Entity {
       this.walk_counter = 0;
     }
   }
+  get_text() {
+    const name = this.name[0].toUpperCase() + this.name.slice(1);
+    return `${name}\nHp: ${this.hp}/${this.stats.max_hp}\nMp: ${this.mp}/${this.stats.max_mp}`;
+  }
 }
 
 export class Player extends Creature {
   constructor(pos: CR, zone: Zone, game: Game) {
     super("player", pos, zone, game);
     this.defog();
+  }
+
+  get_skills() {
+    return ["Attack", "Heal", "Buff", "Run"];
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -313,6 +367,10 @@ export class Player extends Creature {
     }
   }
   interact(tile: Tile) {
+    const enemy = tile.get_enemy();
+    if (enemy !== null) {
+      return this.game.start_battle(this, enemy);
+    }
     const item = tile.pickup();
     item.start_animation();
     this.inventory.push(item);
@@ -369,11 +427,31 @@ export class Tile {
     return this.entities.length === 0;
   }
 
+  get_enemy(): Creature | null {
+    for (const e of this.entities) {
+      if (e instanceof Creature) {
+        return e;
+      }
+    }
+    return null;
+  }
+
+  has_enemy() {
+    const enemy = this.get_enemy();
+    if (enemy === null) {
+      return false;
+    }
+    return true;
+  }
+
   is_interactable() {
     if (this.is_empty() || this.is_rock()) {
       return false;
     }
     if (this.entities[0].name === "pickaxe") {
+      return true;
+    }
+    if (this.has_enemy()) {
       return true;
     }
     return false;
@@ -650,14 +728,37 @@ export class ZoneTransition {
   }
 }
 
-export class Enemy {
-  name: string = "Skeleton";
-  constructor() {
+export class Enemy extends Creature {
+  constructor(name: SpriteName, pos: CR, zone: Zone, game: Game) {
+    super(name, pos, zone, game);
   }
 }
 
+export class BattleSkill {
+  constructor(public rectangle: Rectangle, public name: string) {}
+}
+
 export class Battle {
+  mouse: XY | null = null;
+  skills: BattleSkill[];
   constructor(public player: Player, public enemy: Enemy) {
+    let y = 6;
+    const skills = this.player.get_skills();
+    const lim = skills.length > 8 ? 8 : skills.length;
+    this.skills = [];
+    for (let i = 0; i < lim; ++i) {
+      const rect = rectangle(xy(174, y), wh(77, 20));
+      y += 20 + 3;
+      const name = skills[i];
+      this.skills.push(new BattleSkill(rect, name));
+    }
+  }
+
+  hover(position: XY) {
+    this.mouse = position;
+  }
+  click(position: XY) {
+    this.hover(position);
   }
 }
 
@@ -665,7 +766,7 @@ export class Game {
   transition: ZoneTransition | null = null;
   previous_zone: Zone | null = null;
   disabled_clicks_ms: number = 0;
-  state: GameState = "battle";
+  state: GameState = "zone";
   keyboard: Keyboard = new Keyboard();
   player: Player;
   current_zone: Zone;
@@ -681,8 +782,11 @@ export class Game {
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
     this.battle = null;
-    const enemy = new Enemy();
-    this.battle = new Battle(this.player, enemy);
+  }
+
+  start_battle(player: Player, enemy: Creature) {
+    this.battle = new Battle(player, enemy);
+    this.state = "battle";
   }
 
   put_zone(zone: Zone) {
@@ -983,6 +1087,10 @@ export class Game {
     if (this.disabled_clicks_ms > 0) {
       return;
     }
+    if (this.state === "battle" && this.battle !== null) {
+      this.battle.click(position);
+      return;
+    }
     if (this.state === "zone") {
       return this.zone_click(position);
     }
@@ -992,6 +1100,10 @@ export class Game {
   }
 
   hover(position: XY) {
+    if (this.state === "battle" && this.battle !== null) {
+      this.battle.hover(position);
+      return;
+    }
     for (const x of this.choices) {
       x.hover(position);
     }

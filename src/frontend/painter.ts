@@ -1,6 +1,7 @@
-import { Drawer, xy_copy } from "../todo_utils.ts";
+import { Drawer, inside, xy_copy } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import {
+  Battle,
   Choice,
   Entity,
   Player,
@@ -339,22 +340,23 @@ export class Painter {
     this.draw_one_zone(this.application.game.current_zone);
   }
 
-  draw_battle() {
-    const battle = this.application.game.battle;
-    if (battle === null) {
-      return;
-    }
+  draw_battle_sprites(battle: Battle) {
     // TODO: Sprite anchor
     this.offscreen_drawer.sprite(this.sprites["player"][0], xy(32, 64));
     this.offscreen_drawer.sprite(
-      this.sprites["skeleton"][3],
+      this.sprites[battle.enemy.name][3],
       xy(128, 64),
       true,
     );
+  }
+
+  draw_battle_plates(battle: Battle) {
+    const player = battle.player;
+    const enemy = battle.enemy;
 
     this.offscreen_drawer.rectangle(xy(5, 144), wh(79, 43));
     this.offscreen_drawer.text(
-      "Player\nHp: 12/23\nMp: 45/100",
+      player.get_text(),
       this.font,
       xy(5 + 6, 144 + 6),
       "top_left",
@@ -363,24 +365,49 @@ export class Painter {
 
     this.offscreen_drawer.rectangle(xy(89, 144), wh(79, 43));
     this.offscreen_drawer.text(
-      "Skeleton\nHp: 999/999\nMp: 999/999",
+      enemy.get_text(),
       this.font,
       xy(89 + 6, 144 + 6),
       "top_left",
       11,
     );
+  }
 
+  draw_battle_menu(battle: Battle) {
     let y = 6;
-    const skills = ["Attack", "Heal", "Buff", "Run"];
-    for (let i = 0; i < 8; ++i) {
-      this.offscreen_drawer.rectangle(xy(174, y), wh(77, 20));
-      this.offscreen_drawer.text(skills[i % 4], this.font, xy(174 + 4, y + 6));
+    const skills = battle.skills;
+    const lim = skills.length > 8 ? 8 : skills.length;
+    for (let i = 0; i < lim; ++i) {
+      let offset = 0;
+      const rect = skills[i].rectangle;
+      if (battle.mouse !== null && inside(battle.mouse, rect)) {
+        offset -= 1;
+      }
+      this.offscreen_drawer.rectangle(
+        xy(rect.xy.x + offset, rect.xy.y),
+        rect.wh,
+      );
+      this.offscreen_drawer.text(
+        skills[i % 4].name,
+        this.font,
+        xy(174 + 4 + offset, y + 6),
+      );
       this.offscreen_drawer.sprite(
-        this.sprites["skills"][i % 4],
-        xy(174 + 77 - 16 - 2, y + 2),
+        this.sprites["skills"][i], // TODO: Lookup
+        xy(174 + 77 - 16 - 2 + offset, y + 2),
       );
       y += 20 + 3;
     }
+  }
+
+  draw_battle() {
+    const battle = this.application.game.battle;
+    if (battle === null) {
+      return;
+    }
+    this.draw_battle_menu(battle);
+    this.draw_battle_plates(battle);
+    this.draw_battle_sprites(battle);
   }
 
   draw_target() {
