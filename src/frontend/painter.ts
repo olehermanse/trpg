@@ -1,7 +1,8 @@
-import { Drawer, inside, xy_copy } from "../todo_utils.ts";
+import { Drawer, xy_copy } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import {
   Battle,
+  BattleEvent,
   Choice,
   Entity,
   Player,
@@ -11,6 +12,8 @@ import {
 } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
+
+// Resolution: 256x192
 
 export class SpriteMetadata {
   cr: CR;
@@ -377,10 +380,11 @@ export class Painter {
     let y = 6;
     const skills = battle.skills;
     const lim = skills.length > 8 ? 8 : skills.length;
+    const hovered = battle.hover_index;
     for (let i = 0; i < lim; ++i) {
       let offset = 0;
       const rect = skills[i].rectangle;
-      if (battle.mouse !== null && inside(battle.mouse, rect)) {
+      if (i === hovered) {
         offset -= 1;
       }
       this.offscreen_drawer.rectangle(
@@ -400,14 +404,29 @@ export class Painter {
     }
   }
 
+  draw_battle_event(event: BattleEvent) {
+    this.offscreen_drawer.rectangle(xy(5, 6), wh(256 - 10, 43));
+    this.offscreen_drawer.text(
+      event.text,
+      this.font,
+      xy(5 + 6, 6 + 6),
+      "top_left",
+      11,
+    );
+  }
+
   draw_battle() {
     const battle = this.application.game.battle;
     if (battle === null) {
       return;
     }
-    this.draw_battle_menu(battle);
-    this.draw_battle_plates(battle);
     this.draw_battle_sprites(battle);
+    this.draw_battle_plates(battle);
+    if (battle.current_event !== null) {
+      this.draw_battle_event(battle.current_event);
+      return;
+    }
+    this.draw_battle_menu(battle);
   }
 
   draw_target() {

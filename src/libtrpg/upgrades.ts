@@ -73,9 +73,11 @@ const _all_upgrades = {
   "Heal": {
     "description": "Use magic \nto heal\nyourself",
     "skill": (user: Creature, _target: Creature) => {
-      const healing = user.stats.magic;
+      const healing = user.stats.magic + 10;
+      const cost = 2;
       return () => {
         user.hp += healing;
+        user.mp -= cost;
       };
     },
   },
@@ -186,4 +188,10 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
 
 export function upgrade(name: UpgradeName): NamedUpgrade {
   return { "name": name, ...all_upgrades[name] };
+}
+
+export function skill(name: UpgradeName): SkillPerform {
+  const upgrade = { "name": name, ...all_upgrades[name] };
+  console.assert(upgrade.skill !== undefined);
+  return <SkillPerform> upgrade.skill;
 }
