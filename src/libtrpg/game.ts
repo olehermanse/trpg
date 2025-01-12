@@ -389,6 +389,7 @@ export class Player extends Creature {
   interact(tile: Tile) {
     const enemy = tile.get_enemy();
     if (enemy !== null) {
+      tile.remove_enemy(enemy);
       return this.game.start_battle(this, enemy);
     }
     const item = tile.pickup();
@@ -454,6 +455,12 @@ export class Tile {
       }
     }
     return null;
+  }
+
+  remove_enemy(enemy: Creature) {
+    const before = this.entities.length;
+    this.entities = this.entities.filter((e) => e !== enemy);
+    console.assert(before === this.entities.length + 1);
   }
 
   has_enemy() {
