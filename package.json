@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@olehermanse/utils": "^0.0.23",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.6"
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
   },
   "devDependencies": {
     "vitest": "^2.1.8"
