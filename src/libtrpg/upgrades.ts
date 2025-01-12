@@ -1,4 +1,4 @@
-import { randint } from "@olehermanse/utils/funcs.js";
+import { randint, text_wrap } from "@olehermanse/utils/funcs.js";
 import { Creature, Player } from "./game.ts";
 
 export type SkillApply = () => void;
@@ -25,21 +25,21 @@ const _all_upgrades = {
     },
   },
   "Vision": {
-    "description": "Light +1",
+    "description": "Light radius +1",
     "max": 5,
     "passive": (creature: Creature) => {
       creature.stats.light += 1;
     },
   },
-  "Luck": {
-    "description": "Luck +1",
+  "Vitality": {
+    "description": "Max HP +2",
     "max": 99,
     "passive": (creature: Creature) => {
-      creature.stats.luck += 1;
+      creature.stats.max_hp += 2;
     },
   },
   "Strength": {
-    "description": "Damage +1",
+    "description": "Attack damage +1",
     "max": 99,
     "passive": (creature: Creature) => {
       creature.stats.strength += 1;
@@ -48,8 +48,8 @@ const _all_upgrades = {
       return creature.level >= 3;
     },
   },
-  "Intellect": {
-    "description": "Magic +1",
+  "Willpower": {
+    "description": "Magic dmg +1",
     "max": 99,
     "passive": (creature: Creature) => {
       creature.stats.magic += 1;
@@ -59,7 +59,7 @@ const _all_upgrades = {
     },
   },
   "Attack": {
-    "description": "Swing weapon to deal damage",
+    "description": "Swing weapon",
     "skill": (user: Creature, target: Creature) => {
       let damage = 5 + user.stats.strength - target.stats.strength;
       if (damage <= 0) {
@@ -71,7 +71,7 @@ const _all_upgrades = {
     },
   },
   "Heal": {
-    "description": "Use magic \nto heal\nyourself",
+    "description": "Use magic to heal yourself",
     "skill": (user: Creature, _target: Creature) => {
       const healing = user.stats.magic + 10;
       const cost = 2;
@@ -82,9 +82,11 @@ const _all_upgrades = {
     },
   },
   "Buff": {
-    "description": "TODO",
-    "skill": (_user: Creature, _target: Creature) => {
-      return () => {};
+    "description": "Temporarily increase strength",
+    "skill": (user: Creature, _target: Creature) => {
+      return () => {
+        user.stats.strength += 1; // TODO FIX this by adding effects.
+      };
     },
   },
   "Run": {
@@ -187,7 +189,9 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
 }
 
 export function upgrade(name: UpgradeName): NamedUpgrade {
-  return { "name": name, ...all_upgrades[name] };
+  const obj = { "name": name, ...all_upgrades[name] };
+  obj.description = text_wrap(obj.description, 11);
+  return obj;
 }
 
 export function skill(name: UpgradeName): SkillPerform {
