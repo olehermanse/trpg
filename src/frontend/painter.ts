@@ -510,6 +510,16 @@ export class Painter {
       xy(Math.floor(width / 2 - 8), height - 2 * 16),
     );
   }
+  draw_game_over() {
+    const width = this.offscreen_drawer.canvas.width;
+    const height = this.offscreen_drawer.canvas.height;
+    this.offscreen_drawer.text(
+      "Game over!",
+      this.font,
+      xy(width / 2, height / 2),
+      "middle_center",
+    );
+  }
 
   draw_one_map(pos: XY, zone: Zone, scaling: number) {
     for (const tile of zone.all_tiles) {
@@ -624,6 +634,9 @@ export class Painter {
     }
     if (this.application.game.state === "world_map") {
       return this.draw_world_map();
+    }
+    if (this.application.game.state === "game_over") {
+      return this.draw_game_over();
     }
   }
 

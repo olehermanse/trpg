@@ -172,6 +172,25 @@ export class Creature extends Entity {
     this.mp = this.stats.max_mp;
   }
 
+  get_xp() {
+    return Math.floor(20 + this.level * 2 + this.xp_threshold() / 20);
+  }
+
+  apply_limits() {
+    if (this.hp < 0) {
+      this.hp = 0;
+    }
+    if (this.mp < 0) {
+      this.mp = 0;
+    }
+    if (this.hp > this.stats.max_hp) {
+      this.hp = this.stats.max_hp;
+    }
+    if (this.mp > this.stats.max_mp) {
+      this.mp = this.stats.max_mp;
+    }
+  }
+
   count_upgrade(name: UpgradeName): number {
     let count = 0;
     for (const x of this.upgrades) {
@@ -194,7 +213,11 @@ export class Creature extends Entity {
   }
 
   xp_threshold() {
-    return 10 * this.level;
+    if (this.level <= 10) {
+      return 10 + this.level * 2;
+    }
+    const offset = this.level - 10;
+    return 30 + (offset * 10);
   }
 
   add_xp(xp: number) {
@@ -230,6 +253,12 @@ export class Player extends Creature {
     this.defog();
   }
 
+  // Called on level up, after player has chosen upgrade.
+  on_level_up() {
+    this.hp = this.stats.max_hp;
+    this.mp = this.stats.max_mp;
+  }
+
   apply_light(tile: Tile, intensity: LightLevel) {
     if (tile.light === 5) {
       return;
@@ -243,7 +272,7 @@ export class Player extends Creature {
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;
       if (!tile.is_empty()) {
-        this.add_xp(1);
+        // this.add_xp(1);
       }
       return;
     }
@@ -535,7 +564,7 @@ export class Zone extends Grid {
       }
     }
     this.fully_lit = true;
-    this.game.player.add_xp(15);
+    this.game.player.add_xp(25);
   }
 
   starting_zone(): boolean {
@@ -590,6 +619,7 @@ export type GameState =
   | "level_up"
   | "loading"
   | "world_map"
+  | "game_over"
   | "battle";
 
 export class Choice {
@@ -778,7 +808,10 @@ export class BattleIntent {
     const func = skill(this.skill.name);
     const apply = func(this.user, this.target);
     const name = this.user.name[0].toUpperCase() + this.user.name.slice(1);
-    const message = `${name} used ${this.skill.name}.`;
+    let message = `${name} used ${this.skill.name}.`;
+    if (this.skill.name === "Run") {
+      message = "";
+    }
     const event = new BattleEvent(message, apply);
     return [event];
   }
@@ -807,6 +840,8 @@ export class BattleEvent {
 
 export class Battle {
   mouse: XY | null = null;
+  done: boolean;
+  _triggered_end: boolean;
   skills: BattleSkill[];
   intents: BattleIntent[] = [];
   events: BattleEvent[] = [];
@@ -816,6 +851,8 @@ export class Battle {
   current_event: BattleEvent | null = null;
 
   constructor(public player: Player, public enemy: Enemy) {
+    this.done = false;
+    this._triggered_end = false;
     let y = 6;
     const skills: UpgradeName[] = this.player.get_skill_names();
     const lim = skills.length > 8 ? 8 : skills.length;
@@ -841,25 +878,75 @@ export class Battle {
     return [element];
   }
 
+  check_state(): boolean {
+    if (this._triggered_end === true) {
+      return this._triggered_end;
+    }
+    this.player.apply_limits();
+    this.enemy.apply_limits();
+    if (this.player.hp === 0 || this.enemy.hp === 0) {
+      this.intents = [];
+      const msg = this.player.hp === 0
+        ? `${this.player.name} died.`
+        : `${this.enemy.name} died.`;
+      this.events.push(new BattleEvent(msg, () => {}));
+      this._triggered_end = true;
+    }
+    if (this.player.run === true || this.enemy.run) {
+      this.intents = [];
+      const msg = this.player.run
+        ? `${this.player.name} fled like a coward.`
+        : `${this.enemy.name} ran away.`;
+      this.events.push(new BattleEvent(msg, () => {}));
+      this._triggered_end = true;
+    }
+    return this._triggered_end;
+  }
+
   advance() {
+    // If there is an event, only continue if it's done:
     if (this.current_event !== null) {
       if (this.current_event.done) {
         this.current_event = null;
+        if (this.events.length === 0) {
+          // If we just finished and removed an event,
+          // and no more events are waiting.
+          // Check the state, which will potentially
+          // end the battle (someone dies or runs).
+          // This can add more events to this.events
+          this.check_state();
+        }
       } else {
         return;
       }
     }
+
+    // Done with current event, check queued:
     console.assert(this.current_event === null);
     const event = this.events.shift();
     if (event !== undefined) {
       this.current_event = event;
       return;
     }
+
+    if (this._triggered_end) {
+      // Someone died and no more events to play
+      this.done = true;
+      return;
+    }
+
+    // No more events queued
     console.assert(this.events.length === 0);
     if (this.intents.length === 0) {
       return;
     }
+
+    // Get next intent(s)
     console.assert(this.intents.length > 0);
+    const dead = this.check_state();
+    if (dead === true) {
+      console.assert(this.intents.length === 0);
+    }
     while (this.events.length === 0 && this.intents.length > 0) {
       const intents: BattleIntent[] = this._get_intents();
       for (const intent of intents) {
@@ -884,6 +971,9 @@ export class Battle {
   }
   click(position: XY) {
     if (this.current_event !== null) {
+      return;
+    }
+    if (this.done === true) {
       return;
     }
     this.hover(position);
@@ -1096,7 +1186,6 @@ export class Game {
     this.player.level += 1;
     this.goto_state("level_up");
     const upgrades = get_upgrade_choices(this.player);
-    console.log(upgrades);
     this.choices[0].set(upgrades[0]);
     this.choices[1].set(upgrades[1]);
     this.choices[2].set(upgrades[2]);
@@ -1130,8 +1219,8 @@ export class Game {
   level_up_click(position: XY) {
     for (const x of this.choices) {
       if (x.is_inside(position)) {
-        console.log("Upgrade chosen: " + x.name);
         this.player.add_upgrade(upgrade(x.name));
+        this.player.on_level_up();
         this.state = "zone";
         this.player.defog();
         return;
@@ -1265,6 +1354,30 @@ export class Game {
     }
   }
 
+  exit_battle() {
+    console.assert(this.battle !== null);
+    const battle = this.battle;
+    if (battle === null) {
+      console.log("Error: null battle");
+      return;
+    }
+    const player: Player = battle.player;
+    const enemy: Enemy = battle.enemy;
+    console.assert(player.hp >= 0);
+    console.assert(enemy.hp >= 0);
+
+    if (player.hp === 0) {
+      this.goto_state("game_over");
+      this.battle = null;
+      return;
+    }
+    this.goto_state("zone");
+    this.battle = null;
+    if (enemy.hp === 0) {
+      player.add_xp(enemy.get_xp());
+    }
+  }
+
   tick(ms: number) {
     if (this.disabled_clicks_ms > 0) {
       this.disabled_clicks_ms -= ms;
@@ -1286,7 +1399,16 @@ export class Game {
       }
     }
     if (this.state === "battle") {
-      this.battle?.tick(ms);
+      const battle = this.battle;
+      if (battle === null) {
+        console.log("Error: null battle");
+        return;
+      }
+      if (battle.done) {
+        this.exit_battle();
+        return;
+      }
+      battle.tick(ms);
     }
   }
 }
