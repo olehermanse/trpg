@@ -313,7 +313,7 @@ export class Painter {
     }
     for (const tiles of zone.tiles) {
       for (const tile of tiles) {
-        if (tile.light < 5) {
+        if (!tile.is_lit()) {
           this.draw_fog(tile);
         }
       }
@@ -526,7 +526,7 @@ export class Painter {
       if (tile.is_empty()) {
         continue;
       }
-      if (tile.light !== 5) {
+      if (!tile.is_lit()) {
         continue;
       }
       this.offscreen_drawer.white_square(
