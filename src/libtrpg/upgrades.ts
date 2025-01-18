@@ -1,13 +1,23 @@
 import { randint, text_wrap } from "@olehermanse/utils/funcs.js";
-import { Creature, Player } from "./game.ts";
+import { BattleEvent, Creature, Player } from "./game.ts";
 
 export type SkillApply = () => void;
+export type EffectApply = () => BattleEvent[];
 export type SkillPerform = (user: Creature, target: Creature) => SkillApply;
 
 export type UpgradeEligible = (creature: Creature) => boolean;
 
 export type UpgradePassive = (creature: Creature) => void;
 
+export class Effect {
+  constructor(
+    public name: string,
+    public turns: number,
+    public apply_stats?: SkillApply,
+    public apply_tick?: EffectApply,
+  ) {
+  }
+}
 interface Upgrade {
   description: string;
   passive?: UpgradePassive;
@@ -81,11 +91,16 @@ const _all_upgrades = {
       };
     },
   },
-  "Buff": {
-    "description": "Temporarily increase strength",
+  "Might": {
+    "description": "+1 strength for 3 turns",
     "skill": (user: Creature, _target: Creature) => {
       return () => {
-        user.stats.strength += 1; // TODO FIX this by adding effects.
+        user.stats.strength += 1;
+        user.add_effect(
+          new Effect("Strength", 3, () => {
+            user.stats.strength += 1;
+          }),
+        );
       };
     },
   },
