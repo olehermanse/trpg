@@ -178,11 +178,9 @@ export class Creature extends Entity {
     this.effects.push(effect);
   }
   tick_effects(): BattleEvent[] {
-    console.log("tick effects");
     const events: BattleEvent[] = [];
     for (const effect of this.effects) {
       effect.turns -= 1;
-      console.log("Tick");
       console.assert(effect.turns >= 0);
       if (effect.apply_tick !== undefined) {
         events.concat(...effect.apply_tick());
@@ -282,7 +280,7 @@ export class Creature extends Entity {
 
 export class Player extends Creature {
   constructor(pos: CR, zone: Zone, game: Game) {
-    super("player", pos, zone, game);
+    super("Player", pos, zone, game);
     this.defog();
   }
 
@@ -491,7 +489,7 @@ export class Tile {
 
   _find_rock(): Entity | null {
     for (const x of this.entities) {
-      if (x.name === "rock") {
+      if (x.name === "Rock") {
         return x;
       }
     }
@@ -552,7 +550,7 @@ export class Tile {
     if (this.is_empty() || this.is_rock()) {
       return false;
     }
-    if (this.entities[0].name === "pickaxe") {
+    if (this.entities[0].name === "Pickaxe") {
       return true;
     }
     if (this.has_enemy()) {
@@ -563,7 +561,7 @@ export class Tile {
 
   pickup() {
     console.assert(this.entities.length > 0);
-    console.assert(this.entities[0].name === "pickaxe");
+    console.assert(this.entities[0].name === "Pickaxe");
     const item = this.entities[0];
     array_remove(this.entities, item);
     return item;
@@ -859,8 +857,7 @@ export class BattleIntent {
   perform(): BattleEvent[] {
     const func = skill(this.skill.name);
     const apply = func(this.user, this.target);
-    const name = this.user.name[0].toUpperCase() + this.user.name.slice(1);
-    let message = `${name} used ${this.skill.name}.`;
+    let message = `${this.user.name} used ${this.skill.name}.`;
     if (this.skill.name === "Run") {
       message = "";
     }
@@ -972,7 +969,6 @@ export class Battle {
   }
 
   _end_of_turn() {
-    console.log("End of turn");
     console.assert(this.events.length === 0);
     console.assert(this.intents.length === 0);
     this.events.push(
@@ -982,8 +978,6 @@ export class Battle {
   }
 
   goto_state(new_state: BattleState): BattleState {
-    console.log("goto_state: " + new_state);
-    console.log("before: " + this.state);
     if (this.state === new_state) {
       return this.state;
     }
@@ -1064,8 +1058,6 @@ export class Battle {
   }
 
   state_transitions() {
-    console.log("state_transitions");
-    console.log("state " + this.state);
     if (this.state === "over") {
       return this.state;
     }
