@@ -100,13 +100,28 @@ const _all_upgrades = {
       };
     },
   },
+  "Fireball": {
+    "description": "Fire magic to damage the enemy",
+    "skill": (user: Creature, target: Creature, battle: Battle) => {
+      const cost = 2;
+      const success = user.mp >= cost;
+      const damage = user.stats.magic + 5 - target.stats.magic;
+      return () => {
+        if (success) {
+          target.hp -= damage > 0 ? damage : 1;
+          user.mp -= cost;
+        } else {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        }
+      };
+    },
+  },
   "Might": {
     "description": "+1 strength for 3 turns",
     "skill": (user: Creature, _target: Creature, _battle: Battle) => {
       return () => {
-        user.stats.strength += 1;
         user.add_effect(
-          new Effect("Strength", 3, () => {
+          new Effect("Might", 3, () => {
             user.stats.strength += 1;
           }),
         );
