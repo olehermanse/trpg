@@ -1,9 +1,13 @@
 import { randint, text_wrap } from "@olehermanse/utils/funcs.js";
-import { BattleEvent, Creature, Player } from "./game.ts";
+import { Battle, BattleEvent, Creature, Player } from "./game.ts";
 
 export type SkillApply = () => void;
 export type EffectApply = () => BattleEvent[];
-export type SkillPerform = (user: Creature, target: Creature) => SkillApply;
+export type SkillPerform = (
+  user: Creature,
+  target: Creature,
+  battle: Battle,
+) => SkillApply;
 
 export type UpgradeEligible = (creature: Creature) => boolean;
 
@@ -70,7 +74,7 @@ const _all_upgrades = {
   },
   "Attack": {
     "description": "Swing weapon",
-    "skill": (user: Creature, target: Creature) => {
+    "skill": (user: Creature, target: Creature, _battle: Battle) => {
       let damage = 5 + user.stats.strength - target.stats.strength;
       if (damage <= 0) {
         damage = 1;
@@ -82,18 +86,23 @@ const _all_upgrades = {
   },
   "Heal": {
     "description": "Use magic to heal yourself",
-    "skill": (user: Creature, _target: Creature) => {
-      const healing = user.stats.magic + 10;
+    "skill": (user: Creature, _target: Creature, battle: Battle) => {
       const cost = 2;
+      const success = user.mp >= cost;
+      const healing = user.stats.magic + 10;
       return () => {
-        user.hp += healing;
-        user.mp -= cost;
+        if (success) {
+          user.hp += healing;
+          user.mp -= cost;
+        } else {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        }
       };
     },
   },
   "Might": {
     "description": "+1 strength for 3 turns",
-    "skill": (user: Creature, _target: Creature) => {
+    "skill": (user: Creature, _target: Creature, _battle: Battle) => {
       return () => {
         user.stats.strength += 1;
         user.add_effect(
@@ -106,7 +115,7 @@ const _all_upgrades = {
   },
   "Run": {
     "description": "Escape battle",
-    "skill": (user: Creature, _target: Creature) => {
+    "skill": (user: Creature, _target: Creature, _battle: Battle) => {
       return () => {
         user.run = true;
       };
