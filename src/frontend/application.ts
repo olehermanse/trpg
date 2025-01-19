@@ -1,7 +1,7 @@
-import { Game } from "../libtrpg/game.ts";
+import { Battle, Enemy, Game } from "../libtrpg/game.ts";
 import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import { Grid, OXY, oxy } from "@olehermanse/utils/funcs.js";
+import { cr, Grid, OXY, oxy } from "@olehermanse/utils/funcs.js";
 
 class Application {
   canvas: HTMLCanvasElement;
@@ -124,6 +124,10 @@ class Application {
       return;
     }
     if (key === "5") {
+      this.game.battle = new Battle(
+        this.game.player,
+        new Enemy("Skeleton", 3, cr(0, 0), this.game.current_zone, this.game),
+      );
       this.game.goto_state("battle");
       return;
     }

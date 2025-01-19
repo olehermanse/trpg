@@ -116,15 +116,19 @@ const _all_upgrades = {
           return;
         }
         battle.events.push(new BattleEvent(`${target.name} got burned.`));
-        target.add_effect(new Effect("Burn", 3, () => {
-          target.stats.strength -= 2;
-        },() => {
-          const msg = `Burn damaged ${target.name}.`;
-          return [new BattleEvent(msg, () => {
-            target.apply_damage(burn_damage);
-          })];
-        }));
-      }
+        target.add_effect(
+          new Effect("Burn", 3, () => {
+            target.stats.strength -= 2;
+          }, () => {
+            const msg = `Burn damaged ${target.name}.`;
+            return [
+              new BattleEvent(msg, () => {
+                target.apply_damage(burn_damage);
+              }),
+            ];
+          }),
+        );
+      };
     },
   },
   "Might": {
@@ -133,11 +137,15 @@ const _all_upgrades = {
       const has_might = user.has_effect("Might");
       return () => {
         if (has_might) {
-          battle.events.push(new BattleEvent(`${user.name} already has Might.`));
+          battle.events.push(
+            new BattleEvent(`${user.name} already has Might.`),
+          );
           return;
         }
 
-        battle.events.push(new BattleEvent(`${user.name}'s strength increased by Might.`));
+        battle.events.push(
+          new BattleEvent(`${user.name}'s strength increased by Might.`),
+        );
         user.add_effect(
           new Effect("Might", 5, () => {
             user.stats.strength += 1;

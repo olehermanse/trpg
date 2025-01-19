@@ -4,6 +4,7 @@ import {
   Battle,
   BattleEvent,
   Choice,
+  Creature,
   Entity,
   Player,
   Tile,
@@ -11,7 +12,7 @@ import {
   ZoneTransition,
 } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
-import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
+import { cr, limit, wh, xy } from "@olehermanse/utils/funcs.js";
 import { UpgradeName } from "../libtrpg/upgrades.ts";
 
 // Resolution: 256x192
@@ -347,14 +348,56 @@ export class Painter {
     this.draw_one_zone(this.application.game.current_zone);
   }
 
+  draw_health_bar(pos: XY, ref: Creature) {
+    pos.y -= 10;
+    this.offscreen_drawer.rectangle(pos, wh(16, 4));
+    if (ref.hp === 0) {
+      return;
+    }
+    let hp = 14;
+    if (ref.hp < ref.stats.max_hp) {
+      hp = Math.round(14 * ref.hp / ref.stats.max_hp);
+      hp = limit(1, hp, 13);
+    }
+    pos.x += 1;
+    pos.y += 1;
+    this.offscreen_drawer.rectangle(pos, wh(hp, 2));
+  }
+  draw_mana_bar(pos: XY, ref: Creature) {
+    pos.y -= 5;
+    if (ref.mp === 0) {
+      return;
+    }
+    let mp = 16;
+    if (ref.mp < ref.stats.max_mp) {
+      mp = Math.round(16 * ref.mp / ref.stats.max_mp);
+      mp = limit(1, mp, 15);
+    }
+    this.offscreen_drawer.rectangle(pos, wh(mp, 2));
+  }
+  draw_effects(pos: XY, ref: Creature) {
+    pos.y -= 2;
+
+    for (const _ of ref.effects) {
+      this.offscreen_drawer.white_pixel(pos);
+      pos.x += 2;
+    }
+  }
+
   draw_battle_sprites(battle: Battle) {
     // TODO: Sprite anchor
     this.offscreen_drawer.sprite(this.sprites["Player"][0], xy(32, 64));
+    this.draw_health_bar(xy(32, 64), battle.player);
+    this.draw_mana_bar(xy(32, 64), battle.player);
+    this.draw_effects(xy(32, 64), battle.player);
     this.offscreen_drawer.sprite(
       this.sprites[battle.enemy.name][3],
       xy(128, 64),
       true,
     );
+    this.draw_health_bar(xy(128, 64), battle.enemy);
+    this.draw_mana_bar(xy(128, 64), battle.enemy);
+    this.draw_effects(xy(128, 64), battle.enemy);
   }
 
   draw_battle_plates(battle: Battle) {
