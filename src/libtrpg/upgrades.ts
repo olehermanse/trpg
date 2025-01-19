@@ -75,12 +75,9 @@ const _all_upgrades = {
   "Attack": {
     "description": "Swing weapon",
     "skill": (user: Creature, target: Creature, _battle: Battle) => {
-      let damage = 5 + user.stats.strength - target.stats.strength;
-      if (damage <= 0) {
-        damage = 1;
-      }
+      const damage = 5 + user.stats.strength - target.stats.strength;
       return () => {
-        target.hp -= damage;
+        target.apply_damage(damage);
       };
     },
   },
@@ -89,7 +86,7 @@ const _all_upgrades = {
     "skill": (user: Creature, _target: Creature, battle: Battle) => {
       const cost = 2;
       const success = user.mp >= cost;
-      const healing = user.stats.magic + 10;
+      const healing = user.stats.magic + cost;
       return () => {
         if (success) {
           user.hp += healing;
@@ -101,27 +98,48 @@ const _all_upgrades = {
     },
   },
   "Fireball": {
-    "description": "Fire magic to damage the enemy",
+    "description": "Damage and burn the enemy",
     "skill": (user: Creature, target: Creature, battle: Battle) => {
-      const cost = 2;
+      const cost = 3;
       const success = user.mp >= cost;
-      const damage = user.stats.magic + 5 - target.stats.magic;
+      const damage = user.stats.magic + cost - target.stats.magic;
+      const burn_damage = Math.floor(damage / 10);
+      const has_burn = target.has_effect("Burn");
       return () => {
-        if (success) {
-          target.hp -= damage > 0 ? damage : 1;
-          user.mp -= cost;
-        } else {
+        if (!success) {
           battle.events.push(new BattleEvent("Not enough mana"));
+          return;
         }
-      };
+        target.hp -= damage > 0 ? damage : 1;
+        user.mp -= cost;
+        if (has_burn) {
+          return;
+        }
+        battle.events.push(new BattleEvent(`${target.name} got burned.`));
+        target.add_effect(new Effect("Burn", 3, () => {
+          target.stats.strength -= 2;
+        },() => {
+          const msg = `Burn damaged ${target.name}.`;
+          return [new BattleEvent(msg, () => {
+            target.apply_damage(burn_damage);
+          })];
+        }));
+      }
     },
   },
   "Might": {
-    "description": "+1 strength for 3 turns",
-    "skill": (user: Creature, _target: Creature, _battle: Battle) => {
+    "description": "+1 strength for 5 turns",
+    "skill": (user: Creature, _target: Creature, battle: Battle) => {
+      const has_might = user.has_effect("Might");
       return () => {
+        if (has_might) {
+          battle.events.push(new BattleEvent(`${user.name} already has Might.`));
+          return;
+        }
+
+        battle.events.push(new BattleEvent(`${user.name}'s strength increased by Might.`));
         user.add_effect(
-          new Effect("Might", 3, () => {
+          new Effect("Might", 5, () => {
             user.stats.strength += 1;
           }),
         );

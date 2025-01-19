@@ -6,6 +6,7 @@ import {
   distance_cr,
   distance_xy,
   Grid,
+  limit,
   WH,
   wh,
   xy,
@@ -184,13 +185,22 @@ export class Creature extends Entity {
   add_effect(effect: Effect) {
     this.effects.push(effect);
   }
+
+  has_effect(name: string) {
+    for (const effect of this.effects) {
+      if (effect.name === name) {
+        return true;
+      }
+    }
+    return false;
+  }
   tick_effects(): BattleEvent[] {
     const events: BattleEvent[] = [];
     for (const effect of this.effects) {
       effect.turns -= 1;
       console.assert(effect.turns >= 0);
       if (effect.apply_tick !== undefined) {
-        events.concat(...effect.apply_tick());
+        events.push(...effect.apply_tick());
       }
       if (effect.turns === 0) {
         events.push(new BattleEvent(`${effect.name} wore off.`));
@@ -217,6 +227,15 @@ export class Creature extends Entity {
     if (this.mp > this.stats.max_mp) {
       this.mp = this.stats.max_mp;
     }
+  }
+
+  apply_damage(dmg: number, minimum: number = 1) {
+    console.assert(dmg >= 0);
+    if (dmg > minimum) {
+      this.hp -= dmg;
+      return;
+    }
+    this.hp -= minimum;
   }
 
   count_upgrade(name: UpgradeName): number {
@@ -281,7 +300,11 @@ export class Creature extends Entity {
   }
   get_text() {
     const name = this.name[0].toUpperCase() + this.name.slice(1);
-    return `${name}\nHp: ${this.hp}/${this.stats.max_hp}\nMp: ${this.mp}/${this.stats.max_mp}`;
+    // HP and MP can be temporarly outside the limits,
+    // but drawing this can be confusing for the player.
+    const hp = limit(0, this.hp, this.stats.max_hp);
+    const mp = limit(0, this.mp, this.stats.max_mp);
+    return `${name}\nHp: ${hp}/${this.stats.max_hp}\nMp: ${mp}/${this.stats.max_mp}`;
   }
 }
 
