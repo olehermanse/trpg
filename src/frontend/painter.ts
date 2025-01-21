@@ -546,6 +546,14 @@ export class Painter {
       "top_left",
       10,
     );
+
+    const sprite = this.sprites[choice.name];
+    if (sprite === undefined) {
+      return;
+    }
+    const icon_x = Math.floor(pos.x + choice.size.width / 2 - 16 / 2);
+    const icon_y = Math.floor(pos.y + choice.size.height - 16 - 1 - 4);
+    this.offscreen_drawer.sprite(sprite[0], xy(icon_x, icon_y));
   }
 
   draw_level_up() {
