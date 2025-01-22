@@ -129,6 +129,7 @@ const SPRITESHEET = {
   Might: new SpriteMetadata(6, 2, 1),
   Run: new SpriteMetadata(6, 3, 1),
   Fireball: new SpriteMetadata(6, 4, 1),
+  Rend: new SpriteMetadata(6, 5, 1),
   Elixir: new SpriteMetadata(6, 6, 1),
   Pact: new SpriteMetadata(6, 7, 1),
   Strength: new SpriteMetadata(8, 0, 1),
