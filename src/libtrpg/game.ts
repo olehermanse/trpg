@@ -176,7 +176,7 @@ export class Creature extends Entity {
     super(name, pos, zone);
     this.game = game;
     this.level = level;
-    this.upgrades = [upgrade("Attack"), upgrade("Run")];
+    this.upgrades = [upgrade("Attack")];
     this.stats = new Stats(this.level);
     this.hp = this.stats.max_hp;
     this.mp = this.stats.max_mp;

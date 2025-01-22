@@ -128,6 +128,14 @@ const SPRITESHEET = {
   Heal: new SpriteMetadata(6, 1, 1),
   Might: new SpriteMetadata(6, 2, 1),
   Run: new SpriteMetadata(6, 3, 1),
+  Fireball: new SpriteMetadata(6, 4, 1),
+  Elixir: new SpriteMetadata(6, 6, 1),
+  Pact: new SpriteMetadata(6, 7, 1),
+  Strength: new SpriteMetadata(8, 0, 1),
+  Haste: new SpriteMetadata(8, 1, 1),
+  Vision: new SpriteMetadata(8, 2, 1),
+  Willpower: new SpriteMetadata(8, 3, 1),
+  Vitality: new SpriteMetadata(8, 4, 1),
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
