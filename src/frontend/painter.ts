@@ -1,4 +1,3 @@
-import { Drawer, xy_copy } from "../todo_utils.ts";
 import { Application } from "./application.ts"; // For access to width, height, game object
 import {
   Battle,
@@ -12,7 +11,8 @@ import {
   ZoneTransition,
 } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
-import { cr, limit, wh, xy } from "@olehermanse/utils/funcs.js";
+import { cr, limit, wh, xy, xy_copy } from "@olehermanse/utils/funcs.js";
+import { Drawer } from "@olehermanse/utils/draw.js";
 import { UpgradeName } from "../libtrpg/upgrades.ts";
 
 // Resolution: 256x192
@@ -223,6 +223,7 @@ interface Frame {
 
 export class Painter {
   canvas_drawer: Drawer<HTMLCanvasElement>;
+
   offscreen_drawer: Drawer<OffscreenCanvas>;
   real_scale: number;
 

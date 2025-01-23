@@ -1,6 +1,5 @@
-import { cr, randint } from "@olehermanse/utils/funcs.js";
+import { cr, inside_rectangle, randint } from "@olehermanse/utils/funcs.js";
 import { Enemy, Entity, Zone } from "./game.ts";
-import { inside_rectangle } from "../todo_utils.ts";
 
 export type RoomType = "generic" | "chest" | "empty" | "spawn";
 
