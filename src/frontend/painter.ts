@@ -132,7 +132,7 @@ const SPRITESHEET = {
   Rend: new SpriteMetadata(6, 5, 1),
   Elixir: new SpriteMetadata(6, 6, 1),
   Pact: new SpriteMetadata(6, 7, 1),
-  Strength: new SpriteMetadata(8, 0, 1),
+  Physique: new SpriteMetadata(8, 0, 1),
   Haste: new SpriteMetadata(8, 1, 1),
   Vision: new SpriteMetadata(8, 2, 1),
   Willpower: new SpriteMetadata(8, 3, 1),

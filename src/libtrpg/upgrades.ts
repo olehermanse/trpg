@@ -60,14 +60,14 @@ const _all_upgrades = {
     },
   },
   "Vitality": {
-    "description": "Max HP +2",
+    "description": "Max HP +5",
     "max": 99,
     "passive": (creature: Creature) => {
-      creature.stats.max_hp += 2;
+      creature.stats.max_hp += 5;
     },
   },
-  "Strength": {
-    "description": "Attack damage +1",
+  "Physique": {
+    "description": "Strength +1",
     "max": 99,
     "passive": (creature: Creature) => {
       creature.stats.strength += 1;
@@ -77,7 +77,7 @@ const _all_upgrades = {
     },
   },
   "Willpower": {
-    "description": "Magic dmg +1",
+    "description": "Magic +1",
     "max": 99,
     "passive": (creature: Creature) => {
       creature.stats.magic += 1;
