@@ -27,6 +27,7 @@ COPY --from=build /trpg /trpg
 COPY deno.json /trpg/deno.json
 COPY test test
 RUN deno install
+RUN deno task tsc
 RUN deno check --frozen --all src/
 RUN deno task test
 
