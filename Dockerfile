@@ -21,7 +21,7 @@ RUN npm install
 RUN npm run tsc
 RUN npm run test
 
-FROM denoland/deno:2.1.5 AS denotest
+FROM denoland/deno:2.1.9 AS denotest
 WORKDIR /trpg
 COPY --from=build /trpg /trpg
 COPY deno.json /trpg/deno.json
@@ -31,7 +31,7 @@ RUN deno task tsc
 RUN deno check --frozen --all src/
 RUN deno task test
 
-FROM denoland/deno:2.1.5 AS run
+FROM denoland/deno:2.1.9 AS run
 WORKDIR /trpg
 COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
