@@ -39,6 +39,7 @@ export class Effect {
 interface Upgrade {
   description: string;
   passive?: UpgradePassive;
+  minimum_level?: number;
   eligible?: UpgradeEligible;
   max?: number; // Default is only 1
   skill?: SkillPerform;
@@ -72,9 +73,7 @@ const _all_upgrades = {
     "passive": (creature: Creature) => {
       creature.stats.strength += 1;
     },
-    "eligible": (creature: Creature) => {
-      return creature.level >= 3;
-    },
+    "minimum_level": 3,
   },
   "Willpower": {
     "description": "Magic +1",
@@ -82,9 +81,7 @@ const _all_upgrades = {
     "passive": (creature: Creature) => {
       creature.stats.magic += 1;
     },
-    "eligible": (creature: Creature) => {
-      return creature.level >= 3;
-    },
+    "minimum_level": 3,
   },
   "Attack": {
     "description": "Swing weapon",
@@ -160,6 +157,9 @@ const _all_upgrades = {
   },
   "Elixir": {
     "description": "Restore mana",
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
     "skill": (user: Creature, _target: Creature, battle: Battle) => {
       // Restore mana per turn
       // scales with magic stat, and to a very limited extent max mana
@@ -188,6 +188,9 @@ const _all_upgrades = {
   },
   "Pact": {
     "description": "Sacrifice blood to damage everyone",
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
     "skill": (user: Creature, target: Creature, battle: Battle) => {
       // Deals damage to both user and target based on user
       // max HP. Will kill both if there is no healing and if
@@ -320,6 +323,10 @@ export type UpgradeAtlas = {
 function _is_available(upgrade: NamedUpgrade, player: Player) {
   if (upgrade.max !== undefined) {
     console.assert(upgrade.max > 1);
+  }
+
+  if (upgrade.minimum_level !== undefined && player.level < upgrade.minimum_level) {
+    return false;
   }
 
   // Check eligibility function:
