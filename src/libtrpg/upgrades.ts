@@ -325,7 +325,9 @@ function _is_available(upgrade: NamedUpgrade, player: Player) {
     console.assert(upgrade.max > 1);
   }
 
-  if (upgrade.minimum_level !== undefined && player.level < upgrade.minimum_level) {
+  if (
+    upgrade.minimum_level !== undefined && player.level < upgrade.minimum_level
+  ) {
     return false;
   }
 

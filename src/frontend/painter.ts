@@ -57,10 +57,22 @@ export class Animation {
   current_frame_index: number = 0;
   max_time: number;
   done: boolean = false;
+  frames: AnimationFrame[] = [];
   constructor(
-    public frames: AnimationFrame[],
+    frames: AnimationFrame[],
     public loop?: boolean,
   ) {
+
+    // Translate frames from duration to end time:
+    let sum = 0;
+    for (const f of frames) {
+      const frame: AnimationFrame = {time: f.time, index: f.index};
+      const before = frame.time;
+      frame.time += sum;
+      sum += before;
+      this.frames.push(frame);
+    }
+    // Max time is just the end time of the last frame:
     this.max_time = this.frames[this.frames.length - 1].time;
   }
 
@@ -108,21 +120,51 @@ export class Animation {
 }
 
 const SPRITESHEET = {
-  Player: new SpriteMetadata(0, 0, 2),
-  Sword: new SpriteMetadata(1, 0, 2),
+  Player: new SpriteMetadata(
+    0,
+    0,
+    2,
+    new AnimationData([frame(0, 250), frame(1, 250)], false),
+  ),
+  Sword: new SpriteMetadata(
+    1,
+    0,
+    2,
+    new AnimationData([frame(0, 250), frame(1, 250)], false),
+  ),
   Pickaxe: new SpriteMetadata(
     1,
     2,
     2,
-    new AnimationData([frame(0, 250), frame(1, 500)], false),
+    new AnimationData([frame(0, 250), frame(1, 250)], false),
   ),
-  Axe: new SpriteMetadata(1, 4, 2),
-  Staff: new SpriteMetadata(1, 4, 2),
+  Axe: new SpriteMetadata(
+    1,
+    4,
+    2,
+    new AnimationData([frame(0, 250), frame(1, 250)], false),
+  ),
+  Staff: new SpriteMetadata(
+    1,
+    4,
+    2,
+    new AnimationData([frame(0, 250), frame(1, 250)], false),
+  ),
   Selector: new SpriteMetadata(2, 0, 2),
   Chest: new SpriteMetadata(3, 0),
   Rock: new SpriteMetadata(3, 1, 3),
   Crystal: new SpriteMetadata(3, 4),
-  Skeleton: new SpriteMetadata(4, 0, 4),
+  Skeleton: new SpriteMetadata(
+    4,
+    0,
+    4,
+    new AnimationData([
+      frame(0, 350),
+      frame(1, 350),
+      frame(2, 350),
+      frame(3, 350),
+    ], false),
+  ),
   Fog: new SpriteMetadata(5, 0, 5),
   Attack: new SpriteMetadata(6, 0, 1),
   Heal: new SpriteMetadata(6, 1, 1),
@@ -292,8 +334,14 @@ export class Painter {
   }
 
   draw_entity(entity: Entity) {
-    const sprite = this.sprites[entity.name][entity.variant];
+    let sprite = undefined;
+    if (entity.animation !== undefined) {
+      sprite = this.sprites[entity.name][entity.animation.get_current_frame()];
+    } else {
+      sprite = this.sprites[entity.name][entity.variant];
+    }
     if (sprite === undefined) {
+      console.log("Attempted to draw entity while sprite missing");
       return;
     }
     const player: Player = this.application.game.player;

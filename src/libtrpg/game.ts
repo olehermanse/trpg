@@ -79,6 +79,10 @@ export class Entity {
     this.animation = metadata.animation_data.get_animator();
   }
 
+  on_light_up() {
+    return;
+  }
+
   get center(): XY {
     const r = xy(this.xy.x, this.xy.y);
     r.x += this.wh.width / 2;
@@ -329,6 +333,7 @@ export class Player extends Creature {
     }
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;
+      tile.on_light_up();
       if (this.target !== null) {
         if (
           !tile.is_empty() && this.target.cr.c === tile.cr.c &&
@@ -343,6 +348,7 @@ export class Player extends Creature {
       }
       return;
     }
+    console.assert(intensity < 5);
     tile.light = intensity;
   }
 
@@ -571,7 +577,7 @@ export class Tile {
     if (this.is_empty() || this.is_rock()) {
       return false;
     }
-    if (this.entities[0].name === "Pickaxe") {
+    if (this.entities[0].name === "Sword") {
       return true;
     }
     if (this.has_enemy()) {
@@ -582,7 +588,7 @@ export class Tile {
 
   pickup() {
     console.assert(this.entities.length > 0);
-    console.assert(this.entities[0].name === "Pickaxe");
+    console.assert(this.entities[0].name === "Sword");
     const item = this.entities[0];
     array_remove(this.entities, item);
     return item;
@@ -590,6 +596,12 @@ export class Tile {
 
   is_lit(): boolean {
     return this.light === 5;
+  }
+
+  on_light_up() {
+    for (const e of this.entities) {
+      e.on_light_up();
+    }
   }
 }
 
@@ -623,6 +635,12 @@ export class Zone extends Grid {
     }
     game.put_zone(this);
     generate_room(this);
+  }
+
+  tick(ms: number) {
+    for (const x of this.get_entities()) {
+      x.tick(ms);
+    }
   }
 
   check_fog() {
@@ -865,6 +883,13 @@ export class Enemy extends Creature {
     game: Game,
   ) {
     super(name, level, pos, zone, game);
+  }
+
+  override on_light_up(): void {
+    if (this.name === "Skeleton") {
+      console.log("Found skeleton to light up");
+      this.start_animation();
+    }
   }
 }
 
@@ -1618,6 +1643,9 @@ export class Game {
       if (this.player.target === null) {
         this.keyboard_update();
       }
+    }
+    if (this.state === "zone") {
+      this.current_zone.tick(ms);
     }
     if (this.state === "battle") {
       const battle = this.battle;
