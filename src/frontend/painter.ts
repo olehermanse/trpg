@@ -625,7 +625,7 @@ export class Painter {
     this.draw_card(choices[2]);
 
     this.offscreen_drawer.text(
-      "Level up!",
+      `You reached level ${this.application.game.player.level}!`,
       this.font,
       xy(width / 2, choices[0].pos.y / 2),
       "middle_center",
