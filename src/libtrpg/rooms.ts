@@ -31,7 +31,16 @@ function _generic_room(zone: Zone) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     }
     const level = 1 + Math.max(...[zone.pos.c, zone.pos.r].map(Math.abs));
-    const entity = new Enemy("Skeleton", level, pos, zone, zone.game);
+    let entity;
+    if (level == 2){
+      entity = new Enemy("Skeleton", level, pos, zone, zone.game);
+    } else if (level == 3){
+      entity = new Enemy("Robe", level, pos, zone, zone.game);
+    } else if (level == 4){
+      entity = new Enemy("Golem", level, pos, zone, zone.game);
+    } else {
+      entity = new Enemy("Monk", level, pos, zone, zone.game);
+    }
     if (entity.cr.c > zone.columns / 2) {
       entity.reversed = true;
     }

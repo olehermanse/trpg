@@ -886,10 +886,7 @@ export class Enemy extends Creature {
   }
 
   override on_light_up(): void {
-    if (this.name === "Skeleton") {
-      console.log("Found skeleton to light up");
-      this.start_animation();
-    }
+    this.start_animation();
   }
 }
 
