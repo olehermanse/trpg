@@ -34,6 +34,16 @@ import {
 } from "../frontend/painter.ts";
 import { SkillApply } from "./upgrades.ts";
 
+export interface GameSave {
+  permanents: UpgradeName[];
+}
+
+export type SaveFunction = (
+  data: GameSave,
+) => void;
+
+export type LoadFunction = () => GameSave;
+
 const DIAG = 1.42;
 const BASE_SPEED = 20.0;
 
@@ -100,8 +110,8 @@ export class Stats {
   magic;
   // Special stats which have to be increased through choices:
   speed;
+  movement_speed;
   light;
-  luck;
 
   constructor(level?: number) {
     if (level === undefined || level <= 0) {
@@ -110,14 +120,14 @@ export class Stats {
       this.strength = 0;
       this.magic = 0;
       this.speed = 0;
+      this.movement_speed = 0;
       this.light = 0;
-      this.luck = 0;
       return;
     }
     // Don't increase per level:
     this.speed = 1;
     this.light = 1;
-    this.luck = 0;
+    this.movement_speed = 0;
     // Increase per level:
     this.max_hp = 20 + 2 * (level - 1);
     this.max_mp = 10 + 2 * (level - 1);
@@ -131,7 +141,7 @@ export class Stats {
     b.magic = a.magic;
     b.speed = a.speed;
     b.light = a.light;
-    b.luck = a.luck;
+    b.movement_speed = a.movement_speed;
   }
 
   copy() {
@@ -284,13 +294,13 @@ export class Creature extends Entity {
 
   update_stats() {
     this.stats = new Stats(this.level);
-    for (const upgrade of this.upgrades) {
-      upgrade.passive?.(this);
+    for (const u of this.upgrades) {
+      u.passive?.(this);
     }
-    for (const effect of this.effects) {
-      effect.apply_stats?.();
+    for (const e of this.effects) {
+      e.apply_stats?.();
     }
-    this.speed = BASE_SPEED * this.stats.speed;
+    this.speed = BASE_SPEED * (this.stats.speed + this.stats.movement_speed);
   }
 
   add_upgrade(upgrade: NamedUpgrade) {
@@ -316,9 +326,36 @@ export class Creature extends Entity {
 }
 
 export class Player extends Creature {
+  save_function?: SaveFunction;
+
   constructor(pos: CR, zone: Zone, game: Game) {
     super("Player", 1, pos, zone, game);
     this.defog();
+  }
+
+  generate_save(): GameSave {
+    const save: GameSave = { permanents: [] };
+    for (const u of this.upgrades) {
+      if (u.permanent === true) {
+        save.permanents.push(u.name);
+      }
+    }
+    return save;
+  }
+
+  load_save(save: GameSave) {
+    console.assert(this.level === 1);
+    console.assert(this.effects.length === 0);
+    for (const name of save.permanents) {
+      this.add_upgrade(upgrade(name));
+    }
+  }
+
+  override add_upgrade(upgrade: NamedUpgrade): void {
+    super.add_upgrade(upgrade);
+    if (this.save_function !== undefined && upgrade.permanent === true) {
+      this.save_function(this.generate_save());
+    }
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -1238,10 +1275,14 @@ export class Game {
   zones: Record<string, Zone> = {};
   choices: Choice[];
   battle: Battle | null;
-  constructor(public grid: Grid) {
+  constructor(public grid: Grid, save?: GameSave) {
     this.current_zone = new Zone(grid, this, cr(0, 0));
     this.put_zone(this.current_zone);
     this.player = new Player(cr(7, 3), this.current_zone, this);
+    if (save !== undefined) {
+      this.player.load_save(save);
+    }
+    this.player.defog();
     this.choices = [];
     this.choices.push(new Choice("Attack", "Placeholder", 0, grid));
     this.choices.push(new Choice("Attack", "Placeholder", 1, grid));

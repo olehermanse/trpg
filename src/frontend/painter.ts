@@ -62,11 +62,10 @@ export class Animation {
     frames: AnimationFrame[],
     public loop?: boolean,
   ) {
-
     // Translate frames from duration to end time:
     let sum = 0;
     for (const f of frames) {
-      const frame: AnimationFrame = {time: f.time, index: f.index};
+      const frame: AnimationFrame = { time: f.time, index: f.index };
       const before = frame.time;
       frame.time += sum;
       sum += before;
@@ -210,6 +209,8 @@ const SPRITESHEET = {
   Physique: new SpriteMetadata(8, 0, 1),
   Haste: new SpriteMetadata(8, 1, 1),
   Vision: new SpriteMetadata(8, 2, 1),
+  Permahaste: new SpriteMetadata(8, 1, 1),
+  Permavision: new SpriteMetadata(8, 2, 1),
   Willpower: new SpriteMetadata(8, 3, 1),
   Vitality: new SpriteMetadata(8, 4, 1),
 };
