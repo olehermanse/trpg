@@ -32,12 +32,18 @@ function _generic_room(zone: Zone) {
     }
     const level = 1 + Math.max(...[zone.pos.c, zone.pos.r].map(Math.abs));
     let entity;
-    if (level == 2) {
+    if (level === 2) {
       entity = new Enemy("Skeleton", level, pos, zone, zone.game);
-    } else if (level == 3) {
+    } else if (level === 3) {
       entity = new Enemy("Robe", level, pos, zone, zone.game);
-    } else if (level == 4) {
+    } else if (level === 4) {
       entity = new Enemy("Golem", level, pos, zone, zone.game);
+    } else if (level === 5) {
+      entity = new Enemy("Crystalus", level, pos, zone, zone.game);
+    } else if (level === 6) {
+      entity = new Enemy("Mimic", level, pos, zone, zone.game);
+    } else if (level === 7) {
+      entity = new Enemy("Ghost", level, pos, zone, zone.game);
     } else {
       entity = new Enemy("Monk", level, pos, zone, zone.game);
     }
