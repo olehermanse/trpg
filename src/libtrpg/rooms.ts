@@ -1,4 +1,9 @@
-import { cr, inside_rectangle, randint } from "@olehermanse/utils/funcs.js";
+import {
+  cr,
+  inside_rectangle,
+  randint,
+  randpercent,
+} from "@olehermanse/utils/funcs.js";
 import { Enemy, Entity, Zone } from "./game.ts";
 
 export type RoomType = "generic" | "chest" | "empty" | "spawn";
@@ -9,7 +14,11 @@ function _chest_room(zone: Zone) {
   while (!zone.empty(pos)) {
     pos = cr(randint(7, 8), randint(5, 6));
   }
-  const entity = new Entity("Chest", pos, zone);
+  const level = 1 + Math.max(...[zone.pos.c, zone.pos.r].map(Math.abs));
+  const mimic = randpercent(30);
+  const entity = mimic
+    ? new Enemy("Mimic", level, pos, zone, zone.game)
+    : new Entity("Chest", pos, zone);
   if (entity.cr.c >= 8) {
     entity.reversed = true;
   }
@@ -17,7 +26,8 @@ function _chest_room(zone: Zone) {
 }
 
 function _generic_room(zone: Zone) {
-  for (let i = 0; i < 7; i++) {
+  const num_crystals = randint(0, 7);
+  for (let i = 0; i < num_crystals; i++) {
     let pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     while (!zone.empty(pos)) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
@@ -25,7 +35,8 @@ function _generic_room(zone: Zone) {
     const entity = new Entity("Crystal", pos, zone);
     zone.append(entity);
   }
-  for (let i = 0; i < 2; i++) {
+  const num_enemies = randint(0, 3);
+  for (let i = 0; i < num_enemies; i++) {
     let pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     while (!zone.empty(pos)) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
@@ -41,11 +52,15 @@ function _generic_room(zone: Zone) {
     } else if (level === 5) {
       entity = new Enemy("Crystalus", level, pos, zone, zone.game);
     } else if (level === 6) {
-      entity = new Enemy("Mimic", level, pos, zone, zone.game);
-    } else if (level === 7) {
       entity = new Enemy("Ghost", level, pos, zone, zone.game);
+    } else if (level === 7) {
+      entity = new Enemy("Hand", level, pos, zone, zone.game);
+    } else if (level === 8) {
+      entity = new Enemy("Knight", level, pos, zone, zone.game);
+    } else if (level === 9) {
+      entity = new Enemy("Spider", level, pos, zone, zone.game);
     } else {
-      entity = new Enemy("Monk", level, pos, zone, zone.game);
+      entity = new Enemy("Anomaly", level, pos, zone, zone.game);
     }
     if (entity.cr.c > zone.columns / 2) {
       entity.reversed = true;

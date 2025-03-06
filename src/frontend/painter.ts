@@ -204,10 +204,10 @@ const SPRITESHEET = {
     0,
     4,
     new AnimationData([
-      frame(0, 350),
-      frame(1, 350),
-      frame(2, 350),
-      frame(3, 350),
+      frame(0, 1000),
+      frame(1, 250),
+      frame(2, 250),
+      frame(3, 250),
     ], false),
   ),
   Crystalus: new SpriteMetadata(
@@ -223,6 +223,50 @@ const SPRITESHEET = {
   ),
   Ghost: new SpriteMetadata(
     5,
+    8,
+    4,
+    new AnimationData([
+      frame(0, 350),
+      frame(1, 350),
+      frame(2, 350),
+      frame(3, 350),
+    ], false),
+  ),
+  Hand: new SpriteMetadata(
+    5,
+    12,
+    4,
+    new AnimationData([
+      frame(0, 350),
+      frame(1, 350),
+      frame(2, 350),
+      frame(3, 350),
+    ], false),
+  ),
+  Knight: new SpriteMetadata(
+    6,
+    0,
+    4,
+    new AnimationData([
+      frame(0, 350),
+      frame(1, 350),
+      frame(2, 350),
+      frame(3, 350),
+    ], false),
+  ),
+  Spider: new SpriteMetadata(
+    6,
+    4,
+    4,
+    new AnimationData([
+      frame(0, 500),
+      frame(1, 250),
+      frame(2, 250),
+      frame(3, 250),
+    ], false),
+  ),
+  Anomaly: new SpriteMetadata(
+    6,
     8,
     4,
     new AnimationData([
@@ -250,7 +294,11 @@ const SPRITESHEET = {
   Willpower: new SpriteMetadata(7, 13, 1),
   Vitality: new SpriteMetadata(7, 14, 1),
   Block: new SpriteMetadata(7, 15, 1),
-  Fist: new SpriteMetadata(7, 16, 1),
+  Punch: new SpriteMetadata(8, 0, 1),
+  Growth: new SpriteMetadata(8, 1, 1),
+  Permagrowth: new SpriteMetadata(8, 2, 1),
+  Boulder: new SpriteMetadata(8, 3, 1),
+  Orb: new SpriteMetadata(8, 4, 1),
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
