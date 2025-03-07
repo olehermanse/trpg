@@ -276,6 +276,19 @@ export class Creature extends Entity {
     return names;
   }
 
+  has_upgrade(name: UpgradeName): boolean {
+    for (const x of this.upgrades) {
+      if (x.name === name) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  remove_upgrade(name: UpgradeName) {
+    this.upgrades = this.upgrades.filter((x) => x.name !== name);
+  }
+
   add_xp(xp: number) {
     const level = this.level;
     this.xp += xp;
@@ -318,6 +331,12 @@ export class Creature extends Entity {
   }
 
   add_upgrade(upgrade: NamedUpgrade) {
+    if (upgrade.on_pickup !== undefined) {
+      upgrade.on_pickup(this);
+    }
+    if (upgrade.consumed === true) {
+      return;
+    }
     this.upgrades.push(upgrade);
     this.update_stats();
   }
@@ -948,7 +967,7 @@ export class BattleSkill {
 
 export class BattleIntent {
   constructor(
-    public skill: BattleSkill,
+    public skill: UpgradeName,
     public user: Creature,
     public target: Creature,
     public battle: Battle,
@@ -956,10 +975,10 @@ export class BattleIntent {
   }
 
   perform(): BattleEvent[] {
-    const func = skill(this.skill.name);
+    const func = skill(this.skill);
     const apply = func(this.user, this.target, this.battle);
-    let message = `${this.user.name} used ${this.skill.name}.`;
-    if (this.skill.name === "Run") {
+    let message = `${this.user.name} used ${this.skill}.`;
+    if (this.skill === "Run") {
       message = "";
     }
     const event = new BattleEvent(message, apply);
@@ -1240,17 +1259,20 @@ export class Battle {
     if (this.hover_index === null) {
       return;
     }
-    this.intents.push(
-      new BattleIntent(
-        this.skills[this.hover_index],
-        this.player,
-        this.enemy,
-        this,
-      ),
+    const player_intent = new BattleIntent(
+      this.skills[this.hover_index].name,
+      this.player,
+      this.enemy,
+      this,
     );
-    this.intents.push(
-      new BattleIntent(this.skills[0], this.enemy, this.player, this),
+    const enemy_intent = new BattleIntent(
+      this.enemy.get_skill_names()[0],
+      this.enemy,
+      this.player,
+      this,
     );
+    this.intents.push(player_intent);
+    this.intents.push(enemy_intent);
     this.goto_state("skills");
     this.state_transitions();
     this.advance();
