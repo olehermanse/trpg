@@ -269,8 +269,9 @@ export class Creature extends Entity {
   }
 
   get_skill_names(): UpgradeName[] {
+    console.assert(this.upgrades.length === this.sorted_upgrades.length);
     const names: UpgradeName[] = [];
-    for (const x of this.upgrades) {
+    for (const x of this.sorted_upgrades) {
       if (x.skill === undefined) {
         continue;
       }
