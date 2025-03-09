@@ -21,12 +21,14 @@ export type SkillPerform = (
   user: Creature,
   target: Creature,
   battle: Battle,
+  skill: Upgrade,
 ) => SkillApply;
 
 export type UpgradeEligible = (creature: Creature) => boolean;
 
 export type UpgradePassive = (creature: Creature) => void;
 export type UpgradeApply = (creature: Creature) => void;
+export type CostFunction = (creature: Creature) => number;
 
 export class Effect {
   constructor(
@@ -47,6 +49,7 @@ interface Upgrade {
   permanent?: true;
   consumed?: true;
   on_pickup?: UpgradeApply;
+  mana_cost?: CostFunction;
 }
 
 const _all_upgrades = {
@@ -89,7 +92,7 @@ const _all_upgrades = {
     "minimum_level": 10,
   },
   "Growth": {
-    "description": "5% increased XP",
+    "description": "5% more experience",
     "max": 2,
     "passive": (creature: Creature) => {
       creature.stats.increased_xp += 5;
@@ -97,7 +100,7 @@ const _all_upgrades = {
     "minimum_level": 6,
   },
   "Permagrowth": {
-    "description": "3% increased XP",
+    "description": "3% more experience",
     "permanent": true,
     "max": 2,
     "passive": (creature: Creature) => {
@@ -133,7 +136,12 @@ const _all_upgrades = {
   },
   "Attack": {
     "description": "Swing weapon",
-    "skill": (user: Creature, target: Creature, _battle: Battle) => {
+    "skill": (
+      user: Creature,
+      target: Creature,
+      _battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // Standard damage calculation used as basis for all other skills
       // Minimum 1 damage
       // raw damage is 5 + 2x user strength
@@ -158,42 +166,58 @@ const _all_upgrades = {
   },
   "Heal": {
     "description": "Use magic to heal yourself",
-    "skill": (user: Creature, _target: Creature, battle: Battle) => {
+    "mana_cost": (user: Creature) => {
+      return 2 + Math.floor(user.stats.max_mp / 5);
+    },
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      skill: Upgrade,
+    ) => {
       // Healing is based on mana spent with a small boost from magic stat
       // Cost (mana spent) scales with maximum mana
       // Base rule is that 1 mana = 1 hit point healed
-      const cost = 2 + Math.floor(user.stats.max_mp / 10);
-      const success = user.mp >= cost;
+      const cost = skill.mana_cost?.(user);
+      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
+      if (cost === undefined || user.mp < cost) {
+        return () => {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        };
+      }
       const increase = (100 + user.stats.magic) / 100;
       const healing = Math.floor(increase * cost);
       return () => {
-        if (success) {
-          user.hp += healing;
-          user.mp -= cost;
-        } else {
-          battle.events.push(new BattleEvent("Not enough mana"));
-        }
+        user.hp += healing;
+        user.mp -= cost;
       };
     },
   },
   "Fireball": {
     "description": "Damage and burn the enemy",
-    "skill": (user: Creature, target: Creature, battle: Battle) => {
+    "mana_cost": (user: Creature) => {
+      return 2 + Math.floor(user.stats.magic / 2);
+    },
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      skill: Upgrade,
+    ) => {
       // Same damage calc as Attack, but slightly better
       // Mana cost should balance it out
-      // Mana cost scales with damage dealt
       // Burn is 10% of damage dealt
-      // TODO: Should burn and mana cost scale with raw damage instead?
+      const cost = skill.mana_cost?.(user);
+      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
+      if (cost === undefined || user.mp < cost) {
+        return () => {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        };
+      }
       const dmg = damage(user.stats.magic, target.stats.magic, 6, 2);
       const burn_dmg = Math.floor(dmg / 10);
       const has_burn = target.has_effect("Burn");
-      const cost = 2 + Math.floor(dmg / 10);
-      const success = user.mp >= cost;
       return () => {
-        if (!success) {
-          battle.events.push(new BattleEvent("Not enough mana"));
-          return;
-        }
         target.hp -= dmg > 0 ? dmg : 1;
         user.mp -= cost;
         if (has_burn) {
@@ -220,7 +244,12 @@ const _all_upgrades = {
     "eligible": (creature: Creature) => {
       return creature.get_skill_names().length >= 4;
     },
-    "skill": (user: Creature, _target: Creature, battle: Battle) => {
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // Restore mana per turn
       // scales with magic stat, and to a very limited extent max mana
       const power = 2 +
@@ -251,7 +280,12 @@ const _all_upgrades = {
     "eligible": (creature: Creature) => {
       return creature.get_skill_names().length >= 4;
     },
-    "skill": (user: Creature, target: Creature, battle: Battle) => {
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // Deals damage to both user and target based on user
       // max HP. Will kill both if there is no healing and if
       // target has less HP than user max HP.
@@ -301,7 +335,12 @@ const _all_upgrades = {
   },
   "Rend": {
     "description": "Causes enemy to bleed",
-    "skill": (user: Creature, target: Creature, battle: Battle) => {
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // About 1/3 as strong as normal attack, but applies bleed
       // for same amount every turn for 5 turns. (So almost break even at 2nd turn).
       const dmg = Math.floor(
@@ -331,7 +370,12 @@ const _all_upgrades = {
   },
   "Might": {
     "description": "+1 strength for 5 turns",
-    "skill": (user: Creature, _target: Creature, battle: Battle) => {
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // Doesn't scale with anything
       // Something like:
       // 2x5=10 extra damage, 5x1=5 healing
@@ -358,7 +402,12 @@ const _all_upgrades = {
   },
   "Run": {
     "description": "Escape battle",
-    "skill": (user: Creature, _target: Creature, _battle: Battle) => {
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      _battle: Battle,
+      _skill: Upgrade,
+    ) => {
       // Run from battle, getting 0 xp.
       // If lower speed, enemy can attack and kill you first.
       return () => {
@@ -421,7 +470,7 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
 
   // 2. Filter out the names of upgrades which are not available:
   const unlocked: UpgradeName[] = upgrade_names.filter((k: UpgradeName) => {
-    return _is_available(upgrade(k), player);
+    return _is_available(get_upgrade(k), player);
   });
 
   // 3. Add guaranteed options:
@@ -446,7 +495,7 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
     }
 
     for (const name of try_to_add) {
-      if (_is_available(upgrade(name), player)) {
+      if (_is_available(get_upgrade(name), player)) {
         unlocked.splice(unlocked.indexOf(name), 1);
         choices.push(name);
         break;
@@ -466,14 +515,14 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   const sorted: NamedUpgrade[] = [];
   for (const name in all_upgrades) {
     if (choices.includes(<UpgradeName> name)) {
-      sorted.push(upgrade(<UpgradeName> name));
+      sorted.push(get_upgrade(<UpgradeName> name));
     }
   }
 
   return sorted;
 }
 
-export function upgrade(name: UpgradeName): NamedUpgrade {
+export function get_upgrade(name: UpgradeName): NamedUpgrade {
   const obj = { "name": name, ...all_upgrades[name] };
   let description = obj.description;
   if (obj.permanent === true) {
@@ -483,7 +532,7 @@ export function upgrade(name: UpgradeName): NamedUpgrade {
   return obj;
 }
 
-export function skill(name: UpgradeName): SkillPerform {
+export function get_skill(name: UpgradeName): SkillPerform {
   const upgrade = { "name": name, ...all_upgrades[name] };
   console.assert(upgrade.skill !== undefined);
   return <SkillPerform> upgrade.skill;

@@ -364,8 +364,8 @@ function get_font_data(font: ImageBitmap[][]) {
   const FONT_MAP = [
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "abcdefghijklmnopqrstuvwxyz",
-    "1234567890",
-    "!+-*/\"'_.,█^?()[]{}<>#:;@ ",
+    "1234567890 ",
+    "!+-*/\"'_.,█^?()[]{}<>#:;@%",
   ];
   const map: Record<string, ImageBitmap> = {};
   for (let r = 0; r < FONT_MAP.length; r++) {
@@ -609,14 +609,22 @@ export class Painter {
   }
 
   draw_battle_menu(battle: Battle) {
-    let y = 6;
     const skills = battle.skills;
     const lim = skills.length > 8 ? 8 : skills.length;
     const hovered = battle.hover_index;
     for (let i = 0; i < lim; ++i) {
+      const rect = skills[i].rectangle;
+      const y = rect.xy.y;
+      if (skills[i].disabled) {
+        this.offscreen_drawer.text(
+          " (No mana)",
+          this.font,
+          xy(174 + 4, y + 6),
+        );
+        continue;
+      }
       const name = skills[i].name;
       let offset = 0;
-      const rect = skills[i].rectangle;
       if (i === hovered) {
         offset -= 1;
       }
@@ -636,7 +644,6 @@ export class Painter {
           xy(174 + 77 - 16 - 2 + offset, y + 2),
         );
       }
-      y += 20 + 3;
     }
   }
 
