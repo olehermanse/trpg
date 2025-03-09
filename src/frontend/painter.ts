@@ -299,6 +299,9 @@ const SPRITESHEET = {
   Permagrowth: new SpriteMetadata(8, 2, 1),
   Boulder: new SpriteMetadata(8, 3, 1),
   Orb: new SpriteMetadata(8, 4, 1),
+  Mage: new SpriteMetadata(8, 5, 1),
+  Book: new SpriteMetadata(8, 6, 1),
+  Warrior: new SpriteMetadata(8, 7, 1),
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;

@@ -135,6 +135,28 @@ const _all_upgrades = {
     },
     "minimum_level": 3,
   },
+  "Warrior": {
+    "description": "2x strength, 0.5x magic",
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength *= 2;
+      creature.stats.magic = Math.floor(creature.stats.magic / 2);
+    },
+    "eligible": (creature: Creature) => {
+      return !creature.has_upgrade("Mage");
+    },
+  },
+  "Mage": {
+    "description": "2x magic, 0.5x strength",
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.magic *= 2;
+      creature.stats.strength = Math.floor(creature.stats.strength / 2);
+    },
+    "eligible": (creature: Creature) => {
+      return !creature.has_upgrade("Mage");
+    },
+  },
   "Attack": {
     "description": "Swing weapon",
     "eligible": (creature: Creature) => {
@@ -423,7 +445,7 @@ const _all_upgrades = {
 
 export type UpgradeName = keyof typeof _all_upgrades;
 
-const all_upgrades: Record<UpgradeName, Upgrade> = _all_upgrades;
+export const all_upgrades: Record<UpgradeName, Upgrade> = _all_upgrades;
 
 export interface NamedUpgrade extends Upgrade {
   name: UpgradeName;
