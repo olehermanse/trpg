@@ -132,10 +132,10 @@ export class Stats {
     this.speed = 1;
     this.light = 1;
     // Increase per level:
-    this.max_hp = 20 + 2 * (level - 1);
-    this.max_mp = 10 + 2 * (level - 1);
     this.strength = level;
     this.magic = level;
+    this.max_hp = 20; // Increases indirectly via strength
+    this.max_mp = 10; // Increases indirectly via magic
   }
   static assign(a: Stats, b: Stats) {
     b.max_hp = a.max_hp;
@@ -202,6 +202,7 @@ export class Creature extends Entity {
     this.upgrades = [get_upgrade("Attack")];
     this.sort_upgrades();
     this.stats = new Stats(this.level);
+    this.update_stats();
     this.hp = this.stats.max_hp;
     this.mp = this.stats.max_mp;
   }
@@ -334,6 +335,12 @@ export class Creature extends Entity {
       e.apply_stats?.();
     }
     this.speed = BASE_SPEED * (this.stats.speed + this.stats.movement_speed);
+    if (this.stats.strength > 1) {
+      this.stats.max_hp = this.stats.max_hp + (this.stats.strength - 1) * 2;
+    }
+    if (this.stats.magic > 1) {
+      this.stats.max_mp = this.stats.max_mp + (this.stats.magic - 1) * 2;
+    }
   }
 
   sort_upgrades() {
@@ -1070,6 +1077,7 @@ export class Battle {
       this.skills.push(new BattleSkill(rect, name));
     }
     this.disable_buttons();
+    this.update_stats_and_limits();
   }
 
   add_events(...events: BattleEvent[]) {
@@ -1117,13 +1125,13 @@ export class Battle {
 
   after_events() {
     console.assert(this.events.length === 0);
+    this.update_stats_and_limits();
     if (this.state === "over") {
       return this.state;
     }
     if (this.state === "ending_soon") {
       return this.state_transitions();
     }
-    this.update_stats_and_limits();
     if (this.player.hp === 0 || this.enemy.hp === 0) {
       this.intents = [];
       const msg = this.player.hp === 0
@@ -1739,7 +1747,7 @@ export class Game {
 
     player.effects = [];
 
-    if (player.hp === 0) {
+    if (player.hp <= 0) {
       this.goto_state("game_over");
       this.disable_clicks(3000);
       this.battle = null;

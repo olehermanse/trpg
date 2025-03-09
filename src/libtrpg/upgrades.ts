@@ -113,10 +113,10 @@ const _all_upgrades = {
     "minimum_level": 10,
   },
   "Vitality": {
-    "description": "Max HP +5",
+    "description": "Max HP +10",
     "max": 99,
     "passive": (creature: Creature) => {
-      creature.stats.max_hp += 5;
+      creature.stats.max_hp += 10;
     },
   },
   "Physique": {
@@ -176,18 +176,6 @@ const _all_upgrades = {
       return () => {
         target.apply_damage(dmg);
       };
-    },
-  },
-  "Forget": {
-    "description": "Remove attack",
-    "minimum_level": 10,
-    "consumed": true,
-    "on_pickup": (creature: Creature) => {
-      creature.remove_upgrade("Attack");
-    },
-    "eligible": (creature: Creature) => {
-      return creature.has_upgrade("Attack") &&
-        creature.get_skill_names().length == 8;
     },
   },
   "Heal": {
@@ -439,6 +427,18 @@ const _all_upgrades = {
       return () => {
         user.run = true;
       };
+    },
+  },
+  "Forget": {
+    "description": "Remove attack",
+    "minimum_level": 10,
+    "consumed": true,
+    "on_pickup": (creature: Creature) => {
+      creature.remove_upgrade("Attack");
+    },
+    "eligible": (creature: Creature) => {
+      return creature.has_upgrade("Attack") &&
+        creature.get_skill_names().length == 8;
     },
   },
 } as const;
