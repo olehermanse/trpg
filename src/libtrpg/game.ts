@@ -22,6 +22,7 @@ import {
   get_skill,
   get_upgrade,
   get_upgrade_choices,
+  Keyword,
   NamedUpgrade,
   UpgradeName,
 } from "./upgrades.ts";
@@ -288,6 +289,10 @@ export class Creature extends Entity {
       }
     }
     return false;
+  }
+
+  get_upgrades_by_keyword(keyword: Keyword): NamedUpgrade[]{
+    return this.upgrades.filter((x) => x.keywords !== undefined && x.keywords.includes(keyword));
   }
 
   remove_upgrade(name: UpgradeName) {
