@@ -59,6 +59,8 @@ function _generic_room(zone: Zone) {
       entity = new Enemy("Knight", level, pos, zone, zone.game);
     } else if (level === 9) {
       entity = new Enemy("Spider", level, pos, zone, zone.game);
+    } else if (level === 9) {
+      entity = new Enemy("Acolyte", level, pos, zone, zone.game);
     } else {
       entity = new Enemy("Anomaly", level, pos, zone, zone.game);
     }

@@ -166,7 +166,7 @@ const SPRITESHEET = {
       frame(3, 350),
     ], false),
   ),
-  Monk: new SpriteMetadata(
+  Acolyte: new SpriteMetadata(
     4,
     4,
     4,
@@ -294,7 +294,7 @@ const SPRITESHEET = {
   Willpower: new SpriteMetadata(7, 13, 1),
   Vitality: new SpriteMetadata(7, 14, 1),
   Block: new SpriteMetadata(7, 15, 1),
-  Punch: new SpriteMetadata(8, 0, 1),
+  Monk: new SpriteMetadata(8, 0, 1), // Fist / punch
   Growth: new SpriteMetadata(8, 1, 1),
   Permagrowth: new SpriteMetadata(8, 2, 1),
   Boulder: new SpriteMetadata(8, 3, 1),
