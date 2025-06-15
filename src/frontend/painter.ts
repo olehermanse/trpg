@@ -119,12 +119,14 @@ export class Animation {
 }
 
 const SPRITESHEET = {
+  // Player:
   Player: new SpriteMetadata(
     0,
     0,
     2,
     new AnimationData([frame(0, 250), frame(1, 250)], false),
   ),
+  // Equipment:
   Sword: new SpriteMetadata(
     1,
     0,
@@ -149,12 +151,15 @@ const SPRITESHEET = {
     2,
     new AnimationData([frame(0, 250), frame(1, 250)], false),
   ),
+  // UI:
   Selector: new SpriteMetadata(2, 0, 2),
+  // World:
   Fog: new SpriteMetadata(2, 2, 5),
   Rock: new SpriteMetadata(3, 0, 3),
   Crystal: new SpriteMetadata(3, 3),
   Chest: new SpriteMetadata(3, 4, 2),
   Door: new SpriteMetadata(3, 6, 8),
+  // Enemies:
   Skeleton: new SpriteMetadata(
     4,
     0,
@@ -276,32 +281,35 @@ const SPRITESHEET = {
       frame(3, 350),
     ], false),
   ),
-  Attack: new SpriteMetadata(7, 0, 1),
-  Heal: new SpriteMetadata(7, 1, 1),
-  Might: new SpriteMetadata(7, 2, 1),
-  Run: new SpriteMetadata(7, 3, 1),
-  Fireball: new SpriteMetadata(7, 4, 1),
-  Rend: new SpriteMetadata(7, 5, 1),
-  Elixir: new SpriteMetadata(7, 6, 1),
-  Pact: new SpriteMetadata(7, 7, 1),
-  Convert: new SpriteMetadata(7, 8, 1),
-  Droplet: new SpriteMetadata(7, 9, 1),
-  Physique: new SpriteMetadata(7, 10, 1),
-  Haste: new SpriteMetadata(7, 11, 1),
-  Permahaste: new SpriteMetadata(7, 11, 1),
-  Vision: new SpriteMetadata(7, 12, 1),
-  Permavision: new SpriteMetadata(7, 12, 1),
-  Willpower: new SpriteMetadata(7, 13, 1),
-  Vitality: new SpriteMetadata(7, 14, 1),
-  Block: new SpriteMetadata(7, 15, 1),
-  Monk: new SpriteMetadata(8, 0, 1), // Fist / punch
-  Growth: new SpriteMetadata(8, 1, 1),
-  Permagrowth: new SpriteMetadata(8, 2, 1),
-  Boulder: new SpriteMetadata(8, 3, 1),
-  Orb: new SpriteMetadata(8, 4, 1),
-  Mage: new SpriteMetadata(8, 5, 1),
-  Book: new SpriteMetadata(8, 6, 1),
-  Warrior: new SpriteMetadata(8, 7, 1),
+  // Skills:
+  Run: new SpriteMetadata(7, 0, 1), // Person running
+  Attack: new SpriteMetadata(7, 1, 1), // Sword swinging
+  Heal: new SpriteMetadata(7, 2, 1), // Two crosses
+  Might: new SpriteMetadata(7, 3, 1), // Up arrows
+  Fireball: new SpriteMetadata(7, 4, 1), // Flame
+  Rend: new SpriteMetadata(7, 5, 1), // Blade with blood droplet
+  Elixir: new SpriteMetadata(7, 6, 1), // Flask
+  Pact: new SpriteMetadata(7, 7, 1), // Blade cutting palm
+  Convert: new SpriteMetadata(7, 8, 1), // Blood and water droplet
+  Droplet: new SpriteMetadata(7, 9, 1), // Water droplet
+  Boulder: new SpriteMetadata(7, 10, 1), // Big round shaded rock / boulder
+  Orb: new SpriteMetadata(7, 11, 1), // Round circle with highlights
+  Book: new SpriteMetadata(7, 12, 1), // Book
+  // Passives:
+  Vitality: new SpriteMetadata(9, 0, 1), // Chest with abs
+  Willpower: new SpriteMetadata(9, 1, 1), // Brain with exclamation marks
+  Haste: new SpriteMetadata(9, 2, 1), // Boot
+  Permahaste: new SpriteMetadata(9, 2, 1), // Same boot
+  Growth: new SpriteMetadata(9, 3, 1), // Crown
+  Permagrowth: new SpriteMetadata(9, 4, 1), // Fancier crown
+  Vision: new SpriteMetadata(9, 5, 1), // Eye
+  Permavision: new SpriteMetadata(9, 5, 1), // Same eye
+  Physique: new SpriteMetadata(7, 10, 1), // Flexing arm
+  // Classes:
+  Warrior: new SpriteMetadata(10, 0, 1), // Helmet
+  Mage: new SpriteMetadata(10, 1, 1), // Wizard hat
+  Monk: new SpriteMetadata(10, 2, 1), // Fist / punch
+  Priest: new SpriteMetadata(10, 3, 1), // Shield with cross
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
