@@ -272,6 +272,15 @@ export class Creature extends Entity {
     this.hp -= minimum;
   }
 
+  apply_healing(healing: number, minimum: number = 1) {
+    console.assert(healing >= 0);
+    if (healing > minimum) {
+      this.hp += healing;
+      return;
+    }
+    this.hp += minimum;
+  }
+
   count_upgrade(name: UpgradeName): number {
     let count = 0;
     for (const x of this.upgrades) {
