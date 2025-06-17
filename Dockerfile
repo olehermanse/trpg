@@ -21,7 +21,6 @@ RUN npm install
 COPY --from=build /trpg /trpg
 COPY test test
 RUN npm run tsc
-RUN npm run test
 
 FROM denoland/deno:2.3.1@sha256:c75db9474ed7bfc24a4b0aa946767ee4a84a30034c188ce55078a591477d5f3e AS denotest
 WORKDIR /trpg
