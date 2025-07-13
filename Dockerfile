@@ -22,7 +22,7 @@ COPY --from=build /trpg /trpg
 COPY test test
 RUN npm run tsc
 
-FROM denoland/deno:2.3.1@sha256:c75db9474ed7bfc24a4b0aa946767ee4a84a30034c188ce55078a591477d5f3e AS denotest
+FROM denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS denotest
 WORKDIR /trpg
 COPY --from=build /trpg/package-lock.json /trpg/package.json ./
 RUN deno install
@@ -33,7 +33,7 @@ RUN deno task tsc
 RUN deno check --frozen --all src/
 RUN deno task test
 
-FROM denoland/deno:2.3.1@sha256:c75db9474ed7bfc24a4b0aa946767ee4a84a30034c188ce55078a591477d5f3e AS run
+FROM denoland/deno:2.4.1@sha256:1d1c1799f0bc5c63b61f54e07fbfe78a9fc364cb93437437464a0e5dd0769771 AS run
 WORKDIR /trpg
 COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
