@@ -16,7 +16,7 @@ RUN deno run build
 RUN bash add_version.sh
 RUN rm -rf node_modules
 
-FROM node:20@sha256:6f076db82169a365abca591093bdf020f9e8827a8add8ea3826556c290b340c0 AS npmtest
+FROM node:22.17.0@sha256:2fa6c977460b56d4d8278947ab56faeb312bc4cc6c4cf78920c6de27812f51c5 AS npmtest
 WORKDIR /trpg
 COPY --from=build /trpg/package-lock.json /trpg/package.json ./
 RUN npm install
