@@ -24,7 +24,7 @@
   "dependencies": {
     "@olehermanse/utils": "^0.1.10",
     "typescript": "^5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.6"
   },
   "devDependencies": {
     "vitest": "^3.2.4"
