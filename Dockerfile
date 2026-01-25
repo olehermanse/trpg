@@ -1,4 +1,4 @@
-FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS build
+FROM docker.io/denoland/deno:2.6.6@sha256:08941c4fcc2f0448d34ca2452edeb5bca009bed29313079cfad0e5e2fa37710f AS build
 RUN apt-get update -y
 RUN apt-get install -y git
 WORKDIR /trpg
@@ -16,7 +16,7 @@ RUN deno run build
 RUN bash add_version.sh
 RUN rm -rf node_modules
 
-FROM docker.io/node:22.17.0@sha256:2fa6c977460b56d4d8278947ab56faeb312bc4cc6c4cf78920c6de27812f51c5 AS npmtest
+FROM docker.io/node:22.22.0@sha256:cd7bcd2e7a1e6f72052feb023c7f6b722205d3fcab7bbcbd2d1bfdab10b1e935 AS npmtest
 WORKDIR /trpg
 COPY --from=build /trpg/package-lock.json /trpg/package.json ./
 RUN npm install
@@ -25,7 +25,7 @@ COPY test test
 RUN npm run tsc
 RUN npm run build
 
-FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS denotest
+FROM docker.io/denoland/deno:2.6.6@sha256:08941c4fcc2f0448d34ca2452edeb5bca009bed29313079cfad0e5e2fa37710f AS denotest
 WORKDIR /trpg
 COPY --from=build /trpg/package-lock.json /trpg/package.json ./
 RUN deno install
@@ -37,7 +37,7 @@ RUN deno task tsc
 RUN deno check --frozen --all src/
 RUN deno task test
 
-FROM docker.io/denoland/deno:2.5.6@sha256:3ea71953ff50e3ff15c377ead1a8521f624e2f43d27713675a8bed7b33f166aa AS run
+FROM docker.io/denoland/deno:2.6.6@sha256:08941c4fcc2f0448d34ca2452edeb5bca009bed29313079cfad0e5e2fa37710f AS run
 WORKDIR /trpg
 COPY --from=build /trpg/dist/ dist/
 COPY src/ src/
