@@ -16,7 +16,7 @@ RUN deno run build
 RUN bash add_version.sh
 RUN rm -rf node_modules
 
-FROM docker.io/node:22.22.0@sha256:cd7bcd2e7a1e6f72052feb023c7f6b722205d3fcab7bbcbd2d1bfdab10b1e935 AS npmtest
+FROM docker.io/node:24.14.1-alpine3.23@sha256:01743339035a5c3c11a373cd7c83aeab6ed1457b55da6a69e014a95ac4e4700b AS npmtest
 WORKDIR /trpg
 COPY --from=build /trpg/package-lock.json /trpg/package.json ./
 RUN npm install
