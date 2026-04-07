@@ -22,7 +22,7 @@
     "url": "https://github.com/olehermanse/trpg/issues"
   },
   "dependencies": {
-    "@olehermanse/utils": "^0.1.13",
+    "@olehermanse/utils": "^0.1.23",
     "typescript": "^6.0.2",
     "vite": "^8.0.5"
   },
