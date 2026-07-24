@@ -22,8 +22,11 @@ class Painter {
         b.level = a.level;
         b.name = a.name;
         b.w = this.canvas_manager.grid_size;
+        b.h = this.canvas_manager.grid_size;
         b.rotation = a.rotation;
         b.intensity = a.intensity;
+        b.price = a.price;
+        b.draw_price = a.draw_price;
         return b;
     }
 
@@ -36,22 +39,28 @@ class Painter {
         Painter.draw_building(this.canvas_manager.ctx, a, b);
     }
 
-    static draw_tower_generic(ctx, x, y, s, level, rotation, circle, triangle) {
-        let r = (s / 2) * 0.7;
+    static draw_tower_generic(ctx, t, circle, triangle) {
+        let r = (t.w / 2) * 0.7;
         if (circle != null) {
-            Draw.circle(ctx, x, y, r, circle.fill, circle.stroke);
+            Draw.circle(ctx, t.x, t.y, r, circle.fill, circle.stroke);
         }
         if (triangle != null) {
-            for (let i = 0; i < level; ++i) {
-                Draw.triangle(ctx, x, y, r, rotation, triangle.fill, triangle.stroke);
+            for (let i = 0; i < t.level; ++i) {
+                Draw.triangle(ctx, t.x, t.y, r, t.rotation, triangle.fill, triangle.stroke);
                 r = r / 2;
             }
+        }
+        if (t.draw_price) {
+            let tmp = ctx.globalAlpha;
+            ctx.globalAlpha = 1.0;
+            Draw.text_bottom_right(ctx, t.x + t.w / 2, t.y + t.h / 2, String(t.price), "#ffff00", 20);
+            ctx.globalAlpha = tmp;
         }
     }
 
     static draw_rock(ctx, t, target = null) {
         const circle = fill_stroke(GREY, BLACK);
-        Painter.draw_tower_generic(ctx, t.x, t.y, t.w, 1, t.rotation, circle, null);
+        Painter.draw_tower_generic(ctx, t, circle, null);
     }
 
     static draw_gun_tower(ctx, t, target = null) {
@@ -61,7 +70,7 @@ class Painter {
             const stroke = GREEN;
             Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
         }
-        Painter.draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
+        Painter.draw_tower_generic(ctx, t, circle, triangle);
     }
 
     static draw_slow_tower(ctx, t, target = null) {
@@ -71,7 +80,7 @@ class Painter {
             const stroke = BRIGHT_BLUE;
             Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
         }
-        Painter.draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
+        Painter.draw_tower_generic(ctx, t, circle, triangle);
     }
 
     static draw_laser_tower(ctx, t, target = null) {
@@ -81,7 +90,7 @@ class Painter {
             const stroke = BRIGHT_PURPLE;
             Draw.line(ctx, t.x, t.y, target.x, target.y, stroke, 0.1 * t.w * t.intensity);
         }
-        Painter.draw_tower_generic(ctx, t.x, t.y, t.w, t.level, t.rotation, circle, triangle);
+        Painter.draw_tower_generic(ctx, t, circle, triangle);
     }
 
     static draw_bank(ctx, t, target = null) {

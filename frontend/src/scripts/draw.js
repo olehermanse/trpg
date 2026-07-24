@@ -74,12 +74,25 @@ function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = null
     }
 }
 
-function text(ctx, x, y, string, c, size) {
+function _text(ctx, x, y, string, c, size) {
     ctx.font = Math.floor(size) + "px monospace";
+    ctx.fillStyle = c;
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 2;
+    ctx.strokeText(string, x, y);
+    ctx.fillText(string, x, y);
+}
+
+function text(ctx, x, y, string, c, size) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = c;
-    ctx.fillText(string, x, y);
+    _text(ctx, x, y, string, c, size);
+}
+
+function text_bottom_right(ctx, x, y, string, c, size) {
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    _text(ctx, x, y, string, c, size);
 }
 
 function grid(ctx, size, x0, y0, width, height) {
@@ -122,6 +135,7 @@ module.exports = {
     rectangle,
     line,
     text,
+    text_bottom_right,
     grid,
     healthbar,
 };

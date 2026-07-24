@@ -141,6 +141,7 @@ class Tower {
     this.r = r;
     this.painter = painter;
     this.price = price;
+    this.draw_price = false;
     this.rotation = 0;
     this.target = null;
     this.intensity = 0.0;
@@ -523,19 +524,37 @@ class Game {
     return true;
   }
 
-  price(name) {
-    if (name === "bank") {
-      return 100 + 100 * this.banks();
+  get_tower(position) {
+    if (position === null) {
+      return null;
     }
-    return Tower.price(name);
+    if (!this.has_tower(position.c, position.r)) {
+      return null;
+    }
+    return this.tiles[position.c][position.r];
   }
 
-  can_afford(name) {
-    return this.money >= this.price(name);
+  price(selected, position = null) {
+    if (selected === "bank") {
+      return 100 + 100 * this.banks();
+    }
+    let tower = this.get_tower(position);
+    if (tower === null) {
+      return Tower.price(selected);
+    }
+    if (tower.name != selected) {
+      return Tower.price(selected);
+    }
+
+    return Tower.price(selected) + 10;
+  }
+
+  can_afford(name, position = null) {
+    return this.money >= this.price(name, position);
   }
 
   _try_place_tower(c, r, name) {
-    console.assert(this.can_afford(name), "Cannot afford tower");
+    console.assert(this.can_afford(name, position(c, r)), "Cannot afford tower");
     console.assert(this.is_empty(c, r), "Cannot place in non-empty");
 
     const tower = new Tower(c, r, name, this.price(name), this.painter);
@@ -559,7 +578,7 @@ class Game {
   }
 
   place_tower(c, r, name) {
-    console.assert(this.can_afford(name));
+    console.assert(this.can_afford(name, position(c, r)));
     console.assert(this.can_place(c, r, name));
     const price = this.price(name);
     if (this.has_tower(c, r)) {
@@ -606,7 +625,7 @@ class Game {
   }
 
   can_place(c, r, name) {
-    if (!this.can_afford(name)) {
+    if (!this.can_afford(name, position(c, r))) {
       return false;
     }
     if (this.is_outside(c, r)) {
