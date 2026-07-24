@@ -74,6 +74,7 @@ export class Target {
   constructor(
     public cr: CR,
     grid: Grid,
+    public draw: boolean
   ) {
     this.xy = cr_to_xy(cr, grid);
   }
@@ -780,7 +781,7 @@ export class Game {
     if (tile.light !== 5 || !tile.is_empty()) {
       return;
     }
-    this.player.target = new Target(pos, this.grid);
+    this.player.target = new Target(pos, this.grid, true);
   }
 
   level_up_click(position: XY) {
@@ -820,7 +821,7 @@ export class Game {
         (down && this.player.cr.r === this.current_zone.rows - 1) ||
         (right && this.player.cr.c === this.current_zone.columns - 1)
       ) {
-        this.player.target = new Target(this.player.cr, this.grid);
+        this.player.target = new Target(this.player.cr, this.grid, false);
         return;
       }
     }
@@ -854,7 +855,7 @@ export class Game {
       return;
     }
     if (tile.is_empty()) {
-      this.player.target = new Target(pos, this.grid);
+      this.player.target = new Target(pos, this.grid, false);
       return;
     }
     const alternatives: CR[] = cr_4_neighbors(
@@ -879,7 +880,7 @@ export class Game {
         neighbor.c === this.current_zone.columns - 1 ||
         neighbor.r === this.current_zone.rows - 1
       ) {
-        this.player.target = new Target(neighbor, this.grid);
+        this.player.target = new Target(neighbor, this.grid, false);
         return;
       }
       second_choice = neighbor;
@@ -887,7 +888,7 @@ export class Game {
     if (second_choice === null) {
       return;
     }
-    this.player.target = new Target(second_choice, this.grid);
+    this.player.target = new Target(second_choice, this.grid, false);
   }
 
   click(position: XY) {
