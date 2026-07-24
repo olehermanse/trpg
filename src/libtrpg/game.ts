@@ -18,6 +18,7 @@ import {
   UpgradeName,
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
+import { Keyboard } from "./keyboard.ts";
 
 const DIAG = 1.42;
 const BASE_SPEED = 16.0;
@@ -585,6 +586,7 @@ export class Game {
   previous_zone: Zone | null = null;
   disabled_clicks_ms: number = 0;
   state: GameState = "zone";
+  keyboard: Keyboard = new Keyboard();
   player: Player;
   current_zone: Zone;
   zones: Record<string, Zone> = {};
@@ -784,6 +786,66 @@ export class Game {
     }
   }
 
+  keyboard_update() {
+    if (this.transition !== null) {
+      return;
+    }
+    if (this.disabled_clicks_ms > 0) {
+      return;
+    }
+    const pos = cr(0, 0);
+    const up = this.keyboard.pressed("w");
+    const down = this.keyboard.pressed("s");
+    const left = this.keyboard.pressed("a");
+    const right = this.keyboard.pressed("d");
+
+    if (up === down && left === right) {
+      return;
+    }
+
+    if (this.player.target === null) {
+      if (
+        (up && this.player.cr.r === 0) ||
+        (left && this.player.cr.c === 0) ||
+        (down && this.player.cr.r === this.current_zone.rows - 1) ||
+        (right && this.player.cr.c === this.current_zone.columns - 1)
+      ) {
+        this.player.target = new Target(this.player.cr, this.grid);
+        return;
+      }
+    }
+
+    if (up && !down) {
+      pos.r = -1;
+    } else if (down && !up) {
+      pos.r = 1;
+    }
+    if (left && !right) {
+      pos.c = -1;
+    } else if (right && !left) {
+      pos.c = 1;
+    }
+
+    console.assert(pos.c !== 0 || pos.r !== 0);
+    pos.c += this.player.cr.c;
+    pos.r += this.player.cr.r;
+    if (!this.current_zone.inside(pos)) {
+      return;
+    }
+    if (
+      this.player.target !== null &&
+      pos.c === this.player.target.cr.c &&
+      pos.r === this.player.target.cr.r
+    ) {
+      return;
+    }
+    const tile = this.current_zone.tiles[pos.c][pos.r];
+    if (tile.light !== 5 || !tile.is_empty()) {
+      return;
+    }
+    this.player.target = new Target(pos, this.grid);
+  }
+
   click(position: XY) {
     if (this.transition !== null) {
       return;
@@ -820,6 +882,7 @@ export class Game {
       return;
     }
     if (this.state === "zone" || this.state === "world_map") {
+      this.keyboard_update();
       this.player.tick(ms);
     }
   }
