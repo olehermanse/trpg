@@ -85,6 +85,26 @@ const _all_upgrades = {
     },
     "minimum_level": 10,
   },
+  "Growth": {
+    "description": "Increased XP +5%",
+    "max": 2,
+    "passive": (creature: Creature) => {
+      creature.stats.increased_xp += 5;
+    },
+    "minimum_level": 6,
+  },
+  "Permagrowth": {
+    "description": "Increased XP +3%",
+    "permanent": true,
+    "max": 2,
+    "passive": (creature: Creature) => {
+      creature.stats.increased_xp += 3;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.count_upgrade("Growth") === 2;
+    },
+    "minimum_level": 10,
+  },
   "Vitality": {
     "description": "Max HP +5",
     "max": 99,

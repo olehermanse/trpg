@@ -1,13 +1,7 @@
 import { Battle, Enemy, Game, GameSave } from "../libtrpg/game.ts";
 import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import {
-  cr,
-  get_cookie,
-  Grid,
-  OXY,
-  oxy,
-} from "@olehermanse/utils/funcs.js";
+import { cr, get_cookie, Grid, OXY, oxy } from "@olehermanse/utils/funcs.js";
 
 function get_save(): GameSave {
   const cookie = get_cookie("trpg_save_data");
@@ -19,7 +13,8 @@ function get_save(): GameSave {
 }
 
 function set_permanent_cookie(key: string, value: string) {
-  document.cookie = `${key}=${value}; SameSite=None; Secure; Max-Age=31536000; Path=/`;
+  document.cookie =
+    `${key}=${value}; SameSite=None; Secure; Max-Age=31536000; Path=/`;
 }
 
 function put_save(save: GameSave) {

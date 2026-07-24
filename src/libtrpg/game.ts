@@ -33,6 +33,7 @@ import {
   SpriteName,
 } from "../frontend/painter.ts";
 import { SkillApply } from "./upgrades.ts";
+import { xp_reward, xp_threshold } from "./calculations.ts";
 
 export interface GameSave {
   permanents: UpgradeName[];
@@ -111,23 +112,24 @@ export class Stats {
   // Special stats which have to be increased through choices:
   speed;
   movement_speed;
+  increased_xp;
   light;
 
   constructor(level?: number) {
+    this.max_hp = 0;
+    this.max_mp = 0;
+    this.strength = 0;
+    this.magic = 0;
+    this.speed = 0;
+    this.movement_speed = 0;
+    this.increased_xp = 0;
+    this.light = 0;
     if (level === undefined || level <= 0) {
-      this.max_hp = 0;
-      this.max_mp = 0;
-      this.strength = 0;
-      this.magic = 0;
-      this.speed = 0;
-      this.movement_speed = 0;
-      this.light = 0;
       return;
     }
-    // Don't increase per level:
+    // Constant 1 (no increase per level):
     this.speed = 1;
     this.light = 1;
-    this.movement_speed = 0;
     // Increase per level:
     this.max_hp = 20 + 2 * (level - 1);
     this.max_mp = 10 + 2 * (level - 1);
@@ -171,6 +173,8 @@ export class Target {
 export class Creature extends Entity {
   level: number;
   xp = 0;
+  overflow_xp = 0;
+  xp_cents = 0;
   stats: Stats;
   hp: number;
   mp: number;
@@ -227,10 +231,6 @@ export class Creature extends Entity {
     return events;
   }
 
-  get_xp_reward() {
-    return Math.floor(20 + this.level * 2 + this.xp_threshold() / 20);
-  }
-
   apply_limits() {
     if (this.hp < 0) {
       this.hp = 0;
@@ -276,20 +276,34 @@ export class Creature extends Entity {
     return names;
   }
 
-  xp_threshold() {
-    if (this.level <= 10) {
-      return 10 + this.level * 2;
-    }
-    const offset = this.level - 10;
-    return 30 + (offset * 10);
-  }
-
   add_xp(xp: number) {
+    const level = this.level;
     this.xp += xp;
-    if (this.xp >= this.xp_threshold()) {
+    if (this.stats.increased_xp > 0) {
+      this.xp_cents += this.stats.increased_xp * xp;
+      if (this.xp_cents >= 100) {
+        this.overflow_xp += Math.floor(this.xp_cents / 100);
+        this.xp_cents = this.xp_cents % 100;
+      }
+    }
+    if (this.xp >= xp_threshold(level)) {
+      this.overflow_xp += this.xp - xp_threshold(level);
       this.xp = 0;
       this.game.level_up();
+      return;
     }
+    if (this.overflow_xp === 0) {
+      return; // No extra XP to add.
+    }
+    this.xp += this.overflow_xp;
+    this.overflow_xp = 0;
+    if (this.xp < xp_threshold(level)) {
+      return;
+    }
+    // Too much XP added, remove some and let the player level up later
+    this.overflow_xp = 1 + this.xp - xp_threshold(level);
+    this.xp = xp_threshold(level) - 1;
+    return;
   }
 
   update_stats() {
@@ -690,7 +704,7 @@ export class Zone extends Grid {
       }
     }
     this.fully_lit = true;
-    this.game.player.add_xp(25);
+    this.game.player.add_xp(100);
   }
 
   starting_zone(): boolean {
@@ -1665,7 +1679,7 @@ export class Game {
     this.goto_state("zone");
     this.battle = null;
     if (enemy.hp === 0) {
-      player.add_xp(enemy.get_xp_reward());
+      player.add_xp(xp_reward(enemy.level));
     }
   }
 

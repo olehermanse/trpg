@@ -1,7 +1,6 @@
-import { Game } from "../src/libtrpg/game.ts";
 
-// example.test.js
 import { describe, expect, test } from "vitest";
+import { Game } from "../src/libtrpg/game.ts";
 import { Grid } from "@olehermanse/utils/funcs.js";
 
 describe("Game", () => {

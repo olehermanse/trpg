@@ -279,7 +279,7 @@ function get_font_data(font: ImageBitmap[][]) {
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "abcdefghijklmnopqrstuvwxyz",
     "1234567890",
-    "!+-*/\"'_., ^?",
+    "!+-*/\"'_.,█^?()[]{}<>#:;@ ",
   ];
   const map: Record<string, ImageBitmap> = {};
   for (let r = 0; r < FONT_MAP.length; r++) {
@@ -673,23 +673,23 @@ export class Painter {
   draw_game_over() {
     const width = this.offscreen_drawer.canvas.width;
     const height = this.offscreen_drawer.canvas.height;
-      this.offscreen_drawer.text(
-        "Game over!",
-        this.font,
-        xy(width / 2, height / 2),
-        "middle_center",
-      );
+    this.offscreen_drawer.text(
+      "Game over!",
+      this.font,
+      xy(width / 2, height / 2),
+      "middle_center",
+    );
   }
 
   draw_retry() {
     const width = this.offscreen_drawer.canvas.width;
     const height = this.offscreen_drawer.canvas.height;
-      this.offscreen_drawer.text(
-        "Game over?",
-        this.font,
-        xy(width / 2, height / 2),
-        "middle_center",
-      );
+    this.offscreen_drawer.text(
+      "Game over?",
+      this.font,
+      xy(width / 2, height / 2),
+      "middle_center",
+    );
   }
 
   draw_one_map(pos: XY, zone: Zone, scaling: number) {
