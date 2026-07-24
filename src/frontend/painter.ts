@@ -3,53 +3,53 @@ import { Application } from "./application.ts"; // For access to width, height, 
 import { Entity, Player } from "../libtrpg/game.ts";
 
 const SPRITESHEET = {
-  "player": {
-    "row": 0,
-    "col": 0,
-    "frames": 2,
+  player: {
+    row: 0,
+    col: 0,
+    frames: 2,
   },
-  "sword": {
-    "row": 1,
-    "col": 0,
-    "frames": 2,
+  sword: {
+    row: 1,
+    col: 0,
+    frames: 2,
   },
-  "pickaxe": {
-    "row": 1,
-    "col": 2,
-    "frames": 2,
+  pickaxe: {
+    row: 1,
+    col: 2,
+    frames: 2,
   },
-  "axe": {
-    "row": 1,
-    "col": 4,
-    "frames": 2,
+  axe: {
+    row: 1,
+    col: 4,
+    frames: 2,
   },
-  "staff": {
-    "row": 1,
-    "col": 4,
-    "frames": 2,
+  staff: {
+    row: 1,
+    col: 4,
+    frames: 2,
   },
-  "selector": {
-    "row": 2,
-    "col": 0,
-    "frames": 2,
+  selector: {
+    row: 2,
+    col: 0,
+    frames: 2,
   },
-  "chest": {
-    "row": 3,
-    "col": 0,
+  chest: {
+    row: 3,
+    col: 0,
   },
-  "rock": {
-    "row": 3,
-    "col": 1,
-    "frames": 3,
+  rock: {
+    row: 3,
+    col: 1,
+    frames: 3,
   },
-  "crystal": {
-    "row": 3,
-    "col": 4,
+  crystal: {
+    row: 3,
+    col: 4,
   },
-  "skeleton": {
-    "row": 4,
-    "col": 0,
-    "frames": 4,
+  skeleton: {
+    row: 4,
+    col: 0,
+    frames: 4,
   },
 };
 
@@ -83,8 +83,8 @@ export class Painter {
       Promise.all(
         frames.map((frame) =>
           createImageBitmap(this.spritesheet, frame.x, frame.y, 16, 16, {
-            resizeWidth: size,
-            resizeHeight: size,
+            resizeWidth: size * this.application.scale,
+            resizeHeight: size * this.application.scale,
             resizeQuality: "pixelated",
           })
         ),
@@ -106,8 +106,8 @@ export class Painter {
     }
     this.ctx.drawImage(
       sprite,
-      entity.xy.x - entity.wh.width / 2,
-      entity.xy.y - entity.wh.height / 2,
+      this.application.scale * (entity.xy.x - entity.wh.width / 2),
+      this.application.scale * (entity.xy.y - entity.wh.height / 2),
     );
   }
 
@@ -132,54 +132,26 @@ export class Painter {
     let y = 0;
     const rock = this.sprites["rock"][0];
     if (rock != undefined) {
-      this.ctx.drawImage(
-        rock,
-        0,
-        0,
-      );
+      this.ctx.drawImage(rock, 0, 0);
     }
     const crystal = this.sprites["crystal"][0];
     if (crystal != undefined) {
-      this.ctx.drawImage(
-        crystal,
-        8 * width,
-        7 * height,
-      );
+      this.ctx.drawImage(crystal, 8 * width, 7 * height);
     }
     const chest = this.sprites["chest"][0];
     if (chest != undefined) {
-      this.ctx.drawImage(
-        chest,
-        0 * width,
-        6 * height,
-      );
+      this.ctx.drawImage(chest, 0 * width, 6 * height);
     }
     const skeleton = this.sprites["skeleton"][3];
     if (skeleton != undefined) {
-      this.ctx.drawImage(
-        skeleton,
-        width * 3,
-        height * 5,
-      );
-      this.ctx.drawImage(
-        skeleton,
-        width * 4,
-        height * 4,
-      );
-      this.ctx.drawImage(
-        skeleton,
-        width * 3,
-        height * 3,
-      );
+      this.ctx.drawImage(skeleton, width * 3, height * 5);
+      this.ctx.drawImage(skeleton, width * 4, height * 4);
+      this.ctx.drawImage(skeleton, width * 3, height * 3);
     }
     return;
     for (const [_name, frames] of Object.entries(this.sprites)) {
       for (const image of frames) {
-        this.ctx.drawImage(
-          image,
-          x,
-          y,
-        );
+        this.ctx.drawImage(image, x, y);
         x += width;
         if (x > width * 4) {
           x = 0;
@@ -208,7 +180,7 @@ export class Painter {
       return;
     }
     this.ctx.save();
-    this.ctx.translate(x, y);
+    this.ctx.translate(this.application.scale * x, this.application.scale * y);
     if (player.reversed) {
       this.ctx.scale(-1, 1);
     }
@@ -216,8 +188,8 @@ export class Painter {
     const walking = this.sprites["player"][1];
     this.ctx.drawImage(
       player.walk_counter < 1 ? standing : walking,
-      -width / 2,
-      -height / 2,
+      (-this.application.scale * width) / 2,
+      (-this.application.scale * height) / 2,
     );
     this.ctx.restore();
   }
