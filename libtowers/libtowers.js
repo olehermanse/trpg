@@ -475,6 +475,16 @@ class Game {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "bank") {
+        n += t.level;
+      }
+    }
+    return n;
+  }
+
+  effective_banks() {
+    let n = 0;
+    for (let t of this.towers) {
+      if (t.name === "bank") {
         n += t.level_factor();
       }
     }
@@ -482,7 +492,7 @@ class Game {
   }
 
   reward() {
-    let n = this.banks();
+    let n = this.effective_banks();
     return Math.floor(2 * n) + Math.floor(((5 * n + 10) * this.money) / 100);
   }
 
