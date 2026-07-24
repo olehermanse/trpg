@@ -26,6 +26,7 @@ export type SkillPerform = (
 export type UpgradeEligible = (creature: Creature) => boolean;
 
 export type UpgradePassive = (creature: Creature) => void;
+export type UpgradeApply = (creature: Creature) => void;
 
 export class Effect {
   constructor(
@@ -44,6 +45,8 @@ interface Upgrade {
   max?: number; // Default is only 1
   skill?: SkillPerform;
   permanent?: true;
+  consumed?: true;
+  on_pickup?: UpgradeApply;
 }
 
 const _all_upgrades = {
@@ -86,7 +89,7 @@ const _all_upgrades = {
     "minimum_level": 10,
   },
   "Growth": {
-    "description": "Increased XP +5%",
+    "description": "5% increased XP",
     "max": 2,
     "passive": (creature: Creature) => {
       creature.stats.increased_xp += 5;
@@ -94,7 +97,7 @@ const _all_upgrades = {
     "minimum_level": 6,
   },
   "Permagrowth": {
-    "description": "Increased XP +3%",
+    "description": "3% increased XP",
     "permanent": true,
     "max": 2,
     "passive": (creature: Creature) => {
@@ -139,6 +142,18 @@ const _all_upgrades = {
       return () => {
         target.apply_damage(dmg);
       };
+    },
+  },
+  "Forget": {
+    "description": "Remove attack",
+    "minimum_level": 10,
+    "consumed": true,
+    "on_pickup": (creature: Creature) => {
+      creature.remove_upgrade("Attack");
+    },
+    "eligible": (creature: Creature) => {
+      return creature.has_upgrade("Attack") &&
+        creature.get_skill_names().length > 4;
     },
   },
   "Heal": {
