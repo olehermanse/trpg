@@ -19,6 +19,7 @@ import {
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
 import { Keyboard } from "./keyboard.ts";
+import { cr_4_neighbors } from "../todo_utils.ts";
 
 const DIAG = 1.42;
 const BASE_SPEED = 16.0;
@@ -323,6 +324,10 @@ export class Tile {
     rock.variant = variant;
   }
 
+  is_rock() {
+    return this.get_rock_variant() !== null;
+  }
+
   is_empty() {
     return this.entities.length === 0;
   }
@@ -407,12 +412,16 @@ export class Zone extends Grid {
     if (!this.inside(pos)) {
       return;
     }
-    this.tiles[pos.c][pos.r].entities.push(entity);
+    this.get_tile(pos).entities.push(entity);
   }
 
   remove(pos: CR, entity: Entity) {
-    const entities = this.tiles[pos.c][pos.r].entities;
+    const entities = this.get_tile(pos).entities;
     array_remove(entities, entity);
+  }
+
+  get_tile(pos: CR): Tile {
+    return this.tiles[pos.c][pos.r];
   }
 }
 
@@ -794,10 +803,11 @@ export class Game {
       return;
     }
     const pos = cr(0, 0);
-    const up = this.keyboard.pressed("w");
-    const down = this.keyboard.pressed("s");
-    const left = this.keyboard.pressed("a");
-    const right = this.keyboard.pressed("d");
+    let up = this.keyboard.pressed("w") || this.keyboard.pressed("ArrowUp");
+    let down = this.keyboard.pressed("s") || this.keyboard.pressed("ArrowDown");
+    let left = this.keyboard.pressed("a") || this.keyboard.pressed("ArrowLeft");
+    let right =
+      this.keyboard.pressed("d") || this.keyboard.pressed("ArrowRight");
 
     if (up === down && left === right) {
       return;
@@ -840,10 +850,44 @@ export class Game {
       return;
     }
     const tile = this.current_zone.tiles[pos.c][pos.r];
-    if (tile.light !== 5 || !tile.is_empty()) {
+    if (tile.light !== 5) {
       return;
     }
-    this.player.target = new Target(pos, this.grid);
+    if (tile.is_empty()) {
+      this.player.target = new Target(pos, this.grid);
+      return;
+    }
+    const alternatives: CR[] = cr_4_neighbors(
+      this.player.cr,
+      up,
+      down,
+      left,
+      right,
+    );
+    let second_choice = null;
+    for (const neighbor of alternatives) {
+      if (!this.current_zone.inside(neighbor)) {
+        continue;
+      }
+      const tile = this.current_zone.get_tile(neighbor);
+      if (!tile.is_empty()) {
+        continue;
+      }
+      if (
+        neighbor.c === 0 ||
+        neighbor.r === 0 ||
+        neighbor.c === this.current_zone.columns - 1 ||
+        neighbor.r === this.current_zone.rows - 1
+      ) {
+        this.player.target = new Target(neighbor, this.grid);
+        return;
+      }
+      second_choice = neighbor;
+    }
+    if (second_choice === null) {
+      return;
+    }
+    this.player.target = new Target(second_choice, this.grid);
   }
 
   click(position: XY) {
@@ -882,8 +926,10 @@ export class Game {
       return;
     }
     if (this.state === "zone" || this.state === "world_map") {
-      this.keyboard_update();
       this.player.tick(ms);
+      if (this.player.target === null) {
+        this.keyboard_update();
+      }
     }
   }
 }

@@ -70,6 +70,9 @@ class Application {
     document.addEventListener(
       "keydown",
       (event: any) => {
+        if (event.repeat) {
+          return;
+        }
         if (event.key === " ") {
           // Prevent spacebar from scrolling page
           event.preventDefault();
