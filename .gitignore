@@ -1,30 +1,39 @@
-# NodeJS / NPM modules
-node_modules
+*
 
-# Dist files
-dist
-dist-ssr
-*.local
+!/.github/
+!/.github/dependabot.yml
+!/.github/workflows/
+!/.github/workflows/*.yml
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+!/concepts/
+!/concepts/*.png
 
+!/public/
+!/public/favicon.ico
+!/public/*.png
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.gitpod.yml
-*.js
+!/src/
+!/src/styles/
+!/src/styles/style.css
+!/src/*.ts
+!/src/*/
+!/src/*/*.ts
+
+!/test/
+!/test/*.ts
+
+!/.gitattributes
+!/.gitignore
+
+!/LICENSE
+!/README.md
+!/index.html
+!/add_version.sh
+!/Makefile
+!/Dockerfile
+!/captain-definition
+!/deno.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vite.config.js
