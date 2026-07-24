@@ -50,6 +50,7 @@ interface Upgrade {
   consumed?: true;
   on_pickup?: UpgradeApply;
   mana_cost?: CostFunction;
+  unobtainable?: true;
 }
 
 const _all_upgrades = {
@@ -136,6 +137,9 @@ const _all_upgrades = {
   },
   "Attack": {
     "description": "Swing weapon",
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length === 0;
+    },
     "skill": (
       user: Creature,
       target: Creature,
@@ -161,7 +165,7 @@ const _all_upgrades = {
     },
     "eligible": (creature: Creature) => {
       return creature.has_upgrade("Attack") &&
-        creature.get_skill_names().length > 4;
+        creature.get_skill_names().length == 8;
     },
   },
   "Heal": {
@@ -432,6 +436,14 @@ export type UpgradeAtlas = {
 function _is_available(upgrade: NamedUpgrade, player: Player) {
   if (upgrade.max !== undefined) {
     console.assert(upgrade.max > 1);
+  }
+
+  if (upgrade.unobtainable === true) {
+    return false;
+  }
+
+  if (upgrade.skill !== undefined && player.get_skill_names().length === 8) {
+    return false;
   }
 
   if (
