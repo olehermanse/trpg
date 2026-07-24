@@ -118,6 +118,7 @@ const SPRITESHEET = {
   crystal: new SpriteMetadata(3, 4),
   skeleton: new SpriteMetadata(4, 0, 4),
   fog: new SpriteMetadata(5, 0, 5),
+  skills: new SpriteMetadata(6, 0, 4),
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
@@ -338,6 +339,46 @@ export class Painter {
     this.draw_one_zone(this.application.game.current_zone);
   }
 
+  draw_battle() {
+    // TODO: Sprite anchor
+    this.offscreen_drawer.sprite(this.sprites["player"][0], xy(32, 64));
+    this.offscreen_drawer.sprite(
+      this.sprites["skeleton"][3],
+      xy(128, 64),
+      true,
+    );
+
+    this.offscreen_drawer.rectangle(xy(5, 144), wh(79, 43));
+    this.offscreen_drawer.text(
+      "Player\nHp: 12/23\nMp: 45/100",
+      this.font,
+      xy(5 + 6, 144 + 6),
+      "top_left",
+      11,
+    );
+
+    this.offscreen_drawer.rectangle(xy(89, 144), wh(79, 43));
+    this.offscreen_drawer.text(
+      "Skeleton\nHp: 999/999\nMp: 999/999",
+      this.font,
+      xy(89 + 6, 144 + 6),
+      "top_left",
+      11,
+    );
+
+    let y = 6;
+    const skills = ["Attack", "Heal", "Buff", "Run"];
+    for (let i = 0; i < 8; ++i) {
+      this.offscreen_drawer.rectangle(xy(174, y), wh(77, 20));
+      this.offscreen_drawer.text(skills[i % 4], this.font, xy(174 + 4, y + 6));
+      this.offscreen_drawer.sprite(
+        this.sprites["skills"][i % 4],
+        xy(174 + 77 - 16 - 2, y + 2),
+      );
+      y += 20 + 3;
+    }
+  }
+
   draw_target() {
     const player: Player = this.application.game.player;
     if (player.target === null || player.target.draw === false) {
@@ -516,6 +557,9 @@ export class Painter {
     }
     if (this.application.game.state === "zone") {
       return this.draw_zone();
+    }
+    if (this.application.game.state === "battle") {
+      return this.draw_battle();
     }
     if (this.application.game.state === "level_up") {
       return this.draw_level_up();

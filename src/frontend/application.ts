@@ -123,6 +123,10 @@ class Application {
       this.game.goto_state("loading");
       return;
     }
+    if (key === "5") {
+      this.game.goto_state("battle");
+      return;
+    }
     if (key === "p") {
       console.log(this);
       return;
