@@ -18,6 +18,14 @@ function dps(dps, ms) {
   return dps * seconds(ms);
 }
 
+function number_string(num) {
+    const s = "" + num;
+    if (s.includes("e")) {
+        return s;
+    }
+    return Number(num).toLocaleString("no");
+}
+
 function distance(a, b) {
   return Math.sqrt((a.r - b.r) ** 2 + (a.c - b.c) ** 2);
 }
@@ -46,6 +54,7 @@ module.exports = {
   fill_stroke,
   seconds,
   dps,
+  number_string,
   distance,
   limit,
   get_rotation,
