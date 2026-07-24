@@ -15,7 +15,13 @@ export function damage(
   return damage;
 }
 
-export type Keyword = "class" | "damaging" | "dot" | "healing" | "permanent";
+export type Keyword =
+  | "class"
+  | "damaging"
+  | "dot"
+  | "healing"
+  | "permanent"
+  | "skill";
 
 export type SkillApply = () => void;
 export type EffectApply = () => BattleEvent[];
@@ -607,25 +613,35 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   return sorted;
 }
 
-export function is_permanent(upgrade: NamedUpgrade) {
-  if (upgrade.keywords !== undefined && upgrade.keywords.includes("permanent")) {
-    return true;
+export function has_keyword(upgrade: NamedUpgrade, keyword: Keyword) {
+  if (upgrade.keywords === undefined) {
+    return false;
   }
-  return false;
+  if (keyword === "skill" && upgrade.skill !== undefined) {
+    return true; // Implicit
+  }
+  return upgrade.keywords.includes(keyword);
+}
+
+export function is_permanent(upgrade: NamedUpgrade) {
+  return has_keyword(upgrade, "permanent");
 }
 
 export function get_upgrade(name: UpgradeName): NamedUpgrade {
-  const obj = { "name": name, ...all_upgrades[name] };
+  const obj: NamedUpgrade = { name: name, ...all_upgrades[name] };
   let description = obj.description;
   if (is_permanent(obj)) {
-    description += ". Permanent.";
+    description += " (Permanent)";
+  } else if (has_keyword(obj, "skill")) {
+    description += " (Skill)";
   }
+
   obj.description = text_wrap(description, 11);
   return obj;
 }
 
 export function get_skill(name: UpgradeName): SkillPerform {
-  const upgrade = { "name": name, ...all_upgrades[name] };
+  const upgrade = { name: name, ...all_upgrades[name] };
   console.assert(upgrade.skill !== undefined);
   return <SkillPerform> upgrade.skill;
 }
