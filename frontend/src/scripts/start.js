@@ -113,7 +113,7 @@ function select(btn) {
 }
 
 function start(canvas) {
-    const scale = window.devicePixelRatio;
+    let scale = window.devicePixelRatio;
     let rows = 13;
     let columns = 20;
     if (true) {
