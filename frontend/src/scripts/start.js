@@ -119,6 +119,7 @@ function start(canvas) {
     if (true) {
         rows = 17;
         columns = 15;
+        scale = 1.0;
     }
     canvas_manager = new CanvasManager(canvas, columns, rows, 1200, scale);
     const ctx = canvas.getContext("2d");
