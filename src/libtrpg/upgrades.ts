@@ -395,7 +395,7 @@ const _all_upgrades = {
     },
   },
   "Might": {
-    "description": "+1 strength for 5 turns",
+    "description": "+5 strength for 5 turns",
     "skill": (
       user: Creature,
       _target: Creature,
@@ -420,7 +420,7 @@ const _all_upgrades = {
         );
         user.add_effect(
           new Effect("Might", 5, () => {
-            user.stats.strength += 1;
+            user.stats.strength += 5;
           }),
         );
       };
