@@ -372,7 +372,8 @@ export class Zone extends Grid {
     this.game.player.add_xp(15);
   }
 
-  generate() {
+  starting_zone(): boolean {
+    return this.pos.c === 0 && this.pos.r === 0;
   }
 
   inside(pos: CR): boolean {
