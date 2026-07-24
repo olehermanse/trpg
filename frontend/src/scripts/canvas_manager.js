@@ -27,8 +27,7 @@ class CanvasManager {
         this.grid_end = this.grid_start + this.grid_height;
         this.canvas_height = this.grid_end + this.grid_size;
 
-        let draw_callback = this.painter.get_draw_function();
-        this.game = new Game(this.columns, this.rows, draw_callback);
+        this.game = new Game(this.columns, this.rows, this.painter);
         this.game.spawn_rocks();
         const UI_X = 0;
         const UI_Y = this.grid_end - this.grid_size;
@@ -59,20 +58,9 @@ class CanvasManager {
         return (p / canvas.getBoundingClientRect().width) * this.width;
     }
 
-    draw_tower(tower) {
-        const t = this.grid_to_canvas(tower);
-        t.level = tower.level;
-        t.name = tower.name;
-        t.w = this.grid_size;
-        t.rotation = tower.rotation;
-        t.intensity = tower.intensity;
-        const target = this.grid_to_canvas(tower.target);
-        tower.draw(t, target);
-    }
-
     draw_towers() {
         for (let tower of this.game.towers) {
-            this.draw_tower(tower);
+            tower.draw();
         }
     }
 
@@ -140,7 +128,7 @@ class CanvasManager {
         let pos = this.grid_to_canvas(this.preview);
         let r = this.grid_size * this.preview.range;
         Draw.circle(ctx, pos.x, pos.y, r, null, "black", this.line_width);
-        this.draw_tower(this.preview);
+        this.painter.paint(this.preview);
         ctx.globalAlpha = 1.0;
     }
 
@@ -185,7 +173,7 @@ class CanvasManager {
         const name = this.ui.selected.name;
         const tower = this.game.grid_click(this.canvas_to_grid_int(x), this.canvas_to_grid_int(y, this.grid_start), name);
         if (tower != null) {
-            tower.draw = this.painter.get_draw_function();
+            tower.painter = this.painter;
             if (tower.name === "bank") {
                 this.ui.selected.price.text = this.game.price("bank");
             }
@@ -208,7 +196,7 @@ class CanvasManager {
         }
 
         if (this.preview === null) {
-            this.preview = new Tower(c, r, name, this.game.price(name), this.ui.selected.icon);
+            this.preview = new Tower(c, r, name, this.game.price(name), this.painter);
         } else {
             this.preview.r = r;
             this.preview.c = c;
