@@ -17,6 +17,7 @@ import {
   xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
 import {
+  all_upgrades,
   Effect,
   get_skill,
   get_upgrade,
@@ -179,6 +180,7 @@ export class Creature extends Entity {
   hp: number;
   mp: number;
   upgrades: NamedUpgrade[];
+  sorted_upgrades: NamedUpgrade[] = [];
   inventory: Entity[] = [];
   effects: Effect[] = [];
   speed = BASE_SPEED;
@@ -198,6 +200,7 @@ export class Creature extends Entity {
     this.game = game;
     this.level = level;
     this.upgrades = [get_upgrade("Attack")];
+    this.sort_upgrades();
     this.stats = new Stats(this.level);
     this.hp = this.stats.max_hp;
     this.mp = this.stats.max_mp;
@@ -287,6 +290,7 @@ export class Creature extends Entity {
 
   remove_upgrade(name: UpgradeName) {
     this.upgrades = this.upgrades.filter((x) => x.name !== name);
+    this.sort_upgrades();
   }
 
   add_xp(xp: number) {
@@ -320,14 +324,27 @@ export class Creature extends Entity {
   }
 
   update_stats() {
+    console.assert(this.upgrades.length === this.sorted_upgrades.length);
     this.stats = new Stats(this.level);
-    for (const u of this.upgrades) {
+    for (const u of this.sorted_upgrades) {
       u.passive?.(this);
     }
     for (const e of this.effects) {
       e.apply_stats?.();
     }
     this.speed = BASE_SPEED * (this.stats.speed + this.stats.movement_speed);
+  }
+
+  sort_upgrades() {
+    this.sorted_upgrades = [];
+    for (const name in all_upgrades) {
+      for (const upgrade of this.upgrades) {
+        if (name === upgrade.name) {
+          this.sorted_upgrades.push(upgrade);
+        }
+      }
+    }
+    console.assert(this.upgrades.length === this.sorted_upgrades.length);
   }
 
   add_upgrade(upgrade: NamedUpgrade) {
@@ -338,6 +355,7 @@ export class Creature extends Entity {
       return;
     }
     this.upgrades.push(upgrade);
+    this.sort_upgrades();
     this.update_stats();
   }
 
