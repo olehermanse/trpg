@@ -15,6 +15,8 @@ export function damage(
   return damage;
 }
 
+export type Keyword = "class" | "damaging" | "dot" | "healing";
+
 export type SkillApply = () => void;
 export type EffectApply = () => BattleEvent[];
 export type SkillPerform = (
@@ -46,6 +48,7 @@ interface Upgrade {
   eligible?: UpgradeEligible;
   max?: number; // Default is only 1
   skill?: SkillPerform;
+  keywords?: Readonly<Keyword[]>;
   permanent?: true;
   consumed?: true;
   on_pickup?: UpgradeApply;
@@ -137,24 +140,26 @@ const _all_upgrades = {
   },
   "Warrior": {
     "description": "2x strength, 0.5x magic",
+    "keywords": ["class"],
     "minimum_level": 10,
     "passive": (creature: Creature) => {
       creature.stats.strength *= 2;
       creature.stats.magic = Math.floor(creature.stats.magic / 2);
     },
     "eligible": (creature: Creature) => {
-      return !creature.has_upgrade("Mage");
+      return creature.get_upgrades_by_keyword("class").length === 0;
     },
   },
   "Mage": {
     "description": "2x magic, 0.5x strength",
+    "keywords": ["class"],
     "minimum_level": 10,
     "passive": (creature: Creature) => {
       creature.stats.magic *= 2;
       creature.stats.strength = Math.floor(creature.stats.strength / 2);
     },
     "eligible": (creature: Creature) => {
-      return !creature.has_upgrade("Mage");
+      return creature.get_upgrades_by_keyword("class").length === 0;
     },
   },
   "Attack": {
