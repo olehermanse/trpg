@@ -926,6 +926,12 @@ export class Battle {
     }
   }
 
+  add_events(...events: BattleEvent[]) {
+    for (const e of events) {
+      this.events.push(e);
+    }
+  }
+
   _sort() {
     return; // TODO
   }
@@ -960,7 +966,7 @@ export class Battle {
       const msg = this.player.hp === 0
         ? `${this.player.name} died.`
         : `${this.enemy.name} died.`;
-      this.events.push(new BattleEvent(msg, () => {}));
+      this.add_events(new BattleEvent(msg, () => {}));
       return this.goto_state("ending_soon");
     }
     if (this.player.run === true || this.enemy.run) {
@@ -968,7 +974,7 @@ export class Battle {
       const msg = this.player.run
         ? `${this.player.name} fled like a coward.`
         : `${this.enemy.name} ran away.`;
-      this.events.push(new BattleEvent(msg, () => {}));
+      this.add_events(new BattleEvent(msg, () => {}));
       return this.goto_state("ending_soon");
     }
     return this.state;
@@ -977,7 +983,7 @@ export class Battle {
   _end_of_turn() {
     console.assert(this.events.length === 0);
     console.assert(this.intents.length === 0);
-    this.events.push(
+    this.add_events(
       ...this.player.tick_effects(),
       ...this.enemy.tick_effects(),
     );
@@ -1013,7 +1019,7 @@ export class Battle {
       const intents: BattleIntent[] = this._get_intents();
       for (const intent of intents) {
         for (const event of intent.perform()) {
-          this.events.push(event);
+          this.add_events(event);
         }
       }
     }
