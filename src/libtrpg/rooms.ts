@@ -101,11 +101,13 @@ function _select_room_type(zone: Zone) {
     return;
   }
   const percentage = randint(1, 100);
-  if (percentage <= 1) { // 1%
+  if (percentage <= 1) {
+    // 1%
     zone.room_type = "empty";
     return;
   }
-  if (percentage <= 1 + 10) { // 10%
+  if (percentage <= 1 + 10) {
+    // 10%
     zone.room_type = "chest";
     return;
   }

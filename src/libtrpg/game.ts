@@ -292,8 +292,10 @@ export class Creature extends Entity {
     return false;
   }
 
-  get_upgrades_by_keyword(keyword: Keyword): NamedUpgrade[]{
-    return this.upgrades.filter((x) => x.keywords !== undefined && x.keywords.includes(keyword));
+  get_upgrades_by_keyword(keyword: Keyword): NamedUpgrade[] {
+    return this.upgrades.filter((x) =>
+      x.keywords !== undefined && x.keywords.includes(keyword)
+    );
   }
 
   remove_upgrade(name: UpgradeName) {
