@@ -260,7 +260,7 @@ export class Player extends Creature {
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
-    if (tile.light === 5) {
+    if (tile.is_lit()) {
       return;
     }
     if (intensity === 0) {
@@ -271,6 +271,15 @@ export class Player extends Creature {
     }
     if (tile.is_empty() || intensity === 5) {
       tile.light = 5;
+      if (this.target !== null) {
+        if (
+          !tile.is_empty() && this.target.cr.c === tile.cr.c &&
+          this.target.cr.r === tile.cr.r
+        ) {
+          const pos = cr(this.cr.c, this.cr.r);
+          this.target = new Target(pos, this.game.current_zone, true);
+        }
+      }
       if (!tile.is_empty()) {
         // this.add_xp(1);
       }
@@ -285,7 +294,7 @@ export class Player extends Creature {
     }
     for (const tiles of this.zone.tiles) {
       for (const tile of tiles) {
-        if (tile.light === 5) {
+        if (tile.is_lit()) {
           continue;
         }
 
@@ -520,6 +529,10 @@ export class Tile {
     array_remove(this.entities, item);
     return item;
   }
+
+  is_lit(): boolean {
+    return this.light === 5;
+  }
 }
 
 export class Zone extends Grid {
@@ -559,7 +572,7 @@ export class Zone extends Grid {
       return;
     }
     for (const tile of this.all_tiles) {
-      if (tile.light !== 5) {
+      if (!tile.is_lit()) {
         return;
       }
     }
@@ -1193,7 +1206,7 @@ export class Game {
 
   attempt_move_or_interact(pos: CR, mouse: boolean) {
     const tile = this.current_zone.get_tile(pos);
-    console.assert(tile.is_empty() || tile.is_interactable());
+    console.assert(tile.is_empty() || tile.is_interactable() || !tile.is_lit());
     this.player.target = new Target(pos, this.grid, mouse);
   }
 
@@ -1206,13 +1219,32 @@ export class Game {
     ) {
       return;
     }
-    const tile = this.current_zone.get_tile(pos);
-    if (tile.light !== 5) {
+    let tile = this.current_zone.get_tile(pos);
+
+    if (
+      !tile.is_lit() &&
+      (pos.c === 0 || pos.r === 0 || pos.c === this.current_zone.columns - 1 ||
+        pos.r === this.current_zone.rows - 1)
+    ) {
+      if (pos.c === 0) {
+        pos.c = 1;
+      }
+      if (pos.r === 0) {
+        pos.r = 1;
+      }
+      if (pos.c === this.current_zone.columns - 1) {
+        pos.c -= 1;
+      }
+      if (pos.r === this.current_zone.rows - 1) {
+        pos.r -= 1;
+      }
+      tile = this.current_zone.get_tile(pos);
+    }
+
+    if (tile.is_lit() && !tile.is_empty() && !tile.is_interactable()) {
       return;
     }
-    if (!tile.is_empty() && !tile.is_interactable()) {
-      return;
-    }
+
     this.attempt_move_or_interact(pos, true);
   }
 
@@ -1285,7 +1317,7 @@ export class Game {
       return;
     }
     const tile = this.current_zone.tiles[pos.c][pos.r];
-    if (tile.light !== 5) {
+    if (!tile.is_lit()) {
       return;
     }
     if (tile.is_empty() || tile.is_interactable()) {
