@@ -395,11 +395,12 @@ function start(canvas) {
     setup_events(canvas);
     const ms = 10;
     window.setInterval(() => {
-        let speedup = 1.0;
+        tick(ms);
         if (space_pressed) {
-            speedup = 4.0;
+            tick(ms);
+            tick(ms);
+            tick(ms);
         }
-        tick(ms * speedup);
         draw(ctx);
     }, ms)
 }
