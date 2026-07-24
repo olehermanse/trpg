@@ -955,17 +955,34 @@ export class Battle {
     }
   }
 
-  _sort() {
-    return; // TODO
-  }
-
   _get_intents(): BattleIntent[] {
-    this._sort();
-    const element = this.intents.shift();
-    if (element === undefined) {
+    if (this.intents.length === 0) {
       return [];
     }
-    return [element];
+    let fastest_speed: number | undefined = undefined;
+    let fastest_intents: BattleIntent[] = [];
+    const others: BattleIntent[] = [];
+    for (const intent of this.intents) {
+      if (fastest_speed === undefined) {
+        fastest_speed = intent.user.stats.speed;
+        fastest_intents.push(intent);
+        continue;
+      }
+      if (fastest_speed > intent.user.stats.speed) {
+        others.push(intent);
+        continue;
+      }
+      if (fastest_speed === intent.user.stats.speed) {
+        fastest_intents.push(intent);
+        continue;
+      }
+      console.assert(fastest_speed < intent.user.stats.speed);
+      others.push(...fastest_intents);
+      fastest_intents = [intent];
+      fastest_speed = intent.user.stats.speed;
+    }
+    this.intents = others;
+    return fastest_intents;
   }
 
   update_stats_and_limits() {
@@ -992,7 +1009,7 @@ export class Battle {
       this.add_events(new BattleEvent(msg, () => {}));
       return this.goto_state("ending_soon");
     }
-    if (this.player.run === true || this.enemy.run) {
+    if (this.player.run === true || this.enemy.run === true) {
       this.intents = [];
       const msg = this.player.run
         ? `${this.player.name} fled like a coward.`
@@ -1080,6 +1097,10 @@ export class Battle {
       return;
     }
 
+    if (this.current_event === null && this.events.length === 0) {
+      this.after_events();
+    }
+
     if (this.intents.length === 0) {
       return;
     }
@@ -1090,6 +1111,9 @@ export class Battle {
     this._process_intent_queue();
     console.assert(this.events.length > 0 || this.intents.length === 0);
     this._process_event_queue();
+    if (this.current_event === null && this.events.length === 0) {
+      this.after_events();
+    }
   }
 
   state_transitions() {
@@ -1153,6 +1177,9 @@ export class Battle {
     this.goto_state("skills");
     this.state_transitions();
     this.advance();
+    if (this.events.length === 0) {
+      this.after_events();
+    }
     this.state_transitions();
   }
 
@@ -1168,6 +1195,9 @@ export class Battle {
       this.current_event.tick(ms);
     }
     this.advance();
+    if (this.events.length === 0) {
+      this.after_events();
+    }
     this.state_transitions();
   }
 }
