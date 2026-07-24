@@ -12,6 +12,7 @@ import {
   xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
 import {
+  Effect,
   get_upgrade_choices,
   NamedUpgrade,
   skill,
@@ -157,6 +158,7 @@ export class Creature extends Entity {
   mp: number;
   upgrades: NamedUpgrade[];
   inventory: Entity[] = [];
+  effects: Effect[] = [];
   speed = BASE_SPEED;
   walk_counter = 0;
   target: Target | null = null;
@@ -172,7 +174,28 @@ export class Creature extends Entity {
     this.mp = this.stats.max_mp;
   }
 
-  get_xp() {
+  add_effect(effect: Effect) {
+    this.effects.push(effect);
+  }
+  tick_effects(): BattleEvent[] {
+    console.log("tick effects");
+    const events: BattleEvent[] = [];
+    for (const effect of this.effects) {
+      effect.turns -= 1;
+      console.log("Tick");
+      console.assert(effect.turns >= 0);
+      if (effect.apply_tick !== undefined) {
+        events.concat(...effect.apply_tick());
+      }
+      if (effect.turns === 0) {
+        events.push(new BattleEvent(`${effect.name} wore off.`));
+      }
+    }
+    this.effects = this.effects.filter((effect) => effect.turns > 0);
+    return events;
+  }
+
+  get_xp_reward() {
     return Math.floor(20 + this.level * 2 + this.xp_threshold() / 20);
   }
 
@@ -228,10 +251,20 @@ export class Creature extends Entity {
     }
   }
 
+  update_stats() {
+    this.stats = new Stats(this.level);
+    for (const upgrade of this.upgrades) {
+      upgrade.passive?.(this);
+    }
+    for (const effect of this.effects) {
+      effect.apply_stats?.();
+    }
+    this.speed = BASE_SPEED * this.stats.speed;
+  }
+
   add_upgrade(upgrade: NamedUpgrade) {
     this.upgrades.push(upgrade);
-    upgrade.passive?.(this);
-    this.speed = BASE_SPEED * this.stats.speed;
+    this.update_stats();
   }
 
   _animate(ms: number) {
@@ -255,8 +288,14 @@ export class Player extends Creature {
 
   // Called on level up, after player has chosen upgrade.
   on_level_up() {
-    this.hp = this.stats.max_hp;
-    this.mp = this.stats.max_mp;
+    const half_hp = Math.floor(this.stats.max_hp);
+    const half_mp = Math.floor(this.stats.max_mp);
+    if (this.hp < half_hp) {
+      this.hp = half_hp;
+    }
+    if (this.mp < half_mp) {
+      this.mp = half_mp;
+    }
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -834,7 +873,7 @@ export class BattleEvent {
   done: boolean = false;
   ms: number = 0;
   text: string = "";
-  constructor(public msg: string, public apply: SkillApply) {
+  constructor(public msg: string, public apply?: SkillApply) {
   }
 
   tick(ms: number) {
@@ -845,16 +884,22 @@ export class BattleEvent {
     const n = Math.floor(this.ms / 50);
     this.text = this.msg.substring(0, n);
     if (this.ms > this.msg.length * 50 + 250) {
-      this.apply();
+      this.apply?.();
       this.done = true;
     }
   }
 }
 
+export type BattleState =
+  | "skill_select"
+  | "skills"
+  | "end_of_turn"
+  | "ending_soon"
+  | "over";
+
 export class Battle {
   mouse: XY | null = null;
-  done: boolean;
-  _triggered_end: boolean;
+  state: BattleState = "skill_select";
   skills: BattleSkill[];
   intents: BattleIntent[] = [];
   events: BattleEvent[] = [];
@@ -864,8 +909,8 @@ export class Battle {
   current_event: BattleEvent | null = null;
 
   constructor(public player: Player, public enemy: Enemy) {
-    this.done = false;
-    this._triggered_end = false;
+    player.run = false;
+    enemy.run = false;
     let y = 6;
     const skills: UpgradeName[] = this.player.get_skill_names();
     const lim = skills.length > 8 ? 8 : skills.length;
@@ -891,19 +936,29 @@ export class Battle {
     return [element];
   }
 
-  check_state(): boolean {
-    if (this._triggered_end === true) {
-      return this._triggered_end;
-    }
+  update_stats_and_limits() {
+    this.player.update_stats();
+    this.enemy.update_stats();
     this.player.apply_limits();
     this.enemy.apply_limits();
+  }
+
+  after_events() {
+    console.assert(this.events.length === 0);
+    if (this.state === "over") {
+      return this.state;
+    }
+    if (this.state === "ending_soon") {
+      return this.state_transitions();
+    }
+    this.update_stats_and_limits();
     if (this.player.hp === 0 || this.enemy.hp === 0) {
       this.intents = [];
       const msg = this.player.hp === 0
         ? `${this.player.name} died.`
         : `${this.enemy.name} died.`;
       this.events.push(new BattleEvent(msg, () => {}));
-      this._triggered_end = true;
+      return this.goto_state("ending_soon");
     }
     if (this.player.run === true || this.enemy.run) {
       this.intents = [];
@@ -911,55 +966,54 @@ export class Battle {
         ? `${this.player.name} fled like a coward.`
         : `${this.enemy.name} ran away.`;
       this.events.push(new BattleEvent(msg, () => {}));
-      this._triggered_end = true;
+      return this.goto_state("ending_soon");
     }
-    return this._triggered_end;
+    return this.state;
   }
 
-  advance() {
-    // If there is an event, only continue if it's done:
-    if (this.current_event !== null) {
-      if (this.current_event.done) {
-        this.current_event = null;
-        if (this.events.length === 0) {
-          // If we just finished and removed an event,
-          // and no more events are waiting.
-          // Check the state, which will potentially
-          // end the battle (someone dies or runs).
-          // This can add more events to this.events
-          this.check_state();
-        }
-      } else {
-        return;
-      }
-    }
+  _end_of_turn() {
+    console.log("End of turn");
+    console.assert(this.events.length === 0);
+    console.assert(this.intents.length === 0);
+    this.events.push(
+      ...this.player.tick_effects(),
+      ...this.enemy.tick_effects(),
+    );
+  }
 
-    // Done with current event, check queued:
+  goto_state(new_state: BattleState): BattleState {
+    console.log("goto_state: " + new_state);
+    console.log("before: " + this.state);
+    if (this.state === new_state) {
+      return this.state;
+    }
+    this.state = new_state;
+    if (this.state === "end_of_turn") {
+      this._end_of_turn();
+    }
+    return this.state;
+  }
+
+  _process_current_event() {
+    // If there is an event, only continue if it's done:
+    if (this.current_event === null) {
+      return;
+    }
+    if (this.current_event.done) {
+      this.current_event = null;
+    }
+  }
+
+  _process_event_queue() {
     console.assert(this.current_event === null);
     const event = this.events.shift();
     if (event !== undefined) {
       this.current_event = event;
-      return;
     }
+  }
 
-    if (this._triggered_end) {
-      // Someone died and no more events to play
-      this.done = true;
-      return;
-    }
-
-    // No more events queued
-    console.assert(this.events.length === 0);
-    if (this.intents.length === 0) {
-      return;
-    }
-
-    // Get next intent(s)
+  _process_intent_queue() {
     console.assert(this.intents.length > 0);
-    const dead = this.check_state();
-    if (dead === true) {
-      console.assert(this.intents.length === 0);
-    }
     while (this.events.length === 0 && this.intents.length > 0) {
       const intents: BattleIntent[] = this._get_intents();
       for (const intent of intents) {
@@ -968,8 +1022,68 @@ export class Battle {
         }
       }
     }
+  }
 
-    this.current_event = this.events.shift() ?? null;
+  advance() {
+    console.assert(
+      this.current_event !== null || this.events.length > 0 ||
+        this.intents.length > 0,
+    );
+    if (this.state === "ending_soon" || this.state === "over") {
+      console.assert(this.intents.length === 0);
+    }
+
+    this._process_current_event();
+    if (this.current_event !== null) {
+      return;
+    }
+    this._process_event_queue();
+    if (this.current_event !== null) {
+      return;
+    }
+
+    // No more events queued
+    this.after_events();
+
+    // Now there could be some battle over events:
+    this._process_event_queue();
+    if (this.current_event !== null) {
+      return;
+    }
+
+    if (this.intents.length === 0) {
+      return;
+    }
+
+    // Get next intent(s)
+    // console.assert(this.state === "skills");
+    console.assert(this.intents.length > 0 && this.events.length === 0);
+    this._process_intent_queue();
+    console.assert(this.events.length > 0 || this.intents.length === 0);
+    this._process_event_queue();
+  }
+
+  state_transitions() {
+    console.log("state_transitions");
+    console.log("state " + this.state);
+    if (this.state === "over") {
+      return this.state;
+    }
+    if (
+      this.current_event === null && this.events.length === 0 &&
+      this.intents.length === 0
+    ) {
+      if (this.state === "skills") {
+        return this.goto_state("end_of_turn");
+      }
+      if (this.state === "end_of_turn") {
+        return this.goto_state("skill_select");
+      }
+      if (this.state === "ending_soon") {
+        return this.goto_state("over");
+      }
+    }
+    return this.state;
   }
 
   hover(position: XY) {
@@ -986,7 +1100,7 @@ export class Battle {
     if (this.current_event !== null) {
       return;
     }
-    if (this.done === true) {
+    if (this.state !== "skill_select") {
       return;
     }
     this.hover(position);
@@ -1004,10 +1118,14 @@ export class Battle {
     this.intents.push(
       new BattleIntent(this.skills[0], this.enemy, this.player, this),
     );
+    this.goto_state("skills");
+    this.state_transitions();
     this.advance();
+    this.state_transitions();
   }
 
   tick(ms: number) {
+    this.state_transitions();
     if (
       this.current_event === null && this.events.length === 0 &&
       this.intents.length === 0
@@ -1018,6 +1136,7 @@ export class Battle {
       this.current_event.tick(ms);
     }
     this.advance();
+    this.state_transitions();
   }
 }
 
@@ -1398,6 +1517,8 @@ export class Game {
     console.assert(player.hp >= 0);
     console.assert(enemy.hp >= 0);
 
+    player.effects = [];
+
     if (player.hp === 0) {
       this.goto_state("game_over");
       this.battle = null;
@@ -1406,7 +1527,7 @@ export class Game {
     this.goto_state("zone");
     this.battle = null;
     if (enemy.hp === 0) {
-      player.add_xp(enemy.get_xp());
+      player.add_xp(enemy.get_xp_reward());
     }
   }
 
@@ -1436,7 +1557,7 @@ export class Game {
         console.log("Error: null battle");
         return;
       }
-      if (battle.done) {
+      if (battle.state === "over") {
         this.exit_battle();
         return;
       }
