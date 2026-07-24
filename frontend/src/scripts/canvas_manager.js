@@ -5,7 +5,8 @@ const { UI } = require("./ui.js");
 const { FG, BG, GREY } = require("./colors.js");
 
 class CanvasManager {
-    constructor(canvas, columns = 20, rows = 13, width = 1200, scale = 1.0) {
+    constructor(canvas, draw_callback, columns = 20, rows = 13, width = 1200, scale = 1.0) {
+        this.draw_callback = draw_callback;
         this.canvas = canvas;
         this.screenshot = null;
         this.columns = columns;
@@ -24,7 +25,8 @@ class CanvasManager {
         this.grid_end = this.grid_start + this.grid_height;
         this.canvas_height = this.grid_end + this.grid_size;
 
-        this.game = new Game(this.columns, this.rows);
+        this.game = new Game(this.columns, this.rows, draw_callback);
+        this.game.spawn_rocks();
         const UI_X = 0;
         const UI_Y = this.grid_end - this.grid_size;
         const UI_W = this.width;

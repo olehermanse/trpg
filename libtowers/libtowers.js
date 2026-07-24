@@ -7,6 +7,133 @@ const {
   position,
 } = require("./utils.js");
 
+
+class Shape {
+  constructor(c, r, rocks) {
+    this.c = c;
+    this.r = r;
+    this.rocks = rocks;
+  }
+
+  translate(c, r) {
+    for (let rock of this.rocks) {
+      rock.c += c;
+      rock.r += r;
+    }
+  }
+
+  static _get_shape() {
+    let shapes = [];
+    // 1x1
+    shapes.push([
+      [1],
+    ]);
+    // 2x1
+    shapes.push([
+      [1, 1],
+    ]);
+    shapes.push([
+      [1],
+      [1],
+    ]);
+    // 2x2
+    shapes.push([
+      [1, 0],
+      [0, 1],
+    ]);
+    shapes.push([
+      [0, 1],
+      [1, 0],
+    ]);
+    // 3x3 Diagonals:
+    shapes.push([
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+    ]);
+    shapes.push([
+      [0, 0, 1],
+      [0, 1, 0],
+      [1, 0, 0],
+    ]);
+    // 4 corners:
+    shapes.push([
+      [1, 0, 1],
+      [0, 0, 0],
+      [1, 0, 1],
+    ]);
+    // =
+    shapes.push([
+      [1, 1, 1],
+      [0, 0, 0],
+      [1, 1, 1],
+    ]);
+    // ||
+    shapes.push([
+      [1, 0, 1],
+      [1, 0, 1],
+      [1, 0, 1],
+    ]);
+    // L shapes:
+    shapes.push([
+      [0, 0, 1],
+      [0, 0, 1],
+      [1, 1, 1],
+    ]);
+    shapes.push([
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 1, 1],
+    ]);
+    shapes.push([
+      [1, 1, 1],
+      [0, 0, 1],
+      [0, 0, 1],
+    ]);
+    shapes.push([
+      [1, 1, 1],
+      [1, 0, 0],
+      [1, 0, 0],
+    ]);
+
+    // 3x1 and 4x1 bars
+    shapes.push([
+      [1, 1, 1],
+    ]);
+    shapes.push([
+      [1, 1, 1, 1],
+    ]);
+    shapes.push([
+      [1],
+      [1],
+      [1],
+    ]);
+    shapes.push([
+      [1],
+      [1],
+      [1],
+      [1],
+    ]);
+    return shapes[randint(0, shapes.length - 1)];
+  }
+
+  static get_shape() {
+    let base = Shape._get_shape();
+    let rocks = [];
+    let rows = base.length;
+    let columns = base[0].length;
+    for (let c = 0; c < columns; ++c) {
+      for (let r = 0; r < rows; ++r) {
+        if (base[r][c] === 0) {
+          continue;
+        }
+        rocks.push(new Tower(c, r, "rock"));
+      }
+    }
+    return new Shape(columns, rows, rocks);
+  }
+}
+
 class Tower {
   constructor(c, r, name, price, draw = null) {
     this.name = name;
@@ -118,7 +245,8 @@ function randint(min, max) {
 }
 
 class Game {
-  constructor(columns, rows) {
+  constructor(columns, rows, draw_callback) {
+    this.draw_callback = draw_callback;
     this.paused = true;
     this.on_victory = null;
     this.level = 1;
@@ -163,6 +291,47 @@ class Game {
     this.tiles[this.goal.c][this.goal.r] = "goal";
     const success = this.create_path();
     console.assert(success === true, "Could not create path");
+  }
+
+  spawn_rocks() {
+    let money = this.money;
+    this.money = 10000;
+    let counter = 0;
+    for (let i = 0; i < 20; ++i) {
+      let shape = Shape.get_shape();
+      let h = shape.r;
+      let w = shape.c;
+      let p = position(randint(2, this.columns - 2 - w), randint(2, this.rows - 2 - h));
+      if (!this.is_empty_rect(shape, p.c, p.r))
+        continue;
+      shape.translate(p.c, p.r);
+      for (let rock of shape.rocks) {
+        console.assert(this.can_place(rock.c, rock.r, "rock"));
+        let r = this.place_tower(rock.c, rock.r, "rock");
+        console.assert(r != null);
+        r.draw = this.draw_callback;
+        counter += 1;
+      }
+    }
+    this.money = money;
+    return counter;
+  }
+
+  is_empty_rect(shape, col, row) {
+    let start_c = col - 1;
+    let start_r = row - 1;
+    let w = shape.c + 2;
+    let h = shape.r + 2;
+    let end_c = start_c + w;
+    let end_r = start_r + h;
+    for (let c = start_c; c < end_c; ++c) {
+      for (let r = start_r; r < end_r; ++r) {
+        if (!this.is_empty(c, r)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   place_path(c, r) {

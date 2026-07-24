@@ -143,7 +143,8 @@ function start(canvas) {
             scale = 2.0;
         }
     }
-    canvas_manager = new CanvasManager(canvas, columns, rows, 1200, scale);
+    let draw_callback = draw_building;
+    canvas_manager = new CanvasManager(canvas, draw_callback, columns, rows, 1200, scale);
     const ctx = canvas.getContext("2d");
     canvas.setAttribute("width", canvas_manager.canvas_width);
     canvas.setAttribute("height", canvas_manager.canvas_height);
