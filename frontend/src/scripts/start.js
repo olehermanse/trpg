@@ -116,10 +116,12 @@ function start(canvas) {
     let scale = window.devicePixelRatio;
     let rows = 13;
     let columns = 20;
-    if (true) {
+    if (window.matchMedia("screen and (orientation:portrait), (max-width: 600px)").matches) {
         rows = 17;
         columns = 15;
-        scale = 1.0;
+        if (scale > 2.0) {
+            scale = 2.0;
+        }
     }
     canvas_manager = new CanvasManager(canvas, columns, rows, 1200, scale);
     const ctx = canvas.getContext("2d");
