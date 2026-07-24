@@ -22,6 +22,7 @@ import {
   get_skill,
   get_upgrade,
   get_upgrade_choices,
+  is_permanent,
   Keyword,
   NamedUpgrade,
   UpgradeName,
@@ -400,7 +401,7 @@ export class Player extends Creature {
   generate_save(): GameSave {
     const save: GameSave = { permanents: [] };
     for (const u of this.upgrades) {
-      if (u.permanent === true) {
+      if (is_permanent(u)) {
         save.permanents.push(u.name);
       }
     }
@@ -417,7 +418,7 @@ export class Player extends Creature {
 
   override add_upgrade(upgrade: NamedUpgrade): void {
     super.add_upgrade(upgrade);
-    if (this.save_function !== undefined && upgrade.permanent === true) {
+    if (this.save_function !== undefined && is_permanent(upgrade)) {
       this.save_function(this.generate_save());
     }
   }

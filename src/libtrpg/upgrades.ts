@@ -15,7 +15,7 @@ export function damage(
   return damage;
 }
 
-export type Keyword = "class" | "damaging" | "dot" | "healing";
+export type Keyword = "class" | "damaging" | "dot" | "healing" | "permanent";
 
 export type SkillApply = () => void;
 export type EffectApply = () => BattleEvent[];
@@ -49,7 +49,6 @@ interface Upgrade {
   max?: number; // Default is only 1
   skill?: SkillPerform;
   keywords?: Readonly<Keyword[]>;
-  permanent?: true;
   consumed?: true;
   on_pickup?: UpgradeApply;
   mana_cost?: CostFunction;
@@ -73,7 +72,7 @@ const _all_upgrades = {
   },
   "Permahaste": {
     "description": "Movement speed +1",
-    "permanent": true,
+    "keywords": ["permanent"],
     "max": 3,
     "passive": (creature: Creature) => {
       creature.stats.movement_speed += 1;
@@ -85,7 +84,7 @@ const _all_upgrades = {
   },
   "Permavision": {
     "description": "Light radius +1",
-    "permanent": true,
+    "keywords": ["permanent"],
     "max": 3,
     "passive": (creature: Creature) => {
       creature.stats.light += 1;
@@ -105,7 +104,7 @@ const _all_upgrades = {
   },
   "Permagrowth": {
     "description": "3% more experience",
-    "permanent": true,
+    "keywords": ["permanent"],
     "max": 2,
     "passive": (creature: Creature) => {
       creature.stats.increased_xp += 3;
@@ -608,10 +607,17 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   return sorted;
 }
 
+export function is_permanent(upgrade: NamedUpgrade) {
+  if (upgrade.keywords !== undefined && upgrade.keywords.includes("permanent")) {
+    return true;
+  }
+  return false;
+}
+
 export function get_upgrade(name: UpgradeName): NamedUpgrade {
   const obj = { "name": name, ...all_upgrades[name] };
   let description = obj.description;
-  if (obj.permanent === true) {
+  if (is_permanent(obj)) {
     description += ". Permanent.";
   }
   obj.description = text_wrap(description, 11);
