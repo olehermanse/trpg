@@ -1,11 +1,13 @@
 const { xy, number_string } = require("../../../libtowers/utils.js");
 const { Game, Tower } = require("../../../libtowers/libtowers.js");
 const Draw = require("./draw.js");
+const { Painter } = require("./painter.js");
 const { UI } = require("./ui.js");
 const { FG, BG, GREY } = require("./colors.js");
 
 class CanvasManager {
     constructor(canvas, draw_callback, columns = 20, rows = 13, width = 1200, scale = 1.0) {
+        this.painter = new Painter(this);
         this.draw_callback = draw_callback;
         this.canvas = canvas;
         this.screenshot = null;
