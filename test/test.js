@@ -53,8 +53,8 @@ describe("Game", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      let row = game.is_path(1, 1) ? 2 : 1;
-      game.place_tower(1, row, "gun");
+      let p = game.find_empty_not_path();
+      game.place_tower(p.c, p.r, "gun");
       assert.strictEqual(game.towers.length, 1);
     });
   });
@@ -62,9 +62,18 @@ describe("Game", function () {
     it("Places a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      let row = game.is_path(1, 1) ? 2 : 1;
-      game.place_tower(1, row, "gun");
+      let p = game.find_empty_not_path();
+      assert.notStrictEqual(p, null);
+      game.grid_click(p.c, p.r, "gun");
       assert.strictEqual(game.towers.length, 1);
+    });
+    it("Doesn't place a tower when dead", function () {
+      let game = new Game(5, 5);
+      assert.strictEqual(game.towers.length, 0);
+      let p = game.find_empty_not_path();
+      game.lives = 0;
+      game.grid_click(p.c, p.r, "gun");
+      assert.strictEqual(game.towers.length, 0);
     });
     it("Doesn't block the path", function () {
       let game = new Game(3, 3);
@@ -83,9 +92,10 @@ describe("Game", function () {
     it("Doesn't place a tower on a tower", function () {
       let game = new Game(5, 5);
       assert.strictEqual(game.towers.length, 0);
-      let row = game.is_path(1, 1) ? 2 : 1;
-      game.grid_click(1, row, "gun");
-      game.grid_click(1, row, "gun");
+      let p = game.find_empty_not_path();
+      game.grid_click(p.c, p.r, "gun");
+      assert.strictEqual(game.towers.length, 1);
+      game.grid_click(p.c, p.r, "gun");
       assert.strictEqual(game.towers.length, 1);
     });
     it("Doesn't place a tower when you have no money", function () {

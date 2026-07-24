@@ -191,6 +191,17 @@ class Game {
     return this.tiles[c][r] === null || this.is_path(c, r);
   }
 
+  find_empty_not_path() {
+    for (let c = 0; c < this.columns; ++c) {
+      for (let r = 0; r < this.rows; ++r) {
+        if (this.is_empty(c, r) && !this.is_path(c, r)) {
+          return position(c, r);
+        }
+      }
+    }
+    return null;
+  }
+
   is_path(c, r) {
     return this.tiles[c][r] === "path";
   }
@@ -446,6 +457,9 @@ class Game {
   }
 
   grid_click(c, r, name) {
+    if (this.lives <= 0) {
+      return;
+    }
     if (this.can_place(c, r, name)) {
       if (this.paused || !this.is_path(c, r)) {
         return this.place_tower(c, r, name);
