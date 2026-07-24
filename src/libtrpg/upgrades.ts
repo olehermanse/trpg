@@ -29,10 +29,11 @@ export type SkillPerform = (
   user: Creature,
   target: Creature,
   battle: Battle,
-  skill: Upgrade,
+  skill: NamedUpgrade,
 ) => SkillApply;
 
 export type UpgradeEligible = (creature: Creature) => boolean;
+export type UpgradeBoost = (skill: NamedUpgrade) => number;
 
 export type UpgradePassive = (creature: Creature) => void;
 export type UpgradeApply = (creature: Creature) => void;
@@ -52,6 +53,7 @@ interface Upgrade {
   passive?: UpgradePassive;
   minimum_level?: number;
   eligible?: UpgradeEligible;
+  boost?: UpgradeBoost;
   max?: number; // Default is only 1
   skill?: SkillPerform;
   keywords?: Readonly<Keyword[]>;
@@ -167,6 +169,23 @@ const _all_upgrades = {
       return creature.get_upgrades_by_keyword("class").length === 0;
     },
   },
+  "Priest": {
+    "description": "2x healing, 0.5x strength",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength = Math.floor(creature.stats.strength / 2);
+    },
+    "boost": (skill: NamedUpgrade): number => {
+      if (has_keyword(skill, "healing")) {
+        return 100;
+      }
+      return 0;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
   "Attack": {
     "description": "Swing weapon",
     "eligible": (creature: Creature) => {
@@ -176,7 +195,7 @@ const _all_upgrades = {
       user: Creature,
       target: Creature,
       _battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // Standard damage calculation used as basis for all other skills
       // Minimum 1 damage
@@ -194,7 +213,7 @@ const _all_upgrades = {
       user: Creature,
       target: Creature,
       battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // About 1/3 as strong as normal attack, but applies bleed
       // for same amount every turn for 5 turns. (So almost break even at 2nd turn).
@@ -229,7 +248,7 @@ const _all_upgrades = {
       user: Creature,
       _target: Creature,
       battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // Doesn't scale with anything
       // Something like:
@@ -257,6 +276,7 @@ const _all_upgrades = {
   },
   "Heal": {
     "description": "Use magic to heal yourself",
+    "keywords": ["healing"],
     "mana_cost": (user: Creature) => {
       return 2 + Math.floor(user.stats.max_mp / 5);
     },
@@ -264,7 +284,7 @@ const _all_upgrades = {
       user: Creature,
       _target: Creature,
       battle: Battle,
-      skill: Upgrade,
+      skill: NamedUpgrade,
     ) => {
       // Healing is based on mana spent with a small boost from magic stat
       // Cost (mana spent) scales with maximum mana
@@ -277,7 +297,8 @@ const _all_upgrades = {
         };
       }
       const increase = (100 + user.stats.magic) / 100;
-      const healing = Math.floor(increase * cost);
+      const boost = user.get_boost(skill);
+      const healing = Math.floor(increase * cost * boost);
       return () => {
         battle.events.push(
           new BattleEvent(`${user.name} restored ${healing} health.`, () => {
@@ -297,7 +318,7 @@ const _all_upgrades = {
       user: Creature,
       target: Creature,
       battle: Battle,
-      skill: Upgrade,
+      skill: NamedUpgrade,
     ) => {
       // Same damage calc as Attack, but slightly better
       // Mana cost should balance it out
@@ -344,7 +365,7 @@ const _all_upgrades = {
       user: Creature,
       _target: Creature,
       battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // Restore mana per turn
       // scales with magic stat, and to a very limited extent max mana
@@ -381,7 +402,7 @@ const _all_upgrades = {
       user: Creature,
       _target: Creature,
       battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       const mp_ratio = user.mp / user.stats.max_mp;
       const hp_ratio = user.hp / user.stats.max_hp;
@@ -422,7 +443,7 @@ const _all_upgrades = {
       user: Creature,
       target: Creature,
       battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // Deals damage to both user and target based on user
       // max HP. Will kill both if there is no healing and if
@@ -477,7 +498,7 @@ const _all_upgrades = {
       user: Creature,
       _target: Creature,
       _battle: Battle,
-      _skill: Upgrade,
+      _skill: NamedUpgrade,
     ) => {
       // Run from battle, getting 0 xp.
       // If lower speed, enemy can attack and kill you first.

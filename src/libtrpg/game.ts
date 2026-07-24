@@ -209,6 +209,17 @@ export class Creature extends Entity {
     this.mp = this.stats.max_mp;
   }
 
+  get_boost(skill: NamedUpgrade) {
+    let total = 100;
+    for (const upgrade of this.upgrades) {
+      if (upgrade.boost === undefined) {
+        continue;
+      }
+      total += upgrade.boost(skill);
+    }
+    return total / 100;
+  }
+
   add_effect(effect: Effect) {
     this.effects.push(effect);
   }
