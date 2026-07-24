@@ -157,6 +157,23 @@ const _all_upgrades = {
       return creature.get_upgrades_by_keyword("class").length === 0;
     },
   },
+  "Monk": {
+    "description": "+1 to all stats",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength += 1;
+      creature.stats.magic += 1;
+      creature.stats.speed += 1;
+      creature.stats.light += 1;
+      creature.stats.movement_speed += 1;
+      creature.stats.max_hp += 1;
+      creature.stats.max_mp += 1;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
   "Mage": {
     "description": "2x magic, 0.5x strength",
     "keywords": ["class"],
@@ -492,6 +509,7 @@ const _all_upgrades = {
       };
     },
   },
+
   "Run": {
     "description": "Escape battle",
     "skill": (
