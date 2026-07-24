@@ -18,10 +18,10 @@ import {
 } from "@olehermanse/utils/funcs.js";
 import {
   Effect,
+  get_skill,
+  get_upgrade,
   get_upgrade_choices,
   NamedUpgrade,
-  skill,
-  upgrade,
   UpgradeName,
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
@@ -197,7 +197,7 @@ export class Creature extends Entity {
     super(name, pos, zone);
     this.game = game;
     this.level = level;
-    this.upgrades = [upgrade("Attack")];
+    this.upgrades = [get_upgrade("Attack")];
     this.stats = new Stats(this.level);
     this.hp = this.stats.max_hp;
     this.mp = this.stats.max_mp;
@@ -380,7 +380,7 @@ export class Player extends Creature {
     console.assert(this.level === 1);
     console.assert(this.effects.length === 0);
     for (const name of save.permanents) {
-      this.add_upgrade(upgrade(name));
+      this.add_upgrade(get_upgrade(name));
     }
   }
 
@@ -962,6 +962,7 @@ export class Enemy extends Creature {
 }
 
 export class BattleSkill {
+  disabled: boolean = false;
   constructor(public rectangle: Rectangle, public name: UpgradeName) {}
 }
 
@@ -975,12 +976,18 @@ export class BattleIntent {
   }
 
   perform(): BattleEvent[] {
-    const func = skill(this.skill);
-    const apply = func(this.user, this.target, this.battle);
+    const skill = get_upgrade(this.skill);
     let message = `${this.user.name} used ${this.skill}.`;
     if (this.skill === "Run") {
       message = "";
     }
+    if (
+      skill.mana_cost !== undefined && skill.mana_cost(this.user) > this.user.mp
+    ) {
+      return [new BattleEvent("Not enough mana")];
+    }
+    const func = get_skill(this.skill);
+    const apply = func(this.user, this.target, this.battle, skill);
     const event = new BattleEvent(message, apply);
     return [event];
   }
@@ -1043,6 +1050,7 @@ export class Battle {
       const name = skills[i];
       this.skills.push(new BattleSkill(rect, name));
     }
+    this.disable_buttons();
   }
 
   add_events(...events: BattleEvent[]) {
@@ -1132,6 +1140,9 @@ export class Battle {
     this.state = new_state;
     if (this.state === "end_of_turn") {
       this._end_of_turn();
+    }
+    if (this.state === "skill_select") {
+      this.disable_buttons();
     }
     return this.state;
   }
@@ -1233,6 +1244,20 @@ export class Battle {
     return this.state;
   }
 
+  disable_buttons() {
+    for (let i = 0; i < this.skills.length; i++) {
+      const skill = get_upgrade(this.skills[i].name);
+      if (
+        skill.mana_cost !== undefined &&
+        this.player.mp < skill.mana_cost(this.player)
+      ) {
+        this.skills[i].disabled = true;
+      } else {
+        this.skills[i].disabled = false;
+      }
+    }
+  }
+
   hover(position: XY) {
     this.mouse = position;
     for (let i = 0; i < this.skills.length; i++) {
@@ -1257,6 +1282,9 @@ export class Battle {
     }
     this.hover(position);
     if (this.hover_index === null) {
+      return;
+    }
+    if (this.skills[this.hover_index].disabled === true) {
       return;
     }
     const player_intent = new BattleIntent(
@@ -1538,7 +1566,7 @@ export class Game {
       if (x.is_inside(position)) {
         const missing_hp = this.player.stats.max_hp - this.player.hp;
         const missing_mp = this.player.stats.max_mp - this.player.mp;
-        this.player.add_upgrade(upgrade(x.name));
+        this.player.add_upgrade(get_upgrade(x.name));
         this.player.hp = this.player.stats.max_hp - missing_hp;
         this.player.mp = this.player.stats.max_mp - missing_mp;
         this.goto_state("zone");
