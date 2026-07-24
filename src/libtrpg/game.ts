@@ -35,7 +35,7 @@ import {
 import { SkillApply } from "./upgrades.ts";
 
 const DIAG = 1.42;
-const BASE_SPEED = 16.0;
+const BASE_SPEED = 20.0;
 
 export class Entity {
   xy: XY;
