@@ -75,10 +75,42 @@ export class Player extends Entity {
     this.defog();
   }
 
+  get center() {
+    return xy(this.xy.x + this.wh.width / 2, this.xy.y + this.wh.height / 2);
+  }
+
   defog() {
-    const tiles = get_neighbors(this, this.zone);
-    for (let tile of tiles) {
-      this.zone.tiles[tile.c][tile.r].fog = false;
+    for (let tiles of this.zone.tiles) {
+      for (let tile of tiles) {
+        if (tile.light === 5) {
+          continue;
+        }
+        const distance = distance_cr(tile.cr, this.cr);
+        if (distance < 2.0) {
+          tile.light = 5;
+          continue;
+        }
+        if (distance < 3.0) {
+          tile.light = 4;
+          continue;
+        }
+        if (distance < 4.0) {
+          tile.light = 3;
+          continue;
+        }
+        if (distance < 5.0) {
+          tile.light = 2;
+          continue;
+        }
+        if (distance < 6.0) {
+          tile.light = 1;
+          continue;
+        }
+        if (tile.light === 1) {
+          continue;
+        }
+        tile.light = 0;
+      }
     }
   }
 
@@ -124,7 +156,7 @@ export class Player extends Entity {
     this.xy.x = Math.floor(this.fxy.x);
     this.xy.y = Math.floor(this.fxy.y);
 
-    const new_pos = xy_to_cr(this.xy, this.zone);
+    const new_pos = xy_to_cr(this.center, this.zone);
     if (new_pos.c === this.cr.c && new_pos.r === this.cr.r) {
       return;
     }
@@ -135,11 +167,15 @@ export class Player extends Entity {
 }
 
 export class Tile {
-  fog: boolean;
+  light: number;
   entities: Entity[];
-  constructor() {
-    this.fog = true;
+  cr: CR;
+  xy: XY;
+  constructor(cr: CR) {
+    this.light = 0;
     this.entities = [];
+    this.cr = cr;
+    this.xy = xy(cr.c * 16, cr.r * 16);
   }
 }
 
@@ -151,7 +187,7 @@ export class Zone extends Grid {
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
       for (let r = 0; r < grid.rows; r++) {
-        column.push(new Tile());
+        column.push(new Tile(cr(c, r)));
       }
       this.tiles.push(column);
     }
