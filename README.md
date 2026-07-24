@@ -19,7 +19,7 @@ http://127.0.0.1:3000
 ### docker
 
 ```
-docker build --tag tpg . && docker run -it -p 80:80 --name tpg --rm tpg
+docker build --tag tpg . && docker run -it -p 3000:3000 --name tpg --rm tpg
 ```
 
 http://127.0.0.1:80

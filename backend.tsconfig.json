@@ -3,18 +3,23 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "moduleResolution": "Node",
     "strict": false, // TODO: Make this true & fix errors
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "outDir": "dist/frontend"
+    "outDir": "dist/backend"
   },
-  "include": ["src", "libtowers"]
+  "include": [
+    "src",
+    "libtowers"
+  ]
 }
