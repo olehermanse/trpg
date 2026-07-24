@@ -178,175 +178,6 @@ const _all_upgrades = {
       };
     },
   },
-  "Heal": {
-    "description": "Use magic to heal yourself",
-    "mana_cost": (user: Creature) => {
-      return 2 + Math.floor(user.stats.max_mp / 5);
-    },
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      battle: Battle,
-      skill: Upgrade,
-    ) => {
-      // Healing is based on mana spent with a small boost from magic stat
-      // Cost (mana spent) scales with maximum mana
-      // Base rule is that 1 mana = 1 hit point healed
-      const cost = skill.mana_cost?.(user);
-      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
-      if (cost === undefined || user.mp < cost) {
-        return () => {
-          battle.events.push(new BattleEvent("Not enough mana"));
-        };
-      }
-      const increase = (100 + user.stats.magic) / 100;
-      const healing = Math.floor(increase * cost);
-      return () => {
-        user.hp += healing;
-        user.mp -= cost;
-      };
-    },
-  },
-  "Fireball": {
-    "description": "Damage and burn the enemy",
-    "mana_cost": (user: Creature) => {
-      return 2 + Math.floor(user.stats.magic / 2);
-    },
-    "skill": (
-      user: Creature,
-      target: Creature,
-      battle: Battle,
-      skill: Upgrade,
-    ) => {
-      // Same damage calc as Attack, but slightly better
-      // Mana cost should balance it out
-      // Burn is 10% of damage dealt
-      const cost = skill.mana_cost?.(user);
-      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
-      if (cost === undefined || user.mp < cost) {
-        return () => {
-          battle.events.push(new BattleEvent("Not enough mana"));
-        };
-      }
-      const dmg = damage(user.stats.magic, target.stats.magic, 6, 2);
-      const burn_dmg = Math.floor(dmg / 10);
-      const has_burn = target.has_effect("Burn");
-      return () => {
-        target.hp -= dmg > 0 ? dmg : 1;
-        user.mp -= cost;
-        if (has_burn) {
-          return;
-        }
-        battle.events.push(new BattleEvent(`${target.name} got burned.`));
-        target.add_effect(
-          new Effect("Burn", 3, () => {
-            target.stats.strength -= 2;
-          }, () => {
-            const msg = `Burn damaged ${target.name}.`;
-            return [
-              new BattleEvent(msg, () => {
-                target.apply_damage(burn_dmg);
-              }),
-            ];
-          }),
-        );
-      };
-    },
-  },
-  "Elixir": {
-    "description": "Restore mana",
-    "eligible": (creature: Creature) => {
-      return creature.get_skill_names().length >= 4;
-    },
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      battle: Battle,
-      _skill: Upgrade,
-    ) => {
-      // Restore mana per turn
-      // scales with magic stat, and to a very limited extent max mana
-      const power = 2 +
-        Math.floor(user.stats.magic / 10 + user.stats.max_mp / 100);
-      const has_elixir = user.has_effect("Elixir");
-      return () => {
-        if (has_elixir) {
-          battle.events.push(
-            new BattleEvent(`${user.name} Already has elixir.`),
-          );
-          return;
-        }
-        user.add_effect(
-          new Effect("Elixir", 3, undefined, () => {
-            const msg = `Elixir restored ${user.name}'s mana.`;
-            return [
-              new BattleEvent(msg, () => {
-                user.mp += power;
-              }),
-            ];
-          }),
-        );
-      };
-    },
-  },
-  "Pact": {
-    "description": "Sacrifice blood to damage everyone",
-    "eligible": (creature: Creature) => {
-      return creature.get_skill_names().length >= 4;
-    },
-    "skill": (
-      user: Creature,
-      target: Creature,
-      battle: Battle,
-      _skill: Upgrade,
-    ) => {
-      // Deals damage to both user and target based on user
-      // max HP. Will kill both if there is no healing and if
-      // target has less HP than user max HP.
-      // 1 damage immediately
-      // 20% of max hp per turn for 5 turns
-      // Balanced around the fact that it damages both equally
-      const power = Math.ceil(user.stats.max_hp / 5);
-      const user_has_bleed = user.has_effect("Bleed");
-      const target_has_bleed = target.has_effect("Bleed");
-      return () => {
-        user.apply_damage(1);
-        target.apply_damage(1);
-        if (user_has_bleed) {
-          battle.events.push(
-            new BattleEvent(`${user.name} is already bleeding.`),
-          );
-        } else {
-          user.add_effect(
-            new Effect("Bleed", 5, undefined, () => {
-              const msg = `${user.name} was damaged by Bleed.`;
-              return [
-                new BattleEvent(msg, () => {
-                  user.apply_damage(power, 1);
-                }),
-              ];
-            }),
-          );
-        }
-        if (target_has_bleed) {
-          battle.events.push(
-            new BattleEvent(`${target.name} is already bleeding.`),
-          );
-        } else {
-          target.add_effect(
-            new Effect("Bleed", 5, undefined, () => {
-              const msg = `${target.name} was damaged by Bleed.`;
-              return [
-                new BattleEvent(msg, () => {
-                  target.apply_damage(power, 1);
-                }),
-              ];
-            }),
-          );
-        }
-      };
-    },
-  },
   "Rend": {
     "description": "Causes enemy to bleed",
     "skill": (
@@ -411,6 +242,222 @@ const _all_upgrades = {
             user.stats.strength += 5;
           }),
         );
+      };
+    },
+  },
+  "Heal": {
+    "description": "Use magic to heal yourself",
+    "mana_cost": (user: Creature) => {
+      return 2 + Math.floor(user.stats.max_mp / 5);
+    },
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      skill: Upgrade,
+    ) => {
+      // Healing is based on mana spent with a small boost from magic stat
+      // Cost (mana spent) scales with maximum mana
+      // Base rule is that 1 mana = 1 hit point healed
+      const cost = skill.mana_cost?.(user);
+      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
+      if (cost === undefined || user.mp < cost) {
+        return () => {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        };
+      }
+      const increase = (100 + user.stats.magic) / 100;
+      const healing = Math.floor(increase * cost);
+      return () => {
+        battle.events.push(
+          new BattleEvent(`${user.name} restored ${healing} health.`, () => {
+            user.hp += healing;
+            user.mp -= cost;
+          }),
+        );
+      };
+    },
+  },
+  "Fireball": {
+    "description": "Damage and burn the enemy",
+    "mana_cost": (user: Creature) => {
+      return 2 + Math.floor(user.stats.magic / 2);
+    },
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      skill: Upgrade,
+    ) => {
+      // Same damage calc as Attack, but slightly better
+      // Mana cost should balance it out
+      // Burn is 10% of damage dealt
+      const cost = skill.mana_cost?.(user);
+      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
+      if (cost === undefined || user.mp < cost) {
+        return () => {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        };
+      }
+      const dmg = damage(user.stats.magic, target.stats.magic, 6, 2);
+      const burn_dmg = Math.floor(dmg / 10);
+      const has_burn = target.has_effect("Burn");
+      return () => {
+        target.hp -= dmg > 0 ? dmg : 1;
+        user.mp -= cost;
+        if (has_burn) {
+          return;
+        }
+        battle.events.push(new BattleEvent(`${target.name} got burned.`));
+        target.add_effect(
+          new Effect("Burn", 3, () => {
+            target.stats.strength -= 2;
+          }, () => {
+            const msg = `Burn damaged ${target.name}.`;
+            return [
+              new BattleEvent(msg, () => {
+                target.apply_damage(burn_dmg);
+              }),
+            ];
+          }),
+        );
+      };
+    },
+  },
+  "Elixir": {
+    "description": "Restore mana",
+    "minimum_level": 10,
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
+      // Restore mana per turn
+      // scales with magic stat, and to a very limited extent max mana
+      const power = 2 +
+        Math.floor(user.stats.magic / 10 + user.stats.max_mp / 100);
+      const has_elixir = user.has_effect("Elixir");
+      return () => {
+        if (has_elixir) {
+          battle.events.push(
+            new BattleEvent(`${user.name} Already has elixir.`),
+          );
+          return;
+        }
+        user.add_effect(
+          new Effect("Elixir", 3, undefined, () => {
+            const msg = `Elixir restored ${user.name}'s mana.`;
+            return [
+              new BattleEvent(msg, () => {
+                user.mp += power;
+              }),
+            ];
+          }),
+        );
+      };
+    },
+  },
+  "Convert": {
+    "description": "Exchange between health and mana",
+    "minimum_level": 20,
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
+      const mp_ratio = user.mp / user.stats.max_mp;
+      const hp_ratio = user.hp / user.stats.max_hp;
+      if (mp_ratio >= hp_ratio) {
+        let amount = Math.floor(user.stats.max_mp / 4);
+        if (amount > user.mp) {
+          amount = user.mp;
+        }
+        return () => {
+          battle.events.push(
+            new BattleEvent(`${user.name} restored ${amount} health.`, () => {
+              user.hp += amount;
+              user.mp -= amount;
+            }),
+          );
+        };
+      }
+      let amount = Math.floor(user.stats.max_hp / 4);
+      if (amount >= user.hp) {
+        amount = user.hp - 1;
+      }
+      return () => {
+        battle.events.push(
+          new BattleEvent(`${user.name} restored ${amount} mana.`, () => {
+            user.hp -= amount;
+            user.mp += amount;
+          }),
+        );
+      };
+    },
+  },
+  "Pact": {
+    "description": "Sacrifice blood to damage everyone",
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      _skill: Upgrade,
+    ) => {
+      // Deals damage to both user and target based on user
+      // max HP. Will kill both if there is no healing and if
+      // target has less HP than user max HP.
+      // 1 damage immediately
+      // 20% of max hp per turn for 5 turns
+      // Balanced around the fact that it damages both equally
+      const power = Math.ceil(user.stats.max_hp / 5);
+      const user_has_bleed = user.has_effect("Bleed");
+      const target_has_bleed = target.has_effect("Bleed");
+      return () => {
+        user.apply_damage(1);
+        target.apply_damage(1);
+        if (user_has_bleed) {
+          battle.events.push(
+            new BattleEvent(`${user.name} is already bleeding.`),
+          );
+        } else {
+          user.add_effect(
+            new Effect("Bleed", 5, undefined, () => {
+              const msg = `${user.name} was damaged by Bleed.`;
+              return [
+                new BattleEvent(msg, () => {
+                  user.apply_damage(power, 1);
+                }),
+              ];
+            }),
+          );
+        }
+        if (target_has_bleed) {
+          battle.events.push(
+            new BattleEvent(`${target.name} is already bleeding.`),
+          );
+        } else {
+          target.add_effect(
+            new Effect("Bleed", 5, undefined, () => {
+              const msg = `${target.name} was damaged by Bleed.`;
+              return [
+                new BattleEvent(msg, () => {
+                  target.apply_damage(power, 1);
+                }),
+              ];
+            }),
+          );
+        }
       };
     },
   },
