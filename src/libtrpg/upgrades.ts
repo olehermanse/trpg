@@ -64,143 +64,20 @@ interface Upgrade {
 }
 
 const _all_upgrades = {
-  "Haste": {
-    "description": "Speed +1",
-    "max": 3,
-    "passive": (creature: Creature) => {
-      creature.stats.speed += 1;
-    },
-  },
-  "Vision": {
-    "description": "Light radius +1",
-    "max": 3,
-    "passive": (creature: Creature) => {
-      creature.stats.light += 1;
-    },
-  },
-  "Permahaste": {
-    "description": "Movement speed +1",
-    "keywords": ["permanent"],
-    "max": 3,
-    "passive": (creature: Creature) => {
-      creature.stats.movement_speed += 1;
-    },
-    "eligible": (creature: Creature) => {
-      return creature.count_upgrade("Haste") === 3;
-    },
-    "minimum_level": 10,
-  },
-  "Permavision": {
-    "description": "Light radius +1",
-    "keywords": ["permanent"],
-    "max": 3,
-    "passive": (creature: Creature) => {
-      creature.stats.light += 1;
-    },
-    "eligible": (creature: Creature) => {
-      return creature.count_upgrade("Vision") === 3;
-    },
-    "minimum_level": 10,
-  },
-  "Growth": {
-    "description": "5% more experience",
-    "max": 2,
-    "passive": (creature: Creature) => {
-      creature.stats.increased_xp += 5;
-    },
-    "minimum_level": 6,
-  },
-  "Permagrowth": {
-    "description": "3% more experience",
-    "keywords": ["permanent"],
-    "max": 2,
-    "passive": (creature: Creature) => {
-      creature.stats.increased_xp += 3;
-    },
-    "eligible": (creature: Creature) => {
-      return creature.count_upgrade("Growth") === 2;
-    },
-    "minimum_level": 10,
-  },
-  "Vitality": {
-    "description": "Max HP +10",
-    "max": 99,
-    "passive": (creature: Creature) => {
-      creature.stats.max_hp += 10;
-    },
-  },
-  "Physique": {
-    "description": "Strength +1",
-    "max": 99,
-    "passive": (creature: Creature) => {
-      creature.stats.strength += 1;
-    },
-    "minimum_level": 3,
-  },
-  "Willpower": {
-    "description": "Magic +1",
-    "max": 99,
-    "passive": (creature: Creature) => {
-      creature.stats.magic += 1;
-    },
-    "minimum_level": 3,
-  },
-  "Warrior": {
-    "description": "2x strength, 0.5x magic",
-    "keywords": ["class"],
-    "minimum_level": 10,
-    "passive": (creature: Creature) => {
-      creature.stats.strength *= 2;
-      creature.stats.magic = Math.floor(creature.stats.magic / 2);
-    },
-    "eligible": (creature: Creature) => {
-      return creature.get_upgrades_by_keyword("class").length === 0;
-    },
-  },
-  "Monk": {
-    "description": "+1 to all stats",
-    "keywords": ["class"],
-    "minimum_level": 10,
-    "passive": (creature: Creature) => {
-      creature.stats.strength += 1;
-      creature.stats.magic += 1;
-      creature.stats.speed += 1;
-      creature.stats.light += 1;
-      creature.stats.movement_speed += 1;
-      creature.stats.max_hp += 1;
-      creature.stats.max_mp += 1;
-    },
-    "eligible": (creature: Creature) => {
-      return creature.get_upgrades_by_keyword("class").length === 0;
-    },
-  },
-  "Mage": {
-    "description": "2x magic, 0.5x strength",
-    "keywords": ["class"],
-    "minimum_level": 10,
-    "passive": (creature: Creature) => {
-      creature.stats.magic *= 2;
-      creature.stats.strength = Math.floor(creature.stats.strength / 2);
-    },
-    "eligible": (creature: Creature) => {
-      return creature.get_upgrades_by_keyword("class").length === 0;
-    },
-  },
-  "Priest": {
-    "description": "2x healing, 0.5x strength",
-    "keywords": ["class"],
-    "minimum_level": 10,
-    "passive": (creature: Creature) => {
-      creature.stats.strength = Math.floor(creature.stats.strength / 2);
-    },
-    "boost": (skill: NamedUpgrade): number => {
-      if (has_keyword(skill, "healing")) {
-        return 100;
-      }
-      return 0;
-    },
-    "eligible": (creature: Creature) => {
-      return creature.get_upgrades_by_keyword("class").length === 0;
+  // "Special" skills (run, attack, forget attack)
+  "Run": {
+    "description": "Escape battle",
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      _battle: Battle,
+      _skill: NamedUpgrade,
+    ) => {
+      // Run from battle, getting 0 xp.
+      // If lower speed, enemy can attack and kill you first.
+      return () => {
+        user.run = true;
+      };
     },
   },
   "Attack": {
@@ -224,6 +101,19 @@ const _all_upgrades = {
       };
     },
   },
+  "Forget": {
+    "description": "Remove attack",
+    "minimum_level": 10,
+    "consumed": true,
+    "on_pickup": (creature: Creature) => {
+      creature.remove_upgrade("Attack");
+    },
+    "eligible": (creature: Creature) => {
+      return creature.has_upgrade("Attack") &&
+        creature.get_skill_names().length == 8;
+    },
+  },
+  // Other skills:
   "Rend": {
     "description": "Causes enemy to bleed",
     "skill": (
@@ -372,6 +262,66 @@ const _all_upgrades = {
       };
     },
   },
+  "Pact": {
+    "description": "Sacrifice blood to damage everyone",
+    "eligible": (creature: Creature) => {
+      return creature.get_skill_names().length >= 4;
+    },
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      _skill: NamedUpgrade,
+    ) => {
+      // Deals damage to both user and target based on user
+      // max HP. Will kill both if there is no healing and if
+      // target has less HP than user max HP.
+      // 1 damage immediately
+      // 20% of max hp per turn for 5 turns
+      // Balanced around the fact that it damages both equally
+      const power = Math.ceil(user.stats.max_hp / 5);
+      const user_has_bleed = user.has_effect("Bleed");
+      const target_has_bleed = target.has_effect("Bleed");
+      return () => {
+        user.apply_damage(1);
+        target.apply_damage(1);
+        if (user_has_bleed) {
+          battle.events.push(
+            new BattleEvent(`${user.name} is already bleeding.`),
+          );
+        } else {
+          user.add_effect(
+            new Effect("Bleed", 5, undefined, () => {
+              const msg = `${user.name} was damaged by Bleed.`;
+              return [
+                new BattleEvent(msg, () => {
+                  user.apply_damage(power, 1);
+                }),
+              ];
+            }),
+          );
+        }
+        if (target_has_bleed) {
+          battle.events.push(
+            new BattleEvent(`${target.name} is already bleeding.`),
+          );
+        } else {
+          target.add_effect(
+            new Effect("Bleed", 5, undefined, () => {
+              const msg = `${target.name} was damaged by Bleed.`;
+              return [
+                new BattleEvent(msg, () => {
+                  target.apply_damage(power, 1);
+                }),
+              ];
+            }),
+          );
+        }
+      };
+    },
+  },
+  // Mana restoration skills
+  // These enable infinite battles, so might remove them
   "Elixir": {
     "description": "Restore mana",
     "minimum_level": 10,
@@ -451,90 +401,145 @@ const _all_upgrades = {
       };
     },
   },
-  "Pact": {
-    "description": "Sacrifice blood to damage everyone",
+  // Passives:
+  "Haste": {
+    "description": "Speed +1",
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.speed += 1;
+    },
+  },
+  "Vision": {
+    "description": "Light radius +1",
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.light += 1;
+    },
+  },
+  "Permahaste": {
+    "description": "Movement speed +1",
+    "keywords": ["permanent"],
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.movement_speed += 1;
+    },
     "eligible": (creature: Creature) => {
-      return creature.get_skill_names().length >= 4;
+      return creature.count_upgrade("Haste") === 3;
     },
-    "skill": (
-      user: Creature,
-      target: Creature,
-      battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // Deals damage to both user and target based on user
-      // max HP. Will kill both if there is no healing and if
-      // target has less HP than user max HP.
-      // 1 damage immediately
-      // 20% of max hp per turn for 5 turns
-      // Balanced around the fact that it damages both equally
-      const power = Math.ceil(user.stats.max_hp / 5);
-      const user_has_bleed = user.has_effect("Bleed");
-      const target_has_bleed = target.has_effect("Bleed");
-      return () => {
-        user.apply_damage(1);
-        target.apply_damage(1);
-        if (user_has_bleed) {
-          battle.events.push(
-            new BattleEvent(`${user.name} is already bleeding.`),
-          );
-        } else {
-          user.add_effect(
-            new Effect("Bleed", 5, undefined, () => {
-              const msg = `${user.name} was damaged by Bleed.`;
-              return [
-                new BattleEvent(msg, () => {
-                  user.apply_damage(power, 1);
-                }),
-              ];
-            }),
-          );
-        }
-        if (target_has_bleed) {
-          battle.events.push(
-            new BattleEvent(`${target.name} is already bleeding.`),
-          );
-        } else {
-          target.add_effect(
-            new Effect("Bleed", 5, undefined, () => {
-              const msg = `${target.name} was damaged by Bleed.`;
-              return [
-                new BattleEvent(msg, () => {
-                  target.apply_damage(power, 1);
-                }),
-              ];
-            }),
-          );
-        }
-      };
-    },
-  },
-
-  "Run": {
-    "description": "Escape battle",
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      _battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // Run from battle, getting 0 xp.
-      // If lower speed, enemy can attack and kill you first.
-      return () => {
-        user.run = true;
-      };
-    },
-  },
-  "Forget": {
-    "description": "Remove attack",
     "minimum_level": 10,
-    "consumed": true,
-    "on_pickup": (creature: Creature) => {
-      creature.remove_upgrade("Attack");
+  },
+  "Permavision": {
+    "description": "Light radius +1",
+    "keywords": ["permanent"],
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.light += 1;
     },
     "eligible": (creature: Creature) => {
-      return creature.has_upgrade("Attack") &&
-        creature.get_skill_names().length == 8;
+      return creature.count_upgrade("Vision") === 3;
+    },
+    "minimum_level": 10,
+  },
+  "Growth": {
+    "description": "5% more experience",
+    "max": 2,
+    "passive": (creature: Creature) => {
+      creature.stats.increased_xp += 5;
+    },
+    "minimum_level": 6,
+  },
+  "Permagrowth": {
+    "description": "3% more experience",
+    "keywords": ["permanent"],
+    "max": 2,
+    "passive": (creature: Creature) => {
+      creature.stats.increased_xp += 3;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.count_upgrade("Growth") === 2;
+    },
+    "minimum_level": 10,
+  },
+  "Vitality": {
+    "description": "Max HP +10",
+    "max": 99,
+    "passive": (creature: Creature) => {
+      creature.stats.max_hp += 10;
+    },
+  },
+  "Physique": {
+    "description": "Strength +1",
+    "max": 99,
+    "passive": (creature: Creature) => {
+      creature.stats.strength += 1;
+    },
+    "minimum_level": 3,
+  },
+  "Willpower": {
+    "description": "Magic +1",
+    "max": 99,
+    "passive": (creature: Creature) => {
+      creature.stats.magic += 1;
+    },
+    "minimum_level": 3,
+  },
+  // Classes:
+  "Warrior": {
+    "description": "2x strength, 0.5x magic",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength *= 2;
+      creature.stats.magic = Math.floor(creature.stats.magic / 2);
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
+  "Monk": {
+    "description": "+1 to all stats",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength += 1;
+      creature.stats.magic += 1;
+      creature.stats.speed += 1;
+      creature.stats.light += 1;
+      creature.stats.movement_speed += 1;
+      creature.stats.max_hp += 1;
+      creature.stats.max_mp += 1;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
+  "Mage": {
+    "description": "2x magic, 0.5x strength",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.magic *= 2;
+      creature.stats.strength = Math.floor(creature.stats.strength / 2);
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
+  "Priest": {
+    "description": "2x healing, 0.5x strength",
+    "keywords": ["class"],
+    "minimum_level": 10,
+    "passive": (creature: Creature) => {
+      creature.stats.strength = Math.floor(creature.stats.strength / 2);
+    },
+    "boost": (skill: NamedUpgrade): number => {
+      if (has_keyword(skill, "healing")) {
+        return 100;
+      }
+      return 0;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.get_upgrades_by_keyword("class").length === 0;
     },
   },
 } as const;
