@@ -181,7 +181,13 @@ export function randpercent(threshold: number): boolean {
   return false;
 }
 
-export function cr_4_neighbors(pos: CR, up?: boolean, down?: boolean, left?:boolean, right?:boolean): CR[] {
+export function cr_4_neighbors(
+  pos: CR,
+  up?: boolean,
+  down?: boolean,
+  left?: boolean,
+  right?: boolean,
+): CR[] {
   const c = pos.c;
   const r = pos.r;
   const results = [];
@@ -198,4 +204,8 @@ export function cr_4_neighbors(pos: CR, up?: boolean, down?: boolean, left?:bool
     results.push(cr(c + 1, r));
   }
   return results;
+}
+
+export function xy_copy(pos: XY) {
+  return xy(pos.x, pos.y);
 }

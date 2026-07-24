@@ -1,8 +1,8 @@
 import { cr, randint } from "@olehermanse/utils/funcs.js";
 import { Entity, Zone } from "./game.ts";
-import { inside_rectangle, randpercent } from "../todo_utils";
+import { inside_rectangle } from "../todo_utils";
 
-export type RoomType = "generic" | "chest" | "empty";
+export type RoomType = "generic" | "chest" | "empty" | "spawn";
 
 function _chest_room(zone: Zone) {
   // room is 16 columns and 12 rows
@@ -39,9 +39,18 @@ function _generic_room(zone: Zone) {
   }
 }
 
+function _spawn_room(zone: Zone) {
+  const pos = cr(8, 9);
+  const entity = new Entity("pickaxe", pos, zone);
+  zone.append(entity);
+}
+
 function _generate_entities(zone: Zone) {
   if (zone.room_type === "empty") {
     return;
+  }
+  if (zone.room_type === "spawn") {
+    return _spawn_room(zone);
   }
   if (zone.room_type === "chest") {
     return _chest_room(zone);
@@ -54,14 +63,19 @@ function _generate_entities(zone: Zone) {
 
 function _select_room_type(zone: Zone) {
   if (zone.pos.c === 0 && zone.pos.r === 0) {
-    zone.room_type = "empty";
+    zone.room_type = "spawn";
     return;
   }
   if (inside_rectangle(zone.pos.c, zone.pos.r, -1, -1, 1, 1)) {
     zone.room_type = "generic";
     return;
   }
-  if (randpercent(10)) {
+  const percentage = randint(1, 100);
+  if (percentage <= 1) { // 1%
+    zone.room_type = "empty";
+    return;
+  }
+  if (percentage <= 1 + 10) { // 10%
     zone.room_type = "chest";
     return;
   }

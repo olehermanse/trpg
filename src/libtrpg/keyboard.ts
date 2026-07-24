@@ -2,7 +2,6 @@ export class Keyboard {
   state: Set<string> = new Set();
   press(key: string) {
     this.state.add(key);
-    console.log(key);
   }
   release(key: string) {
     this.state.delete(key);
