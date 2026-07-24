@@ -116,7 +116,7 @@ function start(canvas) {
     const scale = window.devicePixelRatio;
     let rows = 13;
     let columns = 20;
-    if (window.matchMedia("(max-width: 600px)").matches) {
+    if (window.matchMedia("screen and (orientation:portrait), (max-width: 600px)").matches) {
         rows = 17;
         columns = 15;
     }
