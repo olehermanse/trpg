@@ -10,7 +10,7 @@ function _chest_room(zone: Zone) {
   while (!zone.empty(pos)) {
     pos = cr(randint(7, 8), randint(5, 6));
   }
-  const entity = new Entity("chest", pos, zone);
+  const entity = new Entity("Chest", pos, zone);
   if (entity.cr.c >= 8) {
     entity.reversed = true;
   }
@@ -23,7 +23,7 @@ function _generic_room(zone: Zone) {
     while (!zone.empty(pos)) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     }
-    const entity = new Entity("crystal", pos, zone);
+    const entity = new Entity("Crystal", pos, zone);
     zone.append(entity);
   }
   for (let i = 0; i < 2; i++) {
@@ -31,7 +31,7 @@ function _generic_room(zone: Zone) {
     while (!zone.empty(pos)) {
       pos = cr(randint(1, zone.columns - 2), randint(2, zone.rows - 3));
     }
-    const entity = new Creature("skeleton", pos, zone, zone.game);
+    const entity = new Creature("Skeleton", pos, zone, zone.game);
     if (entity.cr.c > zone.columns / 2) {
       entity.reversed = true;
     }
@@ -41,7 +41,7 @@ function _generic_room(zone: Zone) {
 
 function _spawn_room(zone: Zone) {
   const pos = cr(8, 9);
-  const entity = new Entity("pickaxe", pos, zone);
+  const entity = new Entity("Pickaxe", pos, zone);
   zone.append(entity);
 }
 
@@ -130,13 +130,13 @@ function _generate_walls(zone: Zone) {
   for (let r = 0; r < zone.rows; r++) {
     if (r !== zone.left_entry) {
       zone.append(
-        new Entity("rock", cr(0, r), zone, randint(0, 2), randint(0, 1) === 0),
+        new Entity("Rock", cr(0, r), zone, randint(0, 2), randint(0, 1) === 0),
       );
     }
     if (r !== zone.right_entry) {
       zone.append(
         new Entity(
-          "rock",
+          "Rock",
           cr(zone.columns - 1, r),
           zone,
           randint(0, 2),
@@ -148,13 +148,13 @@ function _generate_walls(zone: Zone) {
   for (let c = 1; c < zone.columns - 1; c++) {
     if (c !== zone.top_entry) {
       zone.append(
-        new Entity("rock", cr(c, 0), zone, randint(0, 2), randint(0, 1) === 0),
+        new Entity("Rock", cr(c, 0), zone, randint(0, 2), randint(0, 1) === 0),
       );
     }
     if (c !== zone.bottom_entry) {
       zone.append(
         new Entity(
-          "rock",
+          "Rock",
           cr(c, zone.rows - 1),
           zone,
           randint(0, 2),

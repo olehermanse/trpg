@@ -12,6 +12,7 @@ import {
 } from "../libtrpg/game.ts";
 import { CR, XY } from "@olehermanse/utils";
 import { cr, wh, xy } from "@olehermanse/utils/funcs.js";
+import { UpgradeName } from "../libtrpg/upgrades.ts";
 
 // Resolution: 256x192
 
@@ -106,23 +107,26 @@ export class Animation {
 }
 
 const SPRITESHEET = {
-  player: new SpriteMetadata(0, 0, 2),
-  sword: new SpriteMetadata(1, 0, 2),
-  pickaxe: new SpriteMetadata(
+  Player: new SpriteMetadata(0, 0, 2),
+  Sword: new SpriteMetadata(1, 0, 2),
+  Pickaxe: new SpriteMetadata(
     1,
     2,
     2,
     new AnimationData([frame(0, 250), frame(1, 500)], false),
   ),
-  axe: new SpriteMetadata(1, 4, 2),
-  staff: new SpriteMetadata(1, 4, 2),
-  selector: new SpriteMetadata(2, 0, 2),
-  chest: new SpriteMetadata(3, 0),
-  rock: new SpriteMetadata(3, 1, 3),
-  crystal: new SpriteMetadata(3, 4),
-  skeleton: new SpriteMetadata(4, 0, 4),
-  fog: new SpriteMetadata(5, 0, 5),
-  skills: new SpriteMetadata(6, 0, 4),
+  Axe: new SpriteMetadata(1, 4, 2),
+  Staff: new SpriteMetadata(1, 4, 2),
+  Selector: new SpriteMetadata(2, 0, 2),
+  Chest: new SpriteMetadata(3, 0),
+  Rock: new SpriteMetadata(3, 1, 3),
+  Crystal: new SpriteMetadata(3, 4),
+  Skeleton: new SpriteMetadata(4, 0, 4),
+  Fog: new SpriteMetadata(5, 0, 5),
+  Attack: new SpriteMetadata(6, 0, 1),
+  Heal: new SpriteMetadata(6, 1, 1),
+  Might: new SpriteMetadata(6, 2, 1),
+  Run: new SpriteMetadata(6, 3, 1),
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
@@ -291,10 +295,10 @@ export class Painter {
   }
 
   draw_fog(tile: Tile) {
-    if (this.sprites["fog"].length < 5) {
+    if (this.sprites["Fog"].length < 5) {
       return;
     }
-    this.offscreen_drawer.sprite(this.sprites["fog"][tile.light], tile.xy);
+    this.offscreen_drawer.sprite(this.sprites["Fog"][tile.light], tile.xy);
   }
 
   draw_one_zone(zone: Zone) {
@@ -345,7 +349,7 @@ export class Painter {
 
   draw_battle_sprites(battle: Battle) {
     // TODO: Sprite anchor
-    this.offscreen_drawer.sprite(this.sprites["player"][0], xy(32, 64));
+    this.offscreen_drawer.sprite(this.sprites["Player"][0], xy(32, 64));
     this.offscreen_drawer.sprite(
       this.sprites[battle.enemy.name][3],
       xy(128, 64),
@@ -376,12 +380,20 @@ export class Painter {
     );
   }
 
+  get_skill_sprite(name: UpgradeName): ImageBitmap | null {
+    if (name in this.sprites) {
+      return this.sprites[name][0];
+    }
+    return null;
+  }
+
   draw_battle_menu(battle: Battle) {
     let y = 6;
     const skills = battle.skills;
     const lim = skills.length > 8 ? 8 : skills.length;
     const hovered = battle.hover_index;
     for (let i = 0; i < lim; ++i) {
+      const name = skills[i].name;
       let offset = 0;
       const rect = skills[i].rectangle;
       if (i === hovered) {
@@ -396,8 +408,12 @@ export class Painter {
         this.font,
         xy(174 + 4 + offset, y + 6),
       );
+      const sprite = this.get_skill_sprite(name);
+      if (sprite === null) {
+        continue;
+      }
       this.offscreen_drawer.sprite(
-        this.sprites["skills"][i], // TODO: Lookup
+        sprite,
         xy(174 + 77 - 16 - 2 + offset, y + 2),
       );
       y += 20 + 3;
@@ -438,7 +454,7 @@ export class Painter {
     }
     const frame = player.target.frame;
     this.offscreen_drawer.sprite(
-      this.sprites["selector"][frame],
+      this.sprites["Selector"][frame],
       player.target.xy,
       true,
     );
@@ -447,8 +463,8 @@ export class Painter {
   draw_player() {
     // TODO: Move this to a more "proper" animation system
     const player: Player = this.application.game.player;
-    const standing = this.sprites["player"][0];
-    const walking = this.sprites["player"][1];
+    const standing = this.sprites["Player"][0];
+    const walking = this.sprites["Player"][1];
     this.offscreen_drawer.sprite(
       player.walk_counter < 1 ? standing : walking,
       player.xy,
@@ -508,7 +524,7 @@ export class Painter {
     );
 
     this.offscreen_drawer.sprite(
-      this.sprites["player"][0],
+      this.sprites["Player"][0],
       xy(Math.floor(width / 2 - 8), height - 2 * 16),
     );
   }
