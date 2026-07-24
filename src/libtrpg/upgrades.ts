@@ -43,22 +43,47 @@ interface Upgrade {
   eligible?: UpgradeEligible;
   max?: number; // Default is only 1
   skill?: SkillPerform;
+  permanent?: true;
 }
 
 const _all_upgrades = {
   "Haste": {
     "description": "Speed +1",
-    "max": 5,
+    "max": 3,
     "passive": (creature: Creature) => {
       creature.stats.speed += 1;
     },
   },
   "Vision": {
     "description": "Light radius +1",
-    "max": 5,
+    "max": 3,
     "passive": (creature: Creature) => {
       creature.stats.light += 1;
     },
+  },
+  "Permahaste": {
+    "description": "Movement speed +1",
+    "permanent": true,
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.movement_speed += 1;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.count_upgrade("Haste") === 3;
+    },
+    "minimum_level": 10,
+  },
+  "Permavision": {
+    "description": "Light radius +1",
+    "permanent": true,
+    "max": 3,
+    "passive": (creature: Creature) => {
+      creature.stats.light += 1;
+    },
+    "eligible": (creature: Creature) => {
+      return creature.count_upgrade("Vision") === 3;
+    },
+    "minimum_level": 10,
   },
   "Vitality": {
     "description": "Max HP +5",
@@ -367,18 +392,30 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   // 3. Add guaranteed options:
   const choices: UpgradeName[] = [];
 
-  if (player.stats.light < 5 || player.stats.speed < 5) {
-    if (player.stats.light < player.stats.speed) {
-      unlocked.splice(unlocked.indexOf("Vision"), 1);
-      choices.push("Vision");
-    } else if (player.stats.light > player.stats.speed) {
-      unlocked.splice(unlocked.indexOf("Haste"), 1);
-      choices.push("Haste");
-    } else {
-      unlocked.splice(unlocked.indexOf("Vision"), 1);
-      choices.push("Vision");
-      unlocked.splice(unlocked.indexOf("Haste"), 1);
-      choices.push("Haste");
+  const hastes = player.count_upgrade("Haste") +
+    player.count_upgrade("Permahaste");
+  const visions = player.count_upgrade("Vision") +
+    player.count_upgrade("Permavision");
+  if (player.level <= 5 && hastes < 3 || visions < 3) {
+    const try_to_add: UpgradeName[] = [];
+
+    if (hastes === visions) {
+      try_to_add.push("Haste");
+      try_to_add.push("Vision");
+    } else if (hastes < visions) {
+      try_to_add.push("Haste");
+      try_to_add.push("Vision");
+    } else if (visions < hastes) {
+      try_to_add.push("Vision");
+      try_to_add.push("Haste");
+    }
+
+    for (const name of try_to_add) {
+      if (_is_available(upgrade(name), player)) {
+        unlocked.splice(unlocked.indexOf(name), 1);
+        choices.push(name);
+        break;
+      }
     }
   }
 
@@ -403,7 +440,11 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
 
 export function upgrade(name: UpgradeName): NamedUpgrade {
   const obj = { "name": name, ...all_upgrades[name] };
-  obj.description = text_wrap(obj.description, 11);
+  let description = obj.description;
+  if (obj.permanent === true) {
+    description += ". Permanent.";
+  }
+  obj.description = text_wrap(description, 11);
   return obj;
 }
 

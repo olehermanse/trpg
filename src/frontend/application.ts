@@ -1,7 +1,27 @@
-import { Battle, Enemy, Game } from "../libtrpg/game.ts";
+import { Battle, Enemy, Game, GameSave } from "../libtrpg/game.ts";
 import { Painter } from "./painter.ts";
 import type { XY } from "@olehermanse/utils";
-import { cr, Grid, OXY, oxy } from "@olehermanse/utils/funcs.js";
+import {
+  cr,
+  get_cookie,
+  Grid,
+  OXY,
+  oxy,
+  set_cookie,
+} from "@olehermanse/utils/funcs.js";
+
+function get_save(): GameSave {
+  const cookie = get_cookie("trpg_save_data");
+  if (cookie === null) {
+    return { permanents: [] };
+  }
+  const save: GameSave = JSON.parse(cookie);
+  return save;
+}
+
+function put_save(save: GameSave) {
+  set_cookie("trpg_save_data", JSON.stringify(save));
+}
 
 class Application {
   canvas: HTMLCanvasElement;
@@ -43,7 +63,8 @@ class Application {
     this.grid_height = this.rows * this.grid_size;
 
     const grid = new Grid(this.width, this.height, this.columns, this.rows);
-    this.game = new Game(grid);
+    this.game = new Game(grid, get_save());
+    this.game.player.save_function = put_save;
     this.painter = new Painter(this, canvas, columns, rows, 16);
     this.mouse = null;
 
