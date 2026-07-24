@@ -1,35 +1,45 @@
 {
-    "lint": {
-      "include": [
-        "src/",
-        "test/"
+  "compilerOptions": {
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ]
+  },
+  "lock": false,
+  "nodeModulesDir": "auto",
+  "lint": {
+    "include": [
+      "src/",
+      "test/"
+    ],
+    "exclude": [
+      "dist/",
+      "node_modelues/"
+    ],
+    "rules": {
+      "tags": [
+        "recommended"
       ],
+      "include": [],
       "exclude": [
-        "dist/",
-        "node_modelues/"
-      ],
-      "rules": {
-        "tags": [
-          "recommended"
-        ],
-        "include": [],
-        "exclude": [
-          "no-explicit-any",
-          "no-inferrable-types",
-          "no-window",
-          "no-window-prefix",
-          "no-deprecated-deno-api"
-        ]
-      }
-    },
-    "fmt": {
-      "include": [
-        "src/",
-        "test/"
-      ],
-      "exclude": [
-        "dist/",
-        "node_modelues/"
+        "no-explicit-any",
+        "no-inferrable-types",
+        "no-window",
+        "no-window-prefix",
+        "no-deprecated-deno-api"
       ]
     }
+  },
+  "fmt": {
+    "include": [
+      "src/",
+      "test/",
+      "deno.json"
+    ],
+    "exclude": [
+      "dist/",
+      "node_modelues/"
+    ]
   }
+}
