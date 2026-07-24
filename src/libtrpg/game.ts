@@ -14,18 +14,20 @@ import {
 import {
   get_upgrade_choices,
   NamedUpgrade,
+  skill,
   upgrade,
   UpgradeName,
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
 import { Keyboard } from "./keyboard.ts";
-import { cr_4_neighbors, Rectangle, rectangle } from "../todo_utils.ts";
+import { cr_4_neighbors, inside, Rectangle, rectangle } from "../todo_utils.ts";
 import {
   Animation,
   get_sprite_metadata,
   SpriteMetadata,
   SpriteName,
 } from "../frontend/painter.ts";
+import { SkillApply } from "./upgrades.ts";
 
 const DIAG = 1.42;
 const BASE_SPEED = 16.0;
@@ -180,8 +182,8 @@ export class Creature extends Entity {
     return count;
   }
 
-  get_skill_names() {
-    const names = [];
+  get_skill_names(): UpgradeName[] {
+    const names: UpgradeName[] = [];
     for (const x of this.upgrades) {
       if (x.skill === undefined) {
         continue;
@@ -753,15 +755,62 @@ export class Enemy extends Creature {
 }
 
 export class BattleSkill {
-  constructor(public rectangle: Rectangle, public name: string) {}
+  constructor(public rectangle: Rectangle, public name: UpgradeName) {}
+}
+
+export class BattleIntent {
+  constructor(
+    public skill: BattleSkill,
+    public user: Creature,
+    public target: Creature,
+    public battle: Battle,
+  ) {
+  }
+
+  perform(): BattleEvent[] {
+    const func = skill(this.skill.name);
+    const apply = func(this.user, this.target);
+    const name = this.user.name[0].toUpperCase() + this.user.name.slice(1);
+    const message = `${name} used ${this.skill.name}.`;
+    const event = new BattleEvent(message, apply);
+    return [event];
+  }
+}
+
+export class BattleEvent {
+  done: boolean = false;
+  ms: number = 0;
+  text: string = "";
+  constructor(public msg: string, public apply: SkillApply) {
+  }
+
+  tick(ms: number) {
+    if (this.done) {
+      return;
+    }
+    this.ms += ms;
+    const n = Math.floor(this.ms / 50);
+    this.text = this.msg.substring(0, n);
+    if (this.ms > this.msg.length * 50 + 250) {
+      this.apply();
+      this.done = true;
+    }
+  }
 }
 
 export class Battle {
   mouse: XY | null = null;
   skills: BattleSkill[];
+  intents: BattleIntent[] = [];
+  events: BattleEvent[] = [];
+
+  hover_index: number | null = null;
+
+  current_event: BattleEvent | null = null;
+
   constructor(public player: Player, public enemy: Enemy) {
     let y = 6;
-    const skills = this.player.get_skill_names();
+    const skills: UpgradeName[] = this.player.get_skill_names();
     const lim = skills.length > 8 ? 8 : skills.length;
     this.skills = [];
     for (let i = 0; i < lim; ++i) {
@@ -772,11 +821,93 @@ export class Battle {
     }
   }
 
+  _sort() {
+    return; // TODO
+  }
+
+  _get_intents(): BattleIntent[] {
+    this._sort();
+    const element = this.intents.shift();
+    if (element === undefined) {
+      return [];
+    }
+    return [element];
+  }
+
+  advance() {
+    if (this.current_event !== null) {
+      if (this.current_event.done) {
+        this.current_event = null;
+      } else {
+        return;
+      }
+    }
+    console.assert(this.current_event === null);
+    const event = this.events.shift();
+    if (event !== undefined) {
+      this.current_event = event;
+      return;
+    }
+    console.assert(this.events.length === 0);
+    if (this.intents.length === 0) {
+      return;
+    }
+    console.assert(this.intents.length > 0);
+    while (this.events.length === 0 && this.intents.length > 0) {
+      const intents: BattleIntent[] = this._get_intents();
+      for (const intent of intents) {
+        for (const event of intent.perform()) {
+          this.events.push(event);
+        }
+      }
+    }
+
+    this.current_event = this.events.shift() ?? null;
+  }
+
   hover(position: XY) {
     this.mouse = position;
+    for (let i = 0; i < this.skills.length; i++) {
+      if (inside(this.mouse, this.skills[i].rectangle)) {
+        this.hover_index = i;
+        return;
+      }
+    }
+    this.hover_index = null;
   }
   click(position: XY) {
+    if (this.current_event !== null) {
+      return;
+    }
     this.hover(position);
+    if (this.hover_index === null) {
+      return;
+    }
+    this.intents.push(
+      new BattleIntent(
+        this.skills[this.hover_index],
+        this.player,
+        this.enemy,
+        this,
+      ),
+    );
+    this.intents.push(
+      new BattleIntent(this.skills[0], this.enemy, this.player, this),
+    );
+    this.advance();
+  }
+
+  tick(ms: number) {
+    if (
+      this.current_event === null && this.events.length === 0 &&
+      this.intents.length === 0
+    ) {
+      return;
+    }
+    if (this.current_event !== null) {
+      this.current_event.tick(ms);
+    }
+    this.advance();
   }
 }
 
@@ -1146,6 +1277,9 @@ export class Game {
       if (this.player.target === null) {
         this.keyboard_update();
       }
+    }
+    if (this.state === "battle") {
+      this.battle?.tick(ms);
     }
   }
 }
