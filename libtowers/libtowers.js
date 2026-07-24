@@ -28,6 +28,9 @@ class Tower {
       this.range = 2.0;
     }
   }
+  level_factor(){
+    return 1 + (0.9 * (this.level - 1));
+  }
   tick(ms) {
     if (["rock", "bank"].includes(this.name)) {
       return;
@@ -39,11 +42,11 @@ class Tower {
         this.intensity = 1.0;
       }
       if (this.name === "slow") {
-        const slow_factor = this.level * this.slow * this.intensity * sec;
+        const slow_factor = this.level_factor() * this.slow * this.intensity * sec;
         this.target.slow += slow_factor; // squares per second
         this.target.slow_time += 2 * slow_factor; // seconds
       }
-      this.target.health -= dps(this.level * this.dps * this.intensity, ms);
+      this.target.health -= dps(this.level_factor() * this.dps * this.intensity, ms);
       this.rotation = get_rotation(this, this.target);
     }
   }
@@ -438,7 +441,7 @@ class Game {
     let n = 0;
     for (let t of this.towers) {
       if (t.name === "bank") {
-        n += t.level;
+        n += t.level_factor();
       }
     }
     return n;
