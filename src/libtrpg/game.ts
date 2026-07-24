@@ -2,11 +2,15 @@ import { CR, XY } from "@olehermanse/utils";
 import {
   array_remove,
   cr,
+  cr_4_neighbors,
   cr_to_xy,
   distance_cr,
   distance_xy,
   Grid,
+  inside,
   limit,
+  Rectangle,
+  rectangle,
   WH,
   wh,
   xy,
@@ -22,7 +26,6 @@ import {
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
 import { Keyboard } from "./keyboard.ts";
-import { cr_4_neighbors, inside, Rectangle, rectangle } from "../todo_utils.ts";
 import {
   Animation,
   get_sprite_metadata,
