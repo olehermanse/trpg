@@ -1,5 +1,6 @@
 /// <reference lib="deno.ns" />
 
+console.log("Link: http://127.0.0.1:3000");
 Deno.serve(
   { port: 3000, hostname: "0.0.0.0" },
   handle_http,

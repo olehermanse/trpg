@@ -174,7 +174,6 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
     unlocked.splice(i, 1);
     choices.push(name);
   }
-  console.log(choices);
 
   // 5. Sort:
   const sorted: NamedUpgrade[] = [];
@@ -183,7 +182,6 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
       sorted.push(upgrade(<UpgradeName> name));
     }
   }
-  console.log(sorted);
 
   return sorted;
 }
