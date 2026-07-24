@@ -151,7 +151,7 @@ export class Target {
 }
 
 export class Creature extends Entity {
-  level = 1;
+  level: number;
   xp = 0;
   stats: Stats;
   hp: number;
@@ -165,9 +165,16 @@ export class Creature extends Entity {
   game: Game;
   run: boolean = false;
 
-  constructor(name: SpriteName, pos: CR, zone: Zone, game: Game) {
+  constructor(
+    name: SpriteName,
+    level: number,
+    pos: CR,
+    zone: Zone,
+    game: Game,
+  ) {
     super(name, pos, zone);
     this.game = game;
+    this.level = level;
     this.upgrades = [upgrade("Attack"), upgrade("Run")];
     this.stats = new Stats(this.level);
     this.hp = this.stats.max_hp;
@@ -280,20 +287,8 @@ export class Creature extends Entity {
 
 export class Player extends Creature {
   constructor(pos: CR, zone: Zone, game: Game) {
-    super("Player", pos, zone, game);
+    super("Player", 1, pos, zone, game);
     this.defog();
-  }
-
-  // Called on level up, after player has chosen upgrade.
-  on_level_up() {
-    const half_hp = Math.floor(this.stats.max_hp);
-    const half_mp = Math.floor(this.stats.max_mp);
-    if (this.hp < half_hp) {
-      this.hp = half_hp;
-    }
-    if (this.mp < half_mp) {
-      this.mp = half_mp;
-    }
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -523,9 +518,9 @@ export class Tile {
     return this.entities.length === 0;
   }
 
-  get_enemy(): Creature | null {
+  get_enemy(): Enemy | null {
     for (const e of this.entities) {
-      if (e instanceof Creature) {
+      if (e instanceof Enemy) {
         return e;
       }
     }
@@ -836,8 +831,14 @@ export class ZoneTransition {
 }
 
 export class Enemy extends Creature {
-  constructor(name: SpriteName, pos: CR, zone: Zone, game: Game) {
-    super(name, pos, zone, game);
+  constructor(
+    name: SpriteName,
+    level: number,
+    pos: CR,
+    zone: Zone,
+    game: Game,
+  ) {
+    super(name, level, pos, zone, game);
   }
 }
 
@@ -856,7 +857,7 @@ export class BattleIntent {
 
   perform(): BattleEvent[] {
     const func = skill(this.skill.name);
-    const apply = func(this.user, this.target);
+    const apply = func(this.user, this.target, this.battle);
     let message = `${this.user.name} used ${this.skill.name}.`;
     if (this.skill.name === "Run") {
       message = "";
@@ -870,14 +871,19 @@ export class BattleEvent {
   done: boolean = false;
   ms: number = 0;
   text: string = "";
+  clicked: boolean = false;
   constructor(public msg: string, public apply?: SkillApply) {
   }
 
+  click() {
+    this.clicked = true;
+  }
   tick(ms: number) {
     if (this.done) {
       return;
     }
-    this.ms += ms;
+    const speed = this.clicked ? 10.0 : 1.0;
+    this.ms += speed + ms;
     const n = Math.floor(this.ms / 50);
     this.text = this.msg.substring(0, n);
     if (this.ms > this.msg.length * 50 + 250) {
@@ -988,21 +994,16 @@ export class Battle {
     return this.state;
   }
 
-  _process_current_event() {
-    // If there is an event, only continue if it's done:
-    if (this.current_event === null) {
-      return;
-    }
-    if (this.current_event.done) {
-      this.current_event = null;
-    }
-  }
-
   _process_event_queue() {
     console.assert(this.current_event === null);
     const event = this.events.shift();
     if (event !== undefined) {
       this.current_event = event;
+      if (this.current_event.msg === "") {
+        this.current_event.apply?.();
+        this.current_event = null;
+        this._process_event_queue();
+      }
     }
   }
 
@@ -1027,10 +1028,15 @@ export class Battle {
       console.assert(this.intents.length === 0);
     }
 
-    this._process_current_event();
     if (this.current_event !== null) {
-      return;
+      if (this.current_event.done && this.current_event.clicked) {
+        this.current_event = null;
+      } else {
+        return;
+      }
     }
+
+    console.assert(this.current_event === null);
     this._process_event_queue();
     if (this.current_event !== null) {
       return;
@@ -1090,6 +1096,11 @@ export class Battle {
   }
   click(position: XY) {
     if (this.current_event !== null) {
+      if (this.current_event.done) {
+        this.current_event = null;
+        return;
+      }
+      this.current_event.click();
       return;
     }
     if (this.state !== "skill_select") {
@@ -1154,7 +1165,7 @@ export class Game {
     this.battle = null;
   }
 
-  start_battle(player: Player, enemy: Creature) {
+  start_battle(player: Player, enemy: Enemy) {
     this.battle = new Battle(player, enemy);
     this.state = "battle";
   }
@@ -1362,9 +1373,12 @@ export class Game {
   level_up_click(position: XY) {
     for (const x of this.choices) {
       if (x.is_inside(position)) {
+        const missing_hp = this.player.stats.max_hp - this.player.hp;
+        const missing_mp = this.player.stats.max_mp - this.player.mp;
         this.player.add_upgrade(upgrade(x.name));
-        this.player.on_level_up();
-        this.state = "zone";
+        this.player.hp = this.player.stats.max_hp - missing_hp;
+        this.player.mp = this.player.stats.max_mp - missing_mp;
+        this.goto_state("zone");
         this.player.defog();
         return;
       }
