@@ -7,7 +7,6 @@ import {
   Grid,
   OXY,
   oxy,
-  set_cookie,
 } from "@olehermanse/utils/funcs.js";
 
 function get_save(): GameSave {
@@ -19,8 +18,12 @@ function get_save(): GameSave {
   return save;
 }
 
+function set_permanent_cookie(key: string, value: string) {
+  document.cookie = `${key}=${value}; SameSite=None; Secure; Max-Age=31536000; Path=/`;
+}
+
 function put_save(save: GameSave) {
-  set_cookie("trpg_save_data", JSON.stringify(save));
+  set_permanent_cookie("trpg_save_data", JSON.stringify(save));
 }
 
 class Application {
@@ -118,6 +121,11 @@ class Application {
 
   mouse_click(pos: XY) {
     this.game.click(pos);
+    if (this.game.restart === true) {
+      const grid = new Grid(this.width, this.height, this.columns, this.rows);
+      this.game = new Game(grid, get_save());
+      this.game.player.save_function = put_save;
+    }
   }
 
   mouse_release(_pos: XY) {}

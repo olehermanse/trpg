@@ -745,8 +745,9 @@ export type GameState =
   | "level_up"
   | "loading"
   | "world_map"
+  | "battle"
   | "game_over"
-  | "battle";
+  | "retry";
 
 export class Choice {
   pos: XY;
@@ -1275,6 +1276,7 @@ export class Game {
   zones: Record<string, Zone> = {};
   choices: Choice[];
   battle: Battle | null;
+  restart: boolean = false;
   constructor(public grid: Grid, save?: GameSave) {
     this.current_zone = new Zone(grid, this, cr(0, 0));
     this.put_zone(this.current_zone);
@@ -1614,6 +1616,10 @@ export class Game {
     if (this.disabled_clicks_ms > 0) {
       return;
     }
+    if (this.state === "retry") {
+      this.restart = true;
+      return;
+    }
     if (this.state === "battle" && this.battle !== null) {
       this.battle.click(position);
       return;
@@ -1652,6 +1658,7 @@ export class Game {
 
     if (player.hp === 0) {
       this.goto_state("game_over");
+      this.disable_clicks(3000);
       this.battle = null;
       return;
     }
@@ -1668,6 +1675,9 @@ export class Game {
       if (this.disabled_clicks_ms <= 0) {
         this.disabled_clicks_ms = 0;
       }
+    }
+    if (this.state === "game_over" && this.disabled_clicks_ms <= 0) {
+      this.goto_state("retry");
     }
     if (this.transition !== null) {
       this.transition.tick(ms);
