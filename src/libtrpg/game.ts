@@ -13,7 +13,7 @@ import {
 } from "../todo_utils";
 import { randint, xy } from "@olehermanse/utils/funcs.js";
 
-const BASE_SPEED = 150.0;
+const BASE_SPEED = 16.0;
 
 export class Entity {
   name: string;

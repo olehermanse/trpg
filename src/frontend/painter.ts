@@ -32,29 +32,43 @@ export class Painter {
   ctx: CanvasRenderingContext2D;
   application: Application;
   real_scale: number;
+  columns: number;
+  rows: number;
+  size: number;
+  offscreen_canvas: OffscreenCanvas;
 
   spritesheet: Image;
   sprites: Record<string, ImageBitmap[]>;
 
   draw_sprite(sprite, pos: XY, reversed?: boolean) {
-    this.ctx.save();
-    this.ctx.translate(pos.x, pos.y);
+    const ctx = this.offscreen_canvas.getContext("2d");
+    ctx.save();
+    ctx.translate(pos.x, pos.y);
     if (reversed) {
-      this.ctx.scale(-1, 1);
-      this.ctx.translate(-this.real_scale, 0);
+      ctx.scale(-1, 1);
+      ctx.translate(-16, 0);
     }
-    this.ctx.drawImage(sprite, 0, 0);
-    this.ctx.restore();
+    ctx.drawImage(sprite, 0, 0);
+    ctx.restore();
   }
 
-  constructor(application: Application, ctx: CanvasRenderingContext2D) {
+  constructor(
+    application: Application,
+    ctx: CanvasRenderingContext2D,
+    columns: number,
+    rows: number,
+    size: number,
+  ) {
+    this.columns = columns;
+    this.rows = rows;
+    this.size = size;
     this.ctx = ctx;
+    this.offscreen_canvas = new OffscreenCanvas(columns * size, rows * size);
     this.application = application;
     this.real_scale = this.application.scale *
       this.application.game.grid.cell_width;
     this.spritesheet = new Image();
     this.sprites = {};
-    const size = this.application.game.grid.cell_width;
     let frames = [];
     for (const [key, value] of Object.entries(SPRITESHEET)) {
       this.sprites[key] = [];
@@ -72,8 +86,6 @@ export class Painter {
       Promise.all(
         frames.map((frame) =>
           createImageBitmap(this.spritesheet, frame.x, frame.y, 16, 16, {
-            resizeWidth: size * this.application.scale,
-            resizeHeight: size * this.application.scale,
             resizeQuality: "pixelated",
           })
         ),
@@ -94,8 +106,8 @@ export class Painter {
       return;
     }
     const player: Player = this.application.game.player;
-    const width = player.wh.width * this.application.scale;
-    const height = player.wh.height * this.application.scale;
+    const width = player.wh.width;
+    const height = player.wh.height;
     const pos = entity.cr;
     const x = Math.floor(pos.c * width);
     const y = Math.floor(pos.r * height);
@@ -107,8 +119,8 @@ export class Painter {
       return;
     }
     const player: Player = this.application.game.player;
-    const width = player.wh.width * this.application.scale;
-    const height = player.wh.height * this.application.scale;
+    const width = player.wh.width;
+    const height = player.wh.height;
     const x = Math.floor(pos.c * width);
     const y = Math.floor(pos.r * height);
     const fog = this.sprites["fog"];
@@ -147,8 +159,8 @@ export class Painter {
     }
     const half = this.application.game.current_zone.cell_width / 2;
     const player: Player = this.application.game.player;
-    const x = (player.destination.x - half) * this.application.scale;
-    const y = (player.destination.y - half) * this.application.scale;
+    const x = player.destination.x - half;
+    const y = player.destination.y - half;
     const frame = Math.round(0.6 * player.walk_counter) % 2;
     this.draw_sprite(this.sprites["selector"][frame], xy(x, y), true);
   }
@@ -160,18 +172,28 @@ export class Painter {
     }
     const player: Player = this.application.game.player;
     const half = this.application.game.current_zone.cell_width / 2;
-    const x = Math.floor(player.xy.x - half) * this.application.scale;
-    const y = Math.floor(player.xy.y - half) * this.application.scale;
+    const x = Math.floor(player.xy.x - half);
+    const y = Math.floor(player.xy.y - half);
 
     const standing = this.sprites["player"][0];
     const walking = this.sprites["player"][1];
-    this.draw_sprite(player.walk_counter < 1 ? standing : walking, xy(x, y));
+    this.draw_sprite(
+      player.walk_counter < 1 ? standing : walking,
+      xy(x, y),
+      player.reversed,
+    );
+  }
+
+  draw_offscreen_canvas() {
+    this.draw_zone();
   }
 
   draw() {
     const width = this.application.width;
     const height = this.application.height;
     Draw.rectangle(this.ctx, 0, 0, width, height, "black", "black");
-    this.draw_zone();
+    this.draw_offscreen_canvas();
+    const bmp = this.offscreen_canvas.transferToImageBitmap();
+    this.ctx.drawImage(bmp, 0, 0);
   }
 }

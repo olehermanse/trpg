@@ -10,14 +10,14 @@ function start(canvas: HTMLCanvasElement) {
     ctx,
     columns,
     rows,
-    1600,
-    1200,
+    12 * 16,
+    9 * 16,
     scale,
   );
-  // canvas.style.width = `${application.width}px`;
-  // canvas.style.height = `${application.height}px`;
-  canvas.width = application.real_width;
-  canvas.height = application.real_height;
+  canvas.style.width = `${application.width * 4}px`;
+  canvas.style.height = `${application.height * 4}px`;
+  canvas.width = 12 * 16;
+  canvas.height = 9 * 16;
   // application.setup_events(canvas, on_start_click, on_victory);
   const ms = 10;
   window.setInterval(() => {
