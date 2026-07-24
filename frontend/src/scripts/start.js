@@ -1,5 +1,5 @@
 const { CanvasManager } = require("./canvas_manager.js");
-const Painter = require("./painter.js");
+const { Painter } = require("./painter.js");
 
 let canvas_manager = null;
 
