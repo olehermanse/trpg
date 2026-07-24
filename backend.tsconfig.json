@@ -16,10 +16,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "outDir": "dist/backend"
+    "outDir": "dist/"
   },
   "include": [
-    "src",
-    "libtowers"
+    "src"
   ]
 }
