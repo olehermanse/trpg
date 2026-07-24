@@ -41,7 +41,7 @@ function _generic_room(zone: Zone) {
 
 function _spawn_room(zone: Zone) {
   const pos = cr(8, 9);
-  const entity = new Entity("Pickaxe", pos, zone);
+  const entity = new Entity("Sword", pos, zone);
   zone.append(entity);
 }
 
