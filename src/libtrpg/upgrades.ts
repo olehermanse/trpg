@@ -1,12 +1,12 @@
 import { randint } from "@olehermanse/utils/funcs.js";
-import { Player } from "./game.ts";
+import { Creature, Player } from "./game.ts";
 
 interface EligibleFunction {
-  (player: Player): boolean;
+  (creature: Creature): boolean;
 }
 
 interface ApplyFunction {
-  (player: Player): void;
+  (creature: Creature): void;
 }
 
 interface Upgrade {
@@ -18,44 +18,44 @@ interface Upgrade {
 const _all_upgrades = {
   "Haste": {
     "description": "Speed +1",
-    "apply": (player: Player) => {
-      player.stats.speed += 1;
+    "apply": (creature: Creature) => {
+      creature.stats.speed += 1;
     },
-    "eligible": (player: Player) => {
-      return player.stats.speed <= 10;
+    "eligible": (creature: Creature) => {
+      return creature.stats.speed <= 10;
     },
   },
   "Luck": {
     "description": "Luck +1",
-    "apply": (player: Player) => {
-      player.stats.luck += 1;
+    "apply": (creature: Creature) => {
+      creature.stats.luck += 1;
     },
   },
   "Physique": {
     "description": "Strength +1",
-    "apply": (player: Player) => {
-      player.stats.strength += 1;
+    "apply": (creature: Creature) => {
+      creature.stats.strength += 1;
     },
-    "eligible": (player: Player) => {
-      return player.level >= 3;
+    "eligible": (creature: Creature) => {
+      return creature.level >= 3;
     },
   },
   "Intellect": {
     "description": "Magic +1",
-    "apply": (player: Player) => {
-      player.stats.magic += 1;
+    "apply": (creature: Creature) => {
+      creature.stats.magic += 1;
     },
-    "eligible": (player: Player) => {
-      return player.level >= 3;
+    "eligible": (creature: Creature) => {
+      return creature.level >= 3;
     },
   },
   "Vision": {
     "description": "Light +1",
-    "apply": (player: Player) => {
-      player.stats.light += 1;
+    "apply": (creature: Creature) => {
+      creature.stats.light += 1;
     },
-    "eligible": (player: Player) => {
-      return player.stats.light <= 10;
+    "eligible": (creature: Creature) => {
+      return creature.stats.light <= 10;
     },
   },
 } as const;
