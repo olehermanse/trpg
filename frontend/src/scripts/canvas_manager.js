@@ -2,11 +2,12 @@ const { xy, number_string } = require("../../../libtowers/utils.js");
 const { Game, Tower } = require("../../../libtowers/libtowers.js");
 const Draw = require("./draw.js");
 const { UI } = require("./ui.js");
-const { FG, BG } = require("./colors.js");
+const { FG, BG, GREY } = require("./colors.js");
 
 class CanvasManager {
-    constructor(canvas, columns=20, rows=13, width=1200, scale=1.0) {
+    constructor(canvas, columns = 20, rows = 13, width = 1200, scale = 1.0) {
         this.canvas = canvas;
+        this.screenshot = null;
         this.columns = columns;
         this.rows = rows;
         this.scale = scale;
@@ -39,7 +40,7 @@ class CanvasManager {
         return Math.floor((p - offset) / this.grid_size);
     }
 
-    grid_to_canvas(p, offset=0) {
+    grid_to_canvas(p, offset = 0) {
         if (p === null) {
             return p;
         }
@@ -139,13 +140,20 @@ class CanvasManager {
     }
 
     draw(ctx) {
-        // Background:
-        Draw.rectangle(ctx, 0, 0, this.canvas_width, this.canvas_height, BG);
-
-        if (this.game.lives <= 0) {
-            Draw.text(ctx, this.canvas_width / 2, this.canvas_height / 2, "Game over", FG, this.canvas_width / 10);
+        if (this.game.lives <= 0 && this.screenshot != null) {
+            let w = this.canvas_width;
+            let h = this.canvas_height;
+            Draw.rectangle(ctx, 0, 0, w, h, GREY);
+            ctx.drawImage(this.screenshot, w / 4, h / 4, w / 2, h / 2);
+            let level = this.game.level;
+            let cash = this.game.money;
+            Draw.text(ctx, w / 2, 1 * h / 8, "Game over", BG, this.canvas_width / 12);
+            Draw.text(ctx, w / 2, h / 2 + 3 * h / 10, "Level: " + level, BG, this.canvas_width / 24);
+            Draw.text(ctx, w / 2, h / 2 + 4 * h / 10, "Cash: " + cash + "$", BG, this.canvas_width / 24);
             return;
         }
+        // Background:
+        Draw.rectangle(ctx, 0, 0, this.canvas_width, this.canvas_height, BG);
 
         // Grid:
         Draw.rectangle(ctx, 0, this.grid_start, this.grid_width, this.grid_height, FG);
@@ -154,10 +162,18 @@ class CanvasManager {
         this.draw_tiles(ctx);
         this.draw_towers(ctx);
         this.draw_enemies(ctx);
-        // UI:
-        this.draw_preview(ctx);
-        Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
-        this.ui.draw(ctx);
+
+        if (this.game.lives > 0) {
+            // UI:
+            this.draw_preview(ctx);
+            Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
+            this.ui.draw(ctx);
+        } else {
+            Draw.rectangle(ctx, 0, 0, this.width, this.grid_start, BG);
+            this.screenshot = new Image();
+            this.screenshot.src = this.canvas.toDataURL();
+            this.draw(ctx); // Screenshot taken, draw game over screen
+        }
     }
 
     mouse_click(x, y) {
