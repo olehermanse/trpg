@@ -404,18 +404,17 @@ export class Painter {
         rect.wh,
       );
       this.offscreen_drawer.text(
-        skills[i % 4].name,
+        skills[i].name,
         this.font,
         xy(174 + 4 + offset, y + 6),
       );
       const sprite = this.get_skill_sprite(name);
-      if (sprite === null) {
-        continue;
+      if (sprite !== null) {
+        this.offscreen_drawer.sprite(
+          sprite,
+          xy(174 + 77 - 16 - 2 + offset, y + 2),
+        );
       }
-      this.offscreen_drawer.sprite(
-        sprite,
-        xy(174 + 77 - 16 - 2 + offset, y + 2),
-      );
       y += 20 + 3;
     }
   }
