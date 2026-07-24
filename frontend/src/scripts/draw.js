@@ -3,7 +3,7 @@ const GRID_COLOR = "rgba(200,200,200,0.5)";
 
 function line(ctx, x1, y1, x2, y2, strokeStyle, lineWidth = 2) {
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
+    ctx.lineWidth = window.devicePixelRatio * lineWidth;
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
@@ -20,7 +20,7 @@ function circle(ctx, x, y, r, fill = null, stroke = null, lineWidth = 2) {
     }
     if (stroke != null) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = lineWidth;
+        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.stroke();
     }
 }
@@ -46,7 +46,7 @@ function triangle(ctx, x, y, r, angle, fill, stroke = null, lineWidth = 2) {
     }
     if (stroke) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = lineWidth;
+        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.stroke();
     }
 
@@ -60,7 +60,7 @@ function rectangle(ctx, x, y, w, h, fill = null, stroke = null, lineWidth = 2) {
     }
     if (stroke) {
         ctx.strokeStyle = stroke;
-        ctx.lineWidth = lineWidth;
+        ctx.lineWidth = window.devicePixelRatio * lineWidth;
         ctx.strokeRect(x, y, w, h);
     }
 }

@@ -5,13 +5,15 @@ const { UI } = require("./ui.js");
 const { FG, BG } = require("./colors.js");
 
 class CanvasManager {
-    constructor(columns=20, rows=13, width=1200) {
+    constructor(canvas, columns=20, rows=13, width=1200, scale=1.0) {
+        this.canvas = canvas;
         this.columns = columns;
         this.rows = rows;
-        this.width = width;
+        this.scale = scale;
+        this.width = this.scale * width;
 
-        this.canvas_width = width;
-        this.grid_width = width;
+        this.canvas_width = this.width;
+        this.grid_width = this.width;
 
         this.grid_size = this.grid_width / this.columns;
         this.grid_start = this.grid_size;
