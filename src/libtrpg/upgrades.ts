@@ -16,12 +16,15 @@ export function damage(
 }
 
 export type Keyword =
-  | "class"
+  | "skill"
   | "damaging"
-  | "dot"
   | "healing"
-  | "permanent"
-  | "skill";
+  | "buff"
+  | "debuff"
+  | "dot"
+  | "hot"
+  | "class"
+  | "permanent";
 
 export type SkillApply = () => void;
 export type EffectApply = () => BattleEvent[];
@@ -64,22 +67,7 @@ interface Upgrade {
 }
 
 const _all_upgrades = {
-  // "Special" skills (run, attack, forget attack)
-  "Run": {
-    "description": "Escape battle",
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      _battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // Run from battle, getting 0 xp.
-      // If lower speed, enemy can attack and kill you first.
-      return () => {
-        user.run = true;
-      };
-    },
-  },
+  // "Special" skills (attack, forget attack)
   "Attack": {
     "description": "Swing weapon",
     "eligible": (creature: Creature) => {
@@ -113,74 +101,7 @@ const _all_upgrades = {
         creature.get_skill_names().length == 8;
     },
   },
-  // Other skills:
-  "Rend": {
-    "description": "Causes enemy to bleed",
-    "skill": (
-      user: Creature,
-      target: Creature,
-      battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // About 1/3 as strong as normal attack, but applies bleed
-      // for same amount every turn for 5 turns. (So almost break even at 2nd turn).
-      const dmg = Math.floor(
-        damage(user.stats.strength, target.stats.strength, 1, 1) / 3,
-      );
-      const target_has_bleed = target.has_effect("Bleed");
-      return () => {
-        target.apply_damage(dmg);
-        if (target_has_bleed) {
-          battle.events.push(
-            new BattleEvent(`${target.name} is already bleeding.`),
-          );
-        } else {
-          target.add_effect(
-            new Effect("Bleed", 5, undefined, () => {
-              const msg = `${target.name} was damaged by Bleed.`;
-              return [
-                new BattleEvent(msg, () => {
-                  target.apply_damage(dmg, 1);
-                }),
-              ];
-            }),
-          );
-        }
-      };
-    },
-  },
-  "Might": {
-    "description": "+5 strength for 5 turns",
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // Doesn't scale with anything
-      // Something like:
-      // 2x5=10 extra damage, 5x1=5 healing
-      // Okay early, terrible later(?)
-      const has_might = user.has_effect("Might");
-      return () => {
-        if (has_might) {
-          battle.events.push(
-            new BattleEvent(`${user.name} already has Might.`),
-          );
-          return;
-        }
-
-        battle.events.push(
-          new BattleEvent(`${user.name}'s strength increased by Might.`),
-        );
-        user.add_effect(
-          new Effect("Might", 5, () => {
-            user.stats.strength += 5;
-          }),
-        );
-      };
-    },
-  },
+  // Healing:
   "Heal": {
     "description": "Use magic to heal yourself",
     "keywords": ["healing"],
@@ -216,6 +137,123 @@ const _all_upgrades = {
       };
     },
   },
+  "Nourish": {
+    "description": "Heal over time",
+    "keywords": ["healing", "buff", "hot", "skill"],
+    "mana_cost": (user: Creature) => {
+      return 1 + Math.floor(user.stats.max_mp / 6);
+    },
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      skill: NamedUpgrade,
+    ) => {
+      const cost = skill.mana_cost?.(user);
+      console.assert(cost !== undefined && cost !== 0 && user.mp >= cost);
+      if (cost === undefined || user.mp < cost) {
+        return () => {
+          battle.events.push(new BattleEvent("Not enough mana"));
+        };
+      }
+      const increase = (100 + 2 * user.stats.magic) / 100;
+      const boost = user.get_boost(skill);
+      const healing = Math.floor(increase * cost * boost / 5);
+
+      const has_buff = user.has_effect("Nourish");
+      return () => {
+        if (has_buff) {
+          battle.events.push(
+            new BattleEvent(`${user.name} already has Nourish.`),
+          );
+          return;
+        }
+        user.mp -= cost;
+        battle.events.push(
+          new BattleEvent(`${user.name} received Nourish.`),
+        );
+        user.add_effect(
+          new Effect("Nourish", 5, () => {
+          }, () => {
+            const msg = `Nourish healed ${user.name}.`;
+            return [
+              new BattleEvent(msg, () => {
+                user.apply_healing(healing);
+              }),
+            ];
+          }),
+        );
+      };
+    },
+  },
+  // Other skills:
+  "Rend": {
+    "description": "Causes enemy to bleed",
+    "skill": (
+      user: Creature,
+      target: Creature,
+      battle: Battle,
+      _skill: NamedUpgrade,
+    ) => {
+      // About 1/3 as strong as normal attack, but applies bleed
+      // for same amount every turn for 5 turns. (So almost break even at 2nd turn).
+      const dmg = Math.floor(
+        damage(user.stats.strength, target.stats.strength, 1, 1) / 3,
+      );
+      const target_has_bleed = target.has_effect("Bleed");
+      return () => {
+        target.apply_damage(dmg);
+        if (target_has_bleed) {
+          battle.events.push(
+            new BattleEvent(`${target.name} is already bleeding.`),
+          );
+          return;
+        }
+        target.add_effect(
+          new Effect("Bleed", 5, undefined, () => {
+            const msg = `${target.name} was damaged by Bleed.`;
+            return [
+              new BattleEvent(msg, () => {
+                target.apply_damage(dmg, 1);
+              }),
+            ];
+          }),
+        );
+      };
+    },
+  },
+  "Might": {
+    "description": "+5 strength for 5 turns",
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      battle: Battle,
+      _skill: NamedUpgrade,
+    ) => {
+      // Doesn't scale with anything
+      // Something like:
+      // 2x5=10 extra damage, 5x1=5 healing
+      // Okay early, terrible later(?)
+      const has_might = user.has_effect("Might");
+      return () => {
+        if (has_might) {
+          battle.events.push(
+            new BattleEvent(`${user.name} already has Might.`),
+          );
+          return;
+        }
+
+        battle.events.push(
+          new BattleEvent(`${user.name}'s strength increased by Might.`),
+        );
+        user.add_effect(
+          new Effect("Might", 5, () => {
+            user.stats.strength += 5;
+          }),
+        );
+      };
+    },
+  },
   "Fireball": {
     "description": "Damage and burn the enemy",
     "mana_cost": (user: Creature) => {
@@ -241,7 +279,7 @@ const _all_upgrades = {
       const burn_dmg = Math.floor(dmg / 10);
       const has_burn = target.has_effect("Burn");
       return () => {
-        target.hp -= dmg > 0 ? dmg : 1;
+        target.apply_damage(dmg);
         user.mp -= cost;
         if (has_burn) {
           return;
@@ -317,87 +355,6 @@ const _all_upgrades = {
             }),
           );
         }
-      };
-    },
-  },
-  // Mana restoration skills
-  // These enable infinite battles, so might remove them
-  "Elixir": {
-    "description": "Restore mana",
-    "minimum_level": 10,
-    "eligible": (creature: Creature) => {
-      return creature.get_skill_names().length >= 4;
-    },
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      // Restore mana per turn
-      // scales with magic stat, and to a very limited extent max mana
-      const power = 2 +
-        Math.floor(user.stats.magic / 10 + user.stats.max_mp / 100);
-      const has_elixir = user.has_effect("Elixir");
-      return () => {
-        if (has_elixir) {
-          battle.events.push(
-            new BattleEvent(`${user.name} Already has elixir.`),
-          );
-          return;
-        }
-        user.add_effect(
-          new Effect("Elixir", 3, undefined, () => {
-            const msg = `Elixir restored ${user.name}'s mana.`;
-            return [
-              new BattleEvent(msg, () => {
-                user.mp += power;
-              }),
-            ];
-          }),
-        );
-      };
-    },
-  },
-  "Convert": {
-    "description": "Exchange between health and mana",
-    "minimum_level": 20,
-    "eligible": (creature: Creature) => {
-      return creature.get_skill_names().length >= 4;
-    },
-    "skill": (
-      user: Creature,
-      _target: Creature,
-      battle: Battle,
-      _skill: NamedUpgrade,
-    ) => {
-      const mp_ratio = user.mp / user.stats.max_mp;
-      const hp_ratio = user.hp / user.stats.max_hp;
-      if (mp_ratio >= hp_ratio) {
-        let amount = Math.floor(user.stats.max_mp / 4);
-        if (amount > user.mp) {
-          amount = user.mp;
-        }
-        return () => {
-          battle.events.push(
-            new BattleEvent(`${user.name} restored ${amount} health.`, () => {
-              user.hp += amount;
-              user.mp -= amount;
-            }),
-          );
-        };
-      }
-      let amount = Math.floor(user.stats.max_hp / 4);
-      if (amount >= user.hp) {
-        amount = user.hp - 1;
-      }
-      return () => {
-        battle.events.push(
-          new BattleEvent(`${user.name} restored ${amount} mana.`, () => {
-            user.hp -= amount;
-            user.mp += amount;
-          }),
-        );
       };
     },
   },
@@ -540,6 +497,22 @@ const _all_upgrades = {
     },
     "eligible": (creature: Creature) => {
       return creature.get_upgrades_by_keyword("class").length === 0;
+    },
+  },
+  // Run is always last
+  "Run": {
+    "description": "Escape battle",
+    "skill": (
+      user: Creature,
+      _target: Creature,
+      _battle: Battle,
+      _skill: NamedUpgrade,
+    ) => {
+      // Run from battle, getting 0 xp.
+      // If lower speed, enemy can attack and kill you first.
+      return () => {
+        user.run = true;
+      };
     },
   },
 } as const;

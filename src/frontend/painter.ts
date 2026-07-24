@@ -281,35 +281,33 @@ const SPRITESHEET = {
       frame(3, 350),
     ], false),
   ),
-  // Skills:
+  // Row 7 - Special skills:
   Run: new SpriteMetadata(7, 0, 1), // Person running
   Attack: new SpriteMetadata(7, 1, 1), // Sword swinging
-  Heal: new SpriteMetadata(7, 2, 1), // Two crosses
-  Might: new SpriteMetadata(7, 3, 1), // Up arrows
-  Fireball: new SpriteMetadata(7, 4, 1), // Flame
-  Rend: new SpriteMetadata(7, 5, 1), // Blade with blood droplet
-  Elixir: new SpriteMetadata(7, 6, 1), // Flask
-  Pact: new SpriteMetadata(7, 7, 1), // Blade cutting palm
-  Convert: new SpriteMetadata(7, 8, 1), // Blood and water droplet
-  Droplet: new SpriteMetadata(7, 9, 1), // Water droplet
-  Boulder: new SpriteMetadata(7, 10, 1), // Big round shaded rock / boulder
-  Orb: new SpriteMetadata(7, 11, 1), // Round circle with highlights
-  Book: new SpriteMetadata(7, 12, 1), // Book
-  // Passives:
-  Vitality: new SpriteMetadata(9, 0, 1), // Chest with abs
-  Willpower: new SpriteMetadata(9, 1, 1), // Brain with exclamation marks
-  Haste: new SpriteMetadata(9, 2, 1), // Boot
-  Permahaste: new SpriteMetadata(9, 2, 1), // Same boot
-  Growth: new SpriteMetadata(9, 3, 1), // Crown
-  Permagrowth: new SpriteMetadata(9, 4, 1), // Fancier crown
-  Vision: new SpriteMetadata(9, 5, 1), // Eye
-  Permavision: new SpriteMetadata(9, 5, 1), // Same eye
-  Physique: new SpriteMetadata(7, 10, 1), // Flexing arm
-  // Classes:
-  Warrior: new SpriteMetadata(10, 0, 1), // Helmet
-  Mage: new SpriteMetadata(10, 1, 1), // Wizard hat
-  Monk: new SpriteMetadata(10, 2, 1), // Fist / punch
-  Priest: new SpriteMetadata(10, 3, 1), // Shield with cross
+  Forget: new SpriteMetadata(7, 2, 1), // Question marks
+  // Row 8 - Healing:
+  Heal: new SpriteMetadata(8, 0, 1), // Two crosses
+  Nourish: new SpriteMetadata(8, 1, 1), // Leaf
+  // Row 9 - Other skills:
+  Might: new SpriteMetadata(9, 0, 1), // Up arrows
+  Fireball: new SpriteMetadata(9, 1, 1), // Flame
+  Rend: new SpriteMetadata(9, 2, 1), // Blade with blood droplet
+  Pact: new SpriteMetadata(9, 3, 1), // Blade cutting palm
+  // Row 10 - Passives:
+  Vitality: new SpriteMetadata(10, 0, 1), // Chest with abs
+  Willpower: new SpriteMetadata(10, 1, 1), // Brain with exclamation marks
+  Haste: new SpriteMetadata(10, 2, 1), // Boot
+  Permahaste: new SpriteMetadata(10, 2, 1), // Same boot
+  Growth: new SpriteMetadata(10, 3, 1), // Crown
+  Permagrowth: new SpriteMetadata(10, 4, 1), // Fancier crown
+  Vision: new SpriteMetadata(10, 5, 1), // Eye
+  Permavision: new SpriteMetadata(10, 5, 1), // Same eye
+  Physique: new SpriteMetadata(10, 6, 1), // Flexing arm
+  // 11 - Classes:
+  Warrior: new SpriteMetadata(11, 0, 1), // Helmet
+  Mage: new SpriteMetadata(11, 1, 1), // Wizard hat
+  Monk: new SpriteMetadata(11, 2, 1), // Fist / punch
+  Priest: new SpriteMetadata(11, 3, 1), // Shield with cross
 };
 
 export type SpriteName = keyof typeof SPRITESHEET;
