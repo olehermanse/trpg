@@ -155,36 +155,17 @@ export class Painter {
 
   draw_player() {
     this.draw_selector();
-    const player: Player = this.application.game.player;
-    const x = player.xy.x;
-    const y = player.xy.y;
-    const width = player.wh.width;
-    const height = player.wh.height;
     if (this.sprites["player"].length < 2) {
-      Draw.rectangle(
-        this.ctx,
-        x - width / 2,
-        y - height / 2,
-        width,
-        height,
-        "white",
-        "white",
-      );
       return;
     }
-    this.ctx.save();
-    this.ctx.translate(this.application.scale * x, this.application.scale * y);
-    if (player.reversed) {
-      this.ctx.scale(-1, 1);
-    }
+    const player: Player = this.application.game.player;
+    const half = this.application.game.current_zone.cell_width / 2;
+    const x = Math.floor(player.xy.x - half) * this.application.scale;
+    const y = Math.floor(player.xy.y - half) * this.application.scale;
+
     const standing = this.sprites["player"][0];
     const walking = this.sprites["player"][1];
-    this.ctx.drawImage(
-      player.walk_counter < 1 ? standing : walking,
-      (-this.application.scale * width) / 2,
-      (-this.application.scale * height) / 2,
-    );
-    this.ctx.restore();
+    this.draw_sprite(player.walk_counter < 1 ? standing : walking, xy(x, y));
   }
 
   draw() {
