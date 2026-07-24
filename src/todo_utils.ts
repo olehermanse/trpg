@@ -1,4 +1,4 @@
-import { WH, xy } from "@olehermanse/utils/funcs.js";
+import { randint, WH, xy } from "@olehermanse/utils/funcs.js";
 import { XY } from "@olehermanse/utils";
 
 function SCALE() {
@@ -118,10 +118,7 @@ export class Drawer<T extends Canvas> {
       x += 6;
     }
   }
-  rectangle(
-    pos: XY,
-    size: WH,
-  ) {
+  rectangle(pos: XY, size: WH) {
     let x = pos.x;
     let y = pos.y;
     let width = size.width;
@@ -161,4 +158,25 @@ export class Drawer<T extends Canvas> {
     this.ctx.putImageData(right, x + width - 1, y);
     this.ctx.putImageData(bottom, x, y + height - 1);
   }
+}
+
+export function inside_rectangle(
+  c: number,
+  r: number,
+  minc: number,
+  minr: number,
+  maxc: number,
+  maxr: number,
+): boolean {
+  if (c >= minc && c <= maxc && r >= minr && r <= maxr) {
+    return true;
+  }
+  return false;
+}
+
+export function randpercent(threshold: number): boolean {
+  if (randint(1, 100) <= threshold) {
+    return true;
+  }
+  return false;
 }

@@ -6,7 +6,6 @@ import {
   distance_cr,
   distance_xy,
   Grid,
-  randint,
   WH,
   wh,
   xy,
@@ -18,6 +17,7 @@ import {
   NamedUpgrade,
   UpgradeName,
 } from "./upgrades.ts";
+import { generate_room, RoomType } from "./rooms.ts";
 
 const DIAG = 1.42;
 const BASE_SPEED = 16.0;
@@ -69,7 +69,10 @@ export class Target {
   xy: XY;
   ms: number = 0;
   frame: number = 0;
-  constructor(public cr: CR, grid: Grid) {
+  constructor(
+    public cr: CR,
+    grid: Grid,
+  ) {
     this.xy = cr_to_xy(cr, grid);
   }
   tick(ms: number) {
@@ -328,6 +331,7 @@ export class Zone extends Grid {
   tiles: Tile[][];
   all_tiles: Tile[];
   fully_lit: boolean;
+  room_type: RoomType;
   constructor(
     grid: Grid,
     public game: Game,
@@ -341,6 +345,7 @@ export class Zone extends Grid {
     this.fully_lit = false;
     this.tiles = [];
     this.all_tiles = [];
+    this.room_type = "generic";
     for (let c = 0; c < grid.columns; c++) {
       const column = [];
       for (let r = 0; r < grid.rows; r++) {
@@ -350,6 +355,8 @@ export class Zone extends Grid {
       }
       this.tiles.push(column);
     }
+    game.put_zone(this);
+    generate_room(this);
   }
 
   check_fog() {
@@ -365,109 +372,7 @@ export class Zone extends Grid {
     this.game.player.add_xp(15);
   }
 
-  discover_neighbors() {
-    const left = this.game.get_zone(cr(this.pos.c - 1, this.pos.r));
-    const right = this.game.get_zone(cr(this.pos.c + 1, this.pos.r));
-    const top = this.game.get_zone(cr(this.pos.c, this.pos.r - 1));
-    const bottom = this.game.get_zone(cr(this.pos.c, this.pos.r + 1));
-    if (left !== null) {
-      this.left_entry = left.right_entry;
-    }
-    if (right !== null) {
-      this.right_entry = right.left_entry;
-    }
-    if (top !== null) {
-      this.top_entry = top.bottom_entry;
-    }
-    if (bottom !== null) {
-      this.bottom_entry = bottom.top_entry;
-    }
-  }
-
   generate() {
-    this.discover_neighbors();
-    this.left_entry ??= randint(1, this.rows - 2);
-    this.right_entry ??= randint(1, this.rows - 2);
-    for (let r = 0; r < this.rows; r++) {
-      if (r !== this.left_entry) {
-        this.append(
-          new Entity(
-            "rock",
-            cr(0, r),
-            this,
-            randint(0, 2),
-            randint(0, 1) === 0,
-          ),
-        );
-      }
-      if (r !== this.right_entry) {
-        this.append(
-          new Entity(
-            "rock",
-            cr(this.columns - 1, r),
-            this,
-            randint(0, 2),
-            randint(0, 1) === 0,
-          ),
-        );
-      }
-    }
-    this.top_entry ??= randint(1, this.columns - 2);
-    this.bottom_entry ??= randint(1, this.columns - 2);
-    for (let c = 1; c < this.columns - 1; c++) {
-      if (c !== this.top_entry) {
-        this.append(
-          new Entity(
-            "rock",
-            cr(c, 0),
-            this,
-            randint(0, 2),
-            randint(0, 1) === 0,
-          ),
-        );
-      }
-      if (c !== this.bottom_entry) {
-        this.append(
-          new Entity(
-            "rock",
-            cr(c, this.rows - 1),
-            this,
-            randint(0, 2),
-            randint(0, 1) === 0,
-          ),
-        );
-      }
-    }
-    for (let i = 0; i < 7; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      }
-      const entity = new Entity("crystal", pos, this);
-      this.append(entity);
-    }
-    for (let i = 0; i < 2; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      }
-      const entity = new Entity("skeleton", pos, this, 3);
-      if (entity.cr.c > this.columns / 2) {
-        entity.reversed = true;
-      }
-      this.append(entity);
-    }
-    for (let i = 0; i < 1; i++) {
-      let pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      while (!this.empty(pos)) {
-        pos = cr(randint(1, this.columns - 2), randint(2, this.rows - 3));
-      }
-      const entity = new Entity("chest", pos, this);
-      if (entity.cr.c > this.columns / 2) {
-        entity.reversed = true;
-      }
-      this.append(entity);
-    }
   }
 
   inside(pos: CR): boolean {
@@ -597,17 +502,23 @@ export class ZoneTransition {
   speed: number;
   direction: "left" | "right" | "up" | "down";
 
-  constructor(public from: Zone, public to: Zone, speed: number) {
+  constructor(
+    public from: Zone,
+    public to: Zone,
+    speed: number,
+  ) {
     console.assert(
-      (from.pos.c === to.pos.c) || (from.pos.c === to.pos.c - 1) ||
-        (from.pos.c === to.pos.c + 1),
+      from.pos.c === to.pos.c ||
+        from.pos.c === to.pos.c - 1 ||
+        from.pos.c === to.pos.c + 1,
     );
     console.assert(
-      (from.pos.r === to.pos.r) || (from.pos.r === to.pos.r - 1) ||
-        (from.pos.r === to.pos.r + 1),
+      from.pos.r === to.pos.r ||
+        from.pos.r === to.pos.r - 1 ||
+        from.pos.r === to.pos.r + 1,
     );
-    console.assert((from.pos.c === to.pos.c) || (from.pos.r === to.pos.r));
-    console.assert((from.pos.c !== to.pos.c) || (from.pos.r !== to.pos.r));
+    console.assert(from.pos.c === to.pos.c || from.pos.r === to.pos.r);
+    console.assert(from.pos.c !== to.pos.c || from.pos.r !== to.pos.r);
 
     this.speed = map_range_clamped(speed, 1, 5, 200, 500);
 
@@ -744,8 +655,6 @@ export class Game {
         top_entry,
         bottom_entry,
       );
-      this.put_zone(zone);
-      zone.generate();
     }
     this.start_transition(zone);
   }
@@ -770,30 +679,18 @@ export class Game {
 
     for (let r = 0; r < zone.rows; r++) {
       if (left !== null) {
-        this.tile_update(
-          zone.tiles[0][r],
-          left.tiles[left.columns - 1][r],
-        );
+        this.tile_update(zone.tiles[0][r], left.tiles[left.columns - 1][r]);
       }
       if (right !== null) {
-        this.tile_update(
-          zone.tiles[zone.columns - 1][r],
-          right.tiles[0][r],
-        );
+        this.tile_update(zone.tiles[zone.columns - 1][r], right.tiles[0][r]);
       }
     }
     for (let c = 0; c < zone.columns; c++) {
       if (top !== null) {
-        this.tile_update(
-          zone.tiles[c][0],
-          top.tiles[c][top.rows - 1],
-        );
+        this.tile_update(zone.tiles[c][0], top.tiles[c][top.rows - 1]);
       }
       if (bottom !== null) {
-        this.tile_update(
-          zone.tiles[c][zone.rows - 1],
-          bottom.tiles[c][0],
-        );
+        this.tile_update(zone.tiles[c][zone.rows - 1], bottom.tiles[c][0]);
       }
     }
   }
@@ -807,30 +704,18 @@ export class Game {
 
     for (let r = 0; r < zone.rows; r++) {
       if (left !== null) {
-        this.tile_update(
-          left.tiles[left.columns - 1][r],
-          zone.tiles[0][r],
-        );
+        this.tile_update(left.tiles[left.columns - 1][r], zone.tiles[0][r]);
       }
       if (right !== null) {
-        this.tile_update(
-          right.tiles[0][r],
-          zone.tiles[zone.columns - 1][r],
-        );
+        this.tile_update(right.tiles[0][r], zone.tiles[zone.columns - 1][r]);
       }
     }
     for (let c = 0; c < zone.columns; c++) {
       if (top !== null) {
-        this.tile_update(
-          top.tiles[c][top.rows - 1],
-          zone.tiles[c][0],
-        );
+        this.tile_update(top.tiles[c][top.rows - 1], zone.tiles[c][0]);
       }
       if (bottom !== null) {
-        this.tile_update(
-          bottom.tiles[c][0],
-          zone.tiles[c][zone.rows - 1],
-        );
+        this.tile_update(bottom.tiles[c][0], zone.tiles[c][zone.rows - 1]);
       }
     }
   }
@@ -873,7 +758,8 @@ export class Game {
   zone_click(position: XY) {
     const pos = xy_to_cr(position, this.grid);
     if (
-      this.player.target === null && pos.c === this.player.cr.c &&
+      this.player.target === null &&
+      pos.c === this.player.cr.c &&
       pos.r === this.player.cr.r
     ) {
       return;
