@@ -648,6 +648,17 @@ export class ZoneTransition {
   }
 }
 
+export class Enemy {
+  name: string = "Skeleton";
+  constructor() {
+  }
+}
+
+export class Battle {
+  constructor(public player: Player, public enemy: Enemy) {
+  }
+}
+
 export class Game {
   transition: ZoneTransition | null = null;
   previous_zone: Zone | null = null;
@@ -658,6 +669,7 @@ export class Game {
   current_zone: Zone;
   zones: Record<string, Zone> = {};
   choices: Choice[];
+  battle: Battle | null;
   constructor(public grid: Grid) {
     this.current_zone = new Zone(grid, this, cr(0, 0));
     this.put_zone(this.current_zone);
@@ -666,6 +678,9 @@ export class Game {
     this.choices.push(new Choice("Vision", "light +1", 0, grid));
     this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
     this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
+    this.battle = null;
+    const enemy = new Enemy();
+    this.battle = new Battle(this.player, enemy);
   }
 
   put_zone(zone: Zone) {
