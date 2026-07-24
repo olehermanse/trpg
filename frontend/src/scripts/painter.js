@@ -17,11 +17,11 @@ class Painter {
     paint(obj, extra = null) {
         console.assert(this.canvas_manager != null);
         console.assert(this.canvas_manager.ctx != null);
-        Painter.draw_building(this.canvas_manager.ctx, t, target = null);
+        Painter.draw_building(this.canvas_manager.ctx, obj, extra);
     }
 
     get_draw_function() {
-        return this.paint;
+        return (obj, extra) => {this.paint(obj, extra);}
     }
 
     static draw_tower_generic(ctx, x, y, s, level, rotation, circle, triangle) {
