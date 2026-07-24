@@ -25,7 +25,7 @@ class Enemy {
   }
 
   effective_speed() {
-    return this.speed * (1 - this.slow * 0.5);
+    return this.speed * (1 - this.slow * 0.8);
   }
 
   tick(ms) {
