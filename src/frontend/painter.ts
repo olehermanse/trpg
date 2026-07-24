@@ -619,8 +619,12 @@ export class Painter {
       const rect = skills[i].rectangle;
       const y = rect.xy.y;
       if (skills[i].disabled) {
+        this.offscreen_drawer.dotted_rectangle(
+          xy(rect.xy.x, rect.xy.y),
+          rect.wh,
+        );
         this.offscreen_drawer.text(
-          " (No mana)",
+          skills[i].name,
           this.font,
           xy(174 + 4, y + 6),
         );
