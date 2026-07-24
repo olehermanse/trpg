@@ -927,9 +927,9 @@ export class Game {
     this.put_zone(this.current_zone);
     this.player = new Player(cr(7, 3), this.current_zone, this);
     this.choices = [];
-    this.choices.push(new Choice("Vision", "light +1", 0, grid));
-    this.choices.push(new Choice("Haste", "Speed x2", 1, grid));
-    this.choices.push(new Choice("Luck", "Gold +1", 2, grid));
+    this.choices.push(new Choice("Attack", "Placeholder", 0, grid));
+    this.choices.push(new Choice("Attack", "Placeholder", 1, grid));
+    this.choices.push(new Choice("Attack", "Placeholder", 2, grid));
     this.battle = null;
   }
 
