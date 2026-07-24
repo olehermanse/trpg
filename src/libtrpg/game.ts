@@ -13,6 +13,7 @@ import {
 } from "../todo_utils";
 import { randint, xy } from "@olehermanse/utils/funcs.js";
 
+const DIAG = 1.414;
 const BASE_SPEED = 16.0;
 
 export class Entity {
@@ -85,24 +86,25 @@ export class Player extends Entity {
         if (tile.light === 5) {
           continue;
         }
-        const distance = distance_cr(tile.cr, this.cr);
-        if (distance < 2.0) {
+
+        const distance = distance_xy(tile.xy, this.xy) / 16;
+        if (distance <= 2.0) {
           tile.light = 5;
           continue;
         }
-        if (distance < 3.0) {
+        if (distance <= 2.0 * DIAG) {
           tile.light = 4;
           continue;
         }
-        if (distance < 4.0) {
+        if (distance <= 3.0) {
           tile.light = 3;
           continue;
         }
-        if (distance < 5.0) {
+        if (distance <= 3.0 * DIAG) {
           tile.light = 2;
           continue;
         }
-        if (distance < 6.0) {
+        if (distance <= 4.0) {
           tile.light = 1;
           continue;
         }
@@ -116,7 +118,7 @@ export class Player extends Entity {
 
   _animate(ms: number) {
     const factor = this.speed / BASE_SPEED;
-    this.walk_counter += (4 * (ms * factor)) / 1000;
+    this.walk_counter += (3 * (ms * factor)) / 1000;
     if (this.walk_counter >= 2) {
       this.walk_counter = 0;
     }
