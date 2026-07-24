@@ -12,9 +12,9 @@ import {
   xy_to_cr,
 } from "@olehermanse/utils/funcs.js";
 import {
-  get_ugrade,
   get_upgrade_choices,
   NamedUpgrade,
+  upgrade,
   UpgradeName,
 } from "./upgrades.ts";
 import { generate_room, RoomType } from "./rooms.ts";
@@ -159,14 +159,36 @@ export class Creature extends Entity {
   walk_counter = 0;
   target: Target | null = null;
   game: Game;
+  run: boolean = false;
 
   constructor(name: SpriteName, pos: CR, zone: Zone, game: Game) {
     super(name, pos, zone);
     this.game = game;
-    this.upgrades = [];
+    this.upgrades = [upgrade("Attack"), upgrade("Run")];
     this.stats = new Stats(this.level);
     this.hp = this.stats.max_hp;
     this.mp = this.stats.max_mp;
+  }
+
+  count_upgrade(name: UpgradeName): number {
+    let count = 0;
+    for (const x of this.upgrades) {
+      if (x.name === name) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  get_skill_names() {
+    const names = [];
+    for (const x of this.upgrades) {
+      if (x.skill === undefined) {
+        continue;
+      }
+      names.push(x.name);
+    }
+    return names;
   }
 
   xp_threshold() {
@@ -183,7 +205,7 @@ export class Creature extends Entity {
 
   add_upgrade(upgrade: NamedUpgrade) {
     this.upgrades.push(upgrade);
-    upgrade.apply(this);
+    upgrade.passive?.(this);
     this.speed = BASE_SPEED * this.stats.speed;
   }
 
@@ -204,10 +226,6 @@ export class Player extends Creature {
   constructor(pos: CR, zone: Zone, game: Game) {
     super("player", pos, zone, game);
     this.defog();
-  }
-
-  get_skills() {
-    return ["Attack", "Heal", "Buff", "Run"];
   }
 
   apply_light(tile: Tile, intensity: LightLevel) {
@@ -743,7 +761,7 @@ export class Battle {
   skills: BattleSkill[];
   constructor(public player: Player, public enemy: Enemy) {
     let y = 6;
-    const skills = this.player.get_skills();
+    const skills = this.player.get_skill_names();
     const lim = skills.length > 8 ? 8 : skills.length;
     this.skills = [];
     for (let i = 0; i < lim; ++i) {
@@ -975,7 +993,7 @@ export class Game {
     for (const x of this.choices) {
       if (x.is_inside(position)) {
         console.log("Upgrade chosen: " + x.name);
-        this.player.add_upgrade(get_ugrade(x.name));
+        this.player.add_upgrade(upgrade(x.name));
         this.state = "zone";
         this.player.defog();
         return;

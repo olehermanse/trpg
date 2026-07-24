@@ -456,9 +456,17 @@ export class Painter {
     }
 
     this.offscreen_drawer.rectangle(pos, choice.size);
-    const text_position = xy(pos.x + 5, pos.y + 6);
-    const text = choice.name + "\n" + choice.description;
-    this.offscreen_drawer.text(text, this.font, text_position);
+    const x = pos.x + 5;
+    const y = pos.y + 6;
+    const y2 = y + 16;
+    this.offscreen_drawer.text(choice.name, this.font, xy(x, y));
+    this.offscreen_drawer.text(
+      choice.description,
+      this.font,
+      xy(x, y2),
+      "top_left",
+      10,
+    );
   }
 
   draw_level_up() {

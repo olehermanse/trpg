@@ -1,39 +1,47 @@
 import { randint } from "@olehermanse/utils/funcs.js";
 import { Creature, Player } from "./game.ts";
 
-interface EligibleFunction {
-  (creature: Creature): boolean;
-}
+export type SkillApply = () => void;
+export type SkillPerform = (user: Creature, target: Creature) => SkillApply;
 
-interface ApplyFunction {
-  (creature: Creature): void;
-}
+export type UpgradeEligible = (creature: Creature) => boolean;
+
+export type UpgradePassive = (creature: Creature) => void;
 
 interface Upgrade {
   description: string;
-  apply: ApplyFunction;
-  eligible?: EligibleFunction;
+  passive?: UpgradePassive;
+  eligible?: UpgradeEligible;
+  max?: number; // Default is only 1
+  skill?: SkillPerform;
 }
 
 const _all_upgrades = {
   "Haste": {
     "description": "Speed +1",
-    "apply": (creature: Creature) => {
+    "max": 5,
+    "passive": (creature: Creature) => {
       creature.stats.speed += 1;
     },
-    "eligible": (creature: Creature) => {
-      return creature.stats.speed <= 10;
+  },
+  "Vision": {
+    "description": "Light +1",
+    "max": 5,
+    "passive": (creature: Creature) => {
+      creature.stats.light += 1;
     },
   },
   "Luck": {
     "description": "Luck +1",
-    "apply": (creature: Creature) => {
+    "max": 99,
+    "passive": (creature: Creature) => {
       creature.stats.luck += 1;
     },
   },
-  "Physique": {
-    "description": "Strength +1",
-    "apply": (creature: Creature) => {
+  "Strength": {
+    "description": "Damage +1",
+    "max": 99,
+    "passive": (creature: Creature) => {
       creature.stats.strength += 1;
     },
     "eligible": (creature: Creature) => {
@@ -42,20 +50,47 @@ const _all_upgrades = {
   },
   "Intellect": {
     "description": "Magic +1",
-    "apply": (creature: Creature) => {
+    "max": 99,
+    "passive": (creature: Creature) => {
       creature.stats.magic += 1;
     },
     "eligible": (creature: Creature) => {
       return creature.level >= 3;
     },
   },
-  "Vision": {
-    "description": "Light +1",
-    "apply": (creature: Creature) => {
-      creature.stats.light += 1;
+  "Attack": {
+    "description": "Swing weapon to deal damage",
+    "skill": (user: Creature, target: Creature) => {
+      let damage = 5 + user.stats.strength - target.stats.strength;
+      if (damage <= 0) {
+        damage = 1;
+      }
+      return () => {
+        target.hp -= damage;
+      };
     },
-    "eligible": (creature: Creature) => {
-      return creature.stats.light <= 10;
+  },
+  "Heal": {
+    "description": "Use magic \nto heal\nyourself",
+    "skill": (user: Creature, _target: Creature) => {
+      const healing = user.stats.magic;
+      return () => {
+        user.hp += healing;
+      };
+    },
+  },
+  "Buff": {
+    "description": "TODO",
+    "skill": (_user: Creature, _target: Creature) => {
+      return () => {};
+    },
+  },
+  "Run": {
+    "description": "Escape battle",
+    "skill": (user: Creature, _target: Creature) => {
+      return () => {
+        user.run = true;
+      };
     },
   },
 } as const;
@@ -72,6 +107,33 @@ export type UpgradeAtlas = {
   [key in UpgradeName]?: Upgrade;
 };
 
+function _is_available(upgrade: NamedUpgrade, player: Player) {
+  if (upgrade.max !== undefined) {
+    console.assert(upgrade.max > 1);
+  }
+
+  // Check eligibility function:
+  if (upgrade.eligible !== undefined && upgrade.eligible(player) === false) {
+    return false;
+  }
+
+  // Check number of stacks acquired already:
+  const count = player.count_upgrade(upgrade.name);
+  console.assert(count >= 0);
+  if (count === 0) {
+    return true; // No stacks
+  }
+  // At least 1 stack
+  console.assert(count >= 1);
+  if (upgrade.max === undefined) {
+    return false; // No maximum, default is 1
+  }
+  if (count >= upgrade.max) {
+    return false; // Reached maximum stacks
+  }
+  return true; // Not reached maximum stacks
+}
+
 export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   // 1. Get the names of all the upgrades:
   const upgrade_names: UpgradeName[] = <UpgradeName[]> Object.keys(
@@ -80,16 +142,8 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
 
   // 2. Filter out the names of upgrades which are not available:
   const unlocked: UpgradeName[] = upgrade_names.filter((k: UpgradeName) => {
-    const upgrade: Upgrade = all_upgrades[k];
-    if (upgrade === undefined) {
-      return false;
-    }
-    if (upgrade.eligible === undefined) {
-      return true;
-    }
-    return upgrade.eligible(player);
+    return _is_available(upgrade(k), player);
   });
-  console.log(unlocked);
 
   // 3. Add guaranteed options:
   const choices: UpgradeName[] = [];
@@ -122,7 +176,7 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   const sorted: NamedUpgrade[] = [];
   for (const name in all_upgrades) {
     if (choices.includes(<UpgradeName> name)) {
-      sorted.push(get_ugrade(<UpgradeName> name));
+      sorted.push(upgrade(<UpgradeName> name));
     }
   }
   console.log(sorted);
@@ -130,6 +184,6 @@ export function get_upgrade_choices(player: Player): NamedUpgrade[] {
   return sorted;
 }
 
-export function get_ugrade(name: UpgradeName): NamedUpgrade {
+export function upgrade(name: UpgradeName): NamedUpgrade {
   return { "name": name, ...all_upgrades[name] };
 }
