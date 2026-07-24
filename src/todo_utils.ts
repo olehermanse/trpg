@@ -7,8 +7,22 @@ function SCALE() {
   return window.devicePixelRatio;
 }
 
+const TEXT_HEIGHT = 8;
+const HALF_TEXT_HEIGHT = 4;
+
 type Canvas = HTMLCanvasElement | OffscreenCanvas;
 type Context = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+
+type Anchor =
+  | "top_left"
+  | "top_center"
+  | "top_right"
+  | "middle_left"
+  | "middle_center"
+  | "middle_right"
+  | "bottom_left"
+  | "bottom_center"
+  | "bottom_right";
 
 /*
 function _set_pixel(img: ImageData, x: number, y: number, r: number, g: number, b: number, a: number){
@@ -97,9 +111,44 @@ export class Drawer<T extends Canvas> {
     }
     this.ctx.putImageData(pixel, pos.x, pos.y);
   }
-  text(message: string, font: Record<string, ImageBitmap>, pos: XY) {
+  text(
+    message: string,
+    font: Record<string, ImageBitmap>,
+    pos: XY,
+    anchor: Anchor = "top_left",
+  ) {
     let x = pos.x;
     let y = pos.y;
+    if (anchor !== "top_left") {
+      const text_width = 6 * message.length;
+      if (
+        anchor === "top_right" ||
+        anchor === "middle_right" ||
+        anchor === "bottom_right"
+      ) {
+        x -= text_width;
+      } else if (
+        anchor === "top_center" ||
+        anchor === "middle_center" ||
+        anchor === "bottom_center"
+      ) {
+        x -= Math.floor(text_width / 2);
+      }
+      if (
+        anchor === "bottom_left" ||
+        anchor === "bottom_center" ||
+        anchor === "bottom_right"
+      ) {
+        y -= TEXT_HEIGHT;
+      } else if (
+        anchor === "middle_left" ||
+        anchor === "middle_center" ||
+        anchor === "middle_right"
+      ) {
+        y -= HALF_TEXT_HEIGHT;
+      }
+      this.text(message, font, xy(x, y));
+    }
     for (let i = 0; i < message.length; ++i) {
       let letter = message[i];
       if (letter === " ") {

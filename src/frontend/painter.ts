@@ -399,11 +399,12 @@ export class Painter {
     this.draw_card(choices[1]);
     this.draw_card(choices[2]);
 
-    const y = Math.floor(choices[0].pos.y / 2 - 4);
-    const text_width = 6 * "Level up!".length;
-    const x = Math.floor(width / 2 - text_width / 2);
-
-    this.offscreen_drawer.text("Level up!", this.font, xy(x, y));
+    this.offscreen_drawer.text(
+      "Level up!",
+      this.font,
+      xy(width / 2, choices[0].pos.y / 2),
+      "middle_center",
+    );
 
     this.offscreen_drawer.sprite(
       this.sprites["player"][0],
