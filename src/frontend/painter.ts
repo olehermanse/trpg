@@ -426,7 +426,9 @@ export class Painter {
       this.draw_battle_event(battle.current_event);
       return;
     }
-    this.draw_battle_menu(battle);
+    if (battle.state === "skill_select") {
+      this.draw_battle_menu(battle);
+    }
   }
 
   draw_target() {
