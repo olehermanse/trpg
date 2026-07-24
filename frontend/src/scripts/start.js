@@ -68,8 +68,8 @@ function start(canvas) {
         }
     }
     let draw_callback = Painter.draw_building;
-    canvas_manager = new CanvasManager(canvas, draw_callback, columns, rows, 1200, scale);
     const ctx = canvas.getContext("2d");
+    canvas_manager = new CanvasManager(canvas, ctx, draw_callback, columns, rows, 1200, scale);
     canvas.setAttribute("width", canvas_manager.canvas_width);
     canvas.setAttribute("height", canvas_manager.canvas_height);
     canvas_manager.setup_events(canvas, select, Painter.draw_building, on_start_click, on_victory);
