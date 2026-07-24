@@ -29,13 +29,12 @@ class Enemy {
   }
 
   tick(ms) {
-    const sec = (ms / 1000.0);
+    const sec = ms / 1000.0;
     this.slow_time -= sec;
     if (this.slow_time < 0.0) {
       this.slow_time = 0.0;
       this.slow = 0.0;
-    }
-    else if (this.slow > 1.0) {
+    } else if (this.slow > 1.0) {
       this.slow = 1.0;
     }
 
@@ -51,7 +50,11 @@ class Enemy {
     const target = this.path[this.path_index];
     const dx = target.c - this.c;
     const dy = target.r - this.r;
-    if ((Math.abs(dx) < step && Math.abs(dy) < step) && (this.path_index + 1 < this.path.length)) {
+    if (
+      Math.abs(dx) < step &&
+      Math.abs(dy) < step &&
+      this.path_index + 1 < this.path.length
+    ) {
       this.path_index += 1;
     }
     if (Math.abs(dx) > step) {
@@ -59,25 +62,21 @@ class Enemy {
       this.travelled += step;
       if (Math.sign(dx) > 0.0) {
         this.target_rotation = 0.0;
-      }
-      else {
+      } else {
         this.target_rotation = Math.PI;
       }
-    }
-    else {
+    } else {
       this.c = target.c;
     }
     if (Math.abs(dy) > step) {
       this.r += step * Math.sign(dy);
       this.travelled += step;
       if (Math.sign(dy) > 0.0) {
-        this.target_rotation = 3 * Math.PI / 2;
-      }
-      else {
+        this.target_rotation = (3 * Math.PI) / 2;
+      } else {
         this.target_rotation = Math.PI / 2;
       }
-    }
-    else {
+    } else {
       this.r = target.r;
     }
   }
@@ -168,59 +167,52 @@ class Enemies {
   static create(c, r, level, lives, path) {
     let few = null;
     let many = null;
-    if (level <= 2) {
-      return this.specific(Enemy, 1, c, r, path);
-    } else if (level == 3) {
-      return this.specific(Enemy, 2, c, r, path);
-    } else if (level == 4) {
-      return this.specific(Enemy, 4, c, r, path);
+    if (level <= 4) {
+      return this.specific(Enemy, level, c, r, path);
     } else if (level < 10) {
-      few = Speedy;
-      many = Enemy;
-    } else if (level == 10) {
+      return [
+        ...this.specific(Speedy, 1 + (level % 5), c, r, path),
+        ...this.specific(Enemy, level, c, r, path),
+      ];
+    }
+    if (level == 10) {
       return this.specific(Boss, 1, c, r, path);
-    } else if (level < 15) {
-      many = Speedy;
-    } else if (level == 20) {
-      return this.specific(Boss, 8, c, r, path);
-    } else if (level < 20) {
-      few = Purple;
-    } else if (level < 25) {
-      few = Boss;
-      many = Purple;
-    } else if (level == 30) {
-      return this.specific(Mega, 1, c, r, path);
-    } else if (level < 30) {
-      many = Boss;
-    } else if (level < 35) {
-      few = Mega;
-    } else if (level < 40) {
-      many = Mega;
-    } else {
-      return this.specific(Mega, level, c, r, path);
     }
-
-    console.assert((level % 10) != 0);
-    let enemies = [];
-    if (few != null) {
-      let n = 2 * (level % 5);
-      if (lives === 2) {
-        n -= 1;
-      } else if (lives === 1) {
-        n -= 2;
+    if (level < 15) {
+      return this.specific(Speedy, level, c, r, path);
+    }
+    if (level < 20) {
+      return this.specific(Purple, 1 + (level % 5), c, r, path);
+    }
+    if (level == 20) {
+      return this.specific(Boss, 6, c, r, path);
+    }
+    if (level < 25) {
+      return [
+        ...this.specific(Boss, 6 + (level % 5), c, r, path),
+        ...this.specific(Purple, 1 + (level % 5), c, r, path),
+      ];
+    }
+    if (level == 25) {
+      return this.specific(Boss, 14, c, r, path);
+    }
+    if (level == 26) {
+      return this.specific(Purple, 14, c, r, path);
+    }
+    if (level <= 30) {
+      let enemies = [];
+      while (enemies.length < level) {
+        if (enemies.length % 2 === 0)
+          enemies.push(...this.specific(Boss, 1, c, r, path));
+        else
+          enemies.push(...this.specific(Purple, 1, c, r, path));
       }
-      if (n <= 0) {
-        n = 1;
-      }
-      enemies.push(...this.specific(few, n, c, r, path));
+      return enemies;
     }
-    if (many != null) {
-      let n = 8 + 2 * (level % 10);
-      enemies.push(...this.specific(many, n, c, r, path));
+    if (level < 40) {
+      return this.specific(Mega, 1 + level % 10, c, r, path);
     }
-
-    enemies.reverse();
-    return enemies;
+    return this.specific(Mega, level, c, r, path);
   }
 }
 
