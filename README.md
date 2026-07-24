@@ -1,9 +1,19 @@
 # trpg
 
+Website:
+
 https://trpg.oleherman.com
+
+Run locally with docker:
 
 ```
 docker build --tag trpg . && docker run -it -p 3000:3000 --name trpg --rm trpg
+```
+
+Or podman:
+
+```
+podman build --tag trpg . && podman run -it -p 3000:3000 --name trpg --rm trpg
 ```
 
 http://127.0.0.1:3000
